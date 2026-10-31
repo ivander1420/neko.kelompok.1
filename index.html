@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NetQuest TJKT — Interactive Network Learning Lab</title>
+<meta name="description" content="NetQuest TJKT adalah platform pembelajaran jaringan komputer interaktif: simulasi VLAN, subnetting, troubleshooting, story mode, dan virtual network lab.">
+<meta name="theme-color" content="#07101f">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050b18;--ink:#eaf6ff;--mut:#9db3cc;--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.14);--stroke:rgba(255,255,255,.2);--c1:#22e1ff;--c2:#8b6cff;--c3:#3dffb0;--warn:#ffb454;--bad:#ff5d7a;--b1:#1b6bff;--b2:#9b5cff;--b3:#00e0b0;--shadow:rgba(0,0,0,.35)}
+:root:not([data-theme="light"]){}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e8f1ff;--ink:#0b1b33;--mut:#4b607c;--glass:rgba(255,255,255,.5);--glass2:rgba(255,255,255,.8);--stroke:rgba(255,255,255,.95);--c1:#0a8bd6;--c2:#6a4bff;--c3:#00a874;--warn:#c47400;--bad:#d62f55;--shadow:rgba(40,80,140,.25)}}
+:root[data-theme="light"]{--bg:#e8f1ff;--ink:#0b1b33;--mut:#4b607c;--glass:rgba(255,255,255,.5);--glass2:rgba(255,255,255,.8);--stroke:rgba(255,255,255,.95);--c1:#0a8bd6;--c2:#6a4bff;--c3:#00a874;--warn:#c47400;--bad:#d62f55;--shadow:rgba(40,80,140,.25)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 Sora,system-ui,sans-serif;overflow-x:hidden}
+/* Cursor tetap native; indikator khusus hanya titik kecil di desktop. */
+button,input,select{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--c1);outline-offset:3px}
+.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.12em}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+.bg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+.bg i:nth-child(1){width:46vmax;height:46vmax;left:-12vmax;top:-10vmax;background:var(--b1)}
+.bg i:nth-child(2){width:40vmax;height:40vmax;right:-10vmax;top:20vh;background:var(--b2);animation-delay:-6s}
+.bg i:nth-child(3){width:34vmax;height:34vmax;left:25vw;bottom:-14vmax;background:var(--b3);animation-delay:-12s}
+.bg:after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--glass) 1px,transparent 1px),linear-gradient(90deg,var(--glass) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%)}
+@keyframes drift{to{transform:translate(8vw,6vh) scale(1.2)}}
+.float{position:fixed;z-index:-1;font-size:44px;color:var(--c1);opacity:.35;animation:bob 7s ease-in-out infinite alternate;pointer-events:none}
+@keyframes bob{to{transform:translateY(-26px) rotate(8deg)}}
+.glass{position:relative;background:var(--glass);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);border:1px solid var(--stroke);border-radius:28px;box-shadow:inset 0 1px 0 var(--glass2),inset 0 -1px 0 var(--glass),0 24px 60px -20px var(--shadow)}
+.glass:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,30%) var(--my,0%),var(--glass2),transparent 45%);opacity:.7}
+.card{padding:22px;overflow:hidden}
+.card:after{content:"";position:absolute;right:14px;top:14px;width:16px;height:16px;border-top:2px solid var(--c1);border-right:2px solid var(--c1);border-radius:0 8px 0 0;opacity:.7}
+.hud{position:sticky;top:12px;z-index:30;margin:12px auto 0;width:min(1100px,calc(100% - 24px));display:flex;align-items:center;gap:14px;padding:10px 16px;border-radius:999px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;white-space:nowrap}
+.logo b{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;animation:pulse 3s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px transparent,0 0 22px var(--c1)}}
+.xp{flex:1;min-width:80px}
+.xp div{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.bar{height:10px;border-radius:99px;background:var(--glass);border:1px solid var(--stroke);overflow:hidden;margin-top:3px}
+.bar span{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));background-size:200% 100%;animation:shine 3s linear infinite;transition:width .9s cubic-bezier(.2,1.3,.4,1)}
+@keyframes shine{to{background-position:-200% 0}}
+.th{border:1px solid var(--stroke);background:var(--glass);border-radius:50%;width:36px;height:36px;transition:.3s}
+.th:hover{transform:rotate(180deg)}
+main{width:min(1100px,calc(100% - 24px));margin:22px auto 130px}
+.view{display:none}
+.view.on{display:block;animation:in .55s cubic-bezier(.2,.9,.3,1)}
+@keyframes in{from{opacity:0;transform:translateY(24px) scale(.98);filter:blur(8px)}}
+h1{font-size:clamp(34px,6vw,64px);line-height:1.05;font-weight:800;letter-spacing:-2px}
+h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+h3{font-size:17px;margin-bottom:6px}
+p{color:var(--mut)}
+.grad{background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;padding:clamp(22px,4vw,44px);align-items:center}
+.btn{border:1px solid var(--stroke);background:var(--glass2);border-radius:16px;padding:11px 18px;font-weight:600;transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 10px 26px -8px var(--c1)}
+.btn:active{transform:scale(.95)}
+.btn.p{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;border:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pc{position:relative;height:250px}
+.mon{position:absolute;left:4%;top:8px;width:78%;height:170px;border-radius:18px;border:6px solid var(--stroke);background:#04101f;box-shadow:0 0 40px -6px var(--c1);padding:12px;animation:bob 5s ease-in-out infinite alternate}
+.mon:after{content:"";position:absolute;left:38%;bottom:-30px;width:24%;height:24px;background:var(--stroke);border-radius:0 0 10px 10px}
+.term{font:500 12px/1.6 "JetBrains Mono",monospace;color:#7dffc4;white-space:pre-wrap;min-height:60px}
+.term.big{background:#04101f;border-radius:16px;padding:14px;border:1px solid var(--stroke);min-height:130px;margin-top:12px;color:#7dffc4}
+.cur:after{content:"▌";animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.rack{position:absolute;right:0;bottom:0;width:30%;height:200px;border-radius:14px;border:2px solid var(--stroke);background:var(--glass);padding:10px 8px;display:flex;flex-direction:column;gap:8px}
+.rack b{height:22px;border-radius:6px;background:var(--glass2);display:flex;align-items:center;gap:4px;padding:0 6px}
+.rack b i{width:6px;height:6px;border-radius:50%;background:var(--c3);animation:led 1.2s infinite}
+.rack b i:nth-child(2){background:var(--warn);animation-delay:.4s}.rack b i:nth-child(3){animation-delay:.8s}
+@keyframes led{50%{opacity:.15}}
+.grid{display:grid;gap:16px;margin-top:18px}
+.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:1fr 1fr}
+.mis{text-align:left;color:var(--ink);transition:transform .35s cubic-bezier(.3,1.5,.5,1);border:0;padding:0}
+.mis:hover{transform:translateY(-8px) rotate(-1deg)}
+.mis .ic{font-size:36px;display:block;margin-bottom:10px;color:var(--c1)}
+.done{position:absolute;left:14px;top:14px;font-size:12px;color:var(--c3);opacity:0;transform:scale(0);transition:.4s}
+.mis.ok .done{opacity:1;transform:none}
+.dock{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;gap:6px;padding:8px;border-radius:30px}
+.dock button{border:0;background:transparent;border-radius:20px;padding:8px 14px;display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--mut);transition:transform .3s cubic-bezier(.3,1.8,.5,1),background .3s}
+.dock button span{font-size:22px;transition:.3s}
+.dock button:hover{transform:translateY(-8px) scale(1.15)}
+.dock button.on{background:var(--glass2);color:var(--ink);box-shadow:inset 0 1px 0 var(--glass2)}
+.dock button.on span{filter:drop-shadow(0 0 8px var(--c1))}
+.stage{position:relative;padding:18px 0}
+.hosts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.host{border:1px solid var(--stroke);background:var(--glass);border-radius:20px;padding:12px 6px;text-align:center;transition:.3s}
+.host.sel{box-shadow:0 0 0 2px var(--c1);transform:translateY(-4px)}
+.host.dst{box-shadow:0 0 0 2px var(--warn);transform:translateY(-4px)}
+.host .ic{font-size:32px;color:var(--c1)}
+.tag{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:99px;font-size:12px;font-weight:700;color:#04101f;border:0;transition:.3s}
+.v10{background:var(--c1)}.v20{background:var(--warn)}.v30{background:var(--c2);color:#fff}
+.sw{position:relative;margin:34px auto 0;width:86%;height:46px;border-radius:14px;border:1px solid var(--stroke);background:var(--glass2);display:flex;align-items:center;justify-content:space-around;padding:0 14px}
+.sw i{width:14px;height:10px;border-radius:2px;background:var(--c3);animation:led 1.6s infinite}
+.sw i:nth-child(even){animation-delay:.5s}
+.sw.bad{animation:shake .5s;border-color:var(--bad)}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.pkt{position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:radial-gradient(var(--c3),var(--c1));box-shadow:0 0 18px var(--c1);opacity:0;pointer-events:none}
+.field{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+label{font-size:13px;font-weight:600}
+input,select{background:var(--glass);border:1px solid var(--stroke);border-radius:14px;padding:10px 12px;outline:none;transition:.25s}
+input:focus,select:focus{box-shadow:0 0 0 3px var(--c1)}
+input[type=range]{padding:0;accent-color:var(--c1)}
+.bits{display:grid;grid-template-columns:repeat(32,1fr);gap:3px;margin:14px 0 6px}
+.bits i{aspect-ratio:1/1.5;border-radius:5px;display:grid;place-items:center;font:500 9px "JetBrains Mono",monospace;font-style:normal;color:#04101f;background:var(--c1);transition:background .35s,transform .35s}
+.bits i.h{background:var(--glass2);color:var(--mut);transform:scale(.88)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.stat{padding:12px;border-radius:16px;background:var(--glass);border:1px solid var(--stroke)}
+.stat small{display:block;color:var(--mut);font-size:12px}
+.stat b{font:500 14px "JetBrains Mono",monospace;word-break:break-all}
+.msg{margin-top:12px;padding:12px 14px;border-radius:16px;border:1px solid var(--stroke);background:var(--glass);animation:in .4s}
+.msg.ok{border-color:var(--c3)}.msg.no{border-color:var(--bad)}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opt{text-align:left;border:1px solid var(--stroke);background:var(--glass);border-radius:18px;padding:13px 16px;transition:.3s}
+.opt:hover{transform:translateX(6px);background:var(--glass2)}
+.opt.right{background:var(--c3);color:#04101f;animation:pop .5s}
+.opt.wrong{background:var(--bad);color:#fff;animation:shake .4s}
+@keyframes pop{50%{transform:scale(1.04)}}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sw2{position:relative;width:54px;height:30px;border-radius:99px;border:1px solid var(--stroke);background:var(--glass);transition:.3s;padding:0}
+.sw2:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:var(--ink);transition:.35s cubic-bezier(.3,1.8,.5,1)}
+.sw2.on{background:var(--c3)}.sw2.on:after{left:27px}
+#cur{position:fixed;left:0;top:0;z-index:999;pointer-events:none;border-radius:50%;display:none;width:7px;height:7px;margin:-3.5px;background:var(--c1);box-shadow:0 0 9px var(--c1)}
+@media(pointer:fine){#cur{display:block}}
+
+.fx{position:fixed;pointer-events:none;z-index:998}
+.fx{font-weight:800;color:var(--c3);text-shadow:0 0 12px var(--c3);animation:up 1.2s forwards}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+@media(max-width:800px){.hero,.g2{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.pc{height:220px}.dock button{padding:7px 9px}.logo em{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+/* perapihan tata letak */
+html{overflow-x:hidden}
+p,h2,h3,.opt,.msg,.stat b,.term{overflow-wrap:anywhere}
+.glass{isolation:isolate}
+.glass:before{z-index:-1}
+.card{padding:clamp(18px,3vw,26px)}
+.card h3{margin-bottom:8px}
+.grid{gap:18px}
+.view>h2{margin-top:2px}
+.view>p{max-width:62ch}
+.hud{gap:12px}
+.xp div span{white-space:nowrap}
+.mis.card{display:flex;flex-direction:column;align-items:flex-start;gap:2px;font:inherit;text-align:left;padding:clamp(18px,3vw,26px)}
+.mis:hover{transform:translateY(-6px)}
+.mis .done{left:auto;right:44px;top:20px;font-size:11px;font-weight:700}
+.mis h3{margin:0}
+.mis p{font-size:13px;line-height:1.5}
+.hero>*{min-width:0}
+.pc{display:flex;align-items:flex-end;gap:14px;height:auto;padding-bottom:30px}
+.mon{position:relative;left:auto;top:auto;flex:1;width:auto;min-width:0;height:196px}
+.mon:after{bottom:-24px}
+.mon .term{height:100%;overflow:hidden}
+.rack{position:relative;width:26%;height:196px;flex:none}
+.hosts{gap:12px}
+.host{min-width:0;padding:14px 8px}
+.host br{display:none}
+.host small{display:block;font-size:12px;margin-top:2px}
+.host .tag{margin-top:8px}
+.tag{white-space:nowrap}
+.sw{width:100%}
+select{width:100%;text-overflow:ellipsis}
+.bits{grid-template-columns:repeat(4,1fr);gap:10px}
+.oct{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.stats{gap:12px}
+.term.big{min-height:150px}
+@media(max-width:800px){.bits{grid-template-columns:repeat(2,1fr)}.bits i{font-size:9px}.hosts{grid-template-columns:repeat(2,1fr)}.rack{width:30%}.dock{left:10px;right:10px;transform:none;justify-content:space-between;gap:2px;padding:6px}.dock button{flex:1;min-width:0;padding:7px 2px;font-size:10px}.dock button:hover{transform:none}main{margin-bottom:110px}}
+.chip{padding:6px 14px;border-radius:99px;border:1px solid var(--stroke);background:var(--glass2);font:500 14px "JetBrains Mono",monospace;white-space:nowrap}
+.gh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.gtabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.gp{display:none}.gp.on{display:block;animation:in .45s}
+.shake{animation:shake .4s}
+.slots{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:12px;border-radius:18px;border:1px dashed var(--stroke);margin:16px 0}
+.slot{position:relative;overflow:hidden;height:84px;border-radius:9px;border:1px solid var(--stroke);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+.slot small{position:relative;z-index:1;font-size:11px;color:var(--mut)}
+.slot.fill small{color:#04101f;font-weight:700;text-shadow:0 0 4px #fff}
+.slot i{position:absolute;inset:0;animation:sl .4s}
+@keyframes sl{from{transform:translateY(-100%)}}
+.pool{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wire{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;border:1px solid var(--stroke);border-radius:14px;background:var(--glass);transition:transform .3s,opacity .3s}
+.wire i{display:block;width:100%;height:32px;border-radius:8px}
+.wire small{font-size:11px;line-height:1.2;text-align:center;overflow-wrap:anywhere}
+.wire:hover{transform:translateY(-4px)}
+.wire.gone{transform:scale(.3);opacity:0;pointer-events:none}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.fc{position:relative;aspect-ratio:1;padding:0;border:0;background:none;perspective:700px}
+.fi{position:absolute;inset:0;transition:transform .5s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d}
+.fc.open .fi,.fc.hit .fi{transform:rotateY(180deg)}
+.ff,.fb{position:absolute;inset:0;display:grid;place-items:center;border-radius:18px;border:1px solid var(--stroke);backface-visibility:hidden;-webkit-backface-visibility:hidden;font-weight:800}
+.ff{background:var(--glass2);color:var(--c1);font-size:28px}
+.fb{transform:rotateY(180deg);background:var(--glass2);font-size:clamp(14px,3vw,22px)}
+.fb.port{color:var(--warn)}.fb.layanan{color:var(--c3)}
+.fc.hit .fb{background:var(--c3);color:#04101f;box-shadow:0 0 22px var(--c3)}
+.cf{position:fixed;width:9px;height:14px;border-radius:2px;pointer-events:none;z-index:998}
+.members{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.mb{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:18px;border:1px solid var(--stroke);background:var(--glass);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.mb:hover{transform:translateY(-4px)}
+.mb b{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff}
+.mb span{font-weight:600;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+@media(max-width:800px){.members{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.members{grid-template-columns:1fr}}
+
+/* ===== Peningkatan situs: halaman publik, login demo, profil guru ===== */
+.topnav{width:min(1100px,calc(100% - 24px));margin:12px auto 0;display:flex;gap:8px;align-items:center;overflow-x:auto;padding:8px;border-radius:20px}
+.topnav button{white-space:nowrap;border:1px solid transparent;background:transparent;border-radius:12px;padding:9px 13px;color:var(--mut);font-weight:600;transition:.2s}
+.topnav button:hover,.topnav button.active{background:var(--glass2);color:var(--ink);border-color:var(--stroke)}
+.topnav .nav-login{margin-left:auto;background:linear-gradient(135deg,var(--c1),var(--c2));color:white}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin:28px 0 12px}
+.eyebrow{font:600 12px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:2px;color:var(--c1);margin-bottom:8px}
+.feature-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:var(--glass2);color:var(--c1);font-size:23px;margin-bottom:12px}
+.teacher-card{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:center}
+.teacher-avatar{width:110px;height:110px;border-radius:28px;display:grid;place-items:center;background:linear-gradient(135deg,var(--c1),var(--c2));color:white;font-size:38px;font-weight:800;box-shadow:0 12px 32px var(--shadow)}
+.pill{display:inline-block;padding:5px 11px;border-radius:99px;background:var(--glass2);border:1px solid var(--stroke);font-size:12px;margin:4px 4px 0 0}
+.login-wrap{max-width:520px;margin:32px auto}
+.login-brand{font-size:13px;color:var(--c1);font-weight:800;letter-spacing:2px;text-transform:uppercase}
+.login-note{font-size:12px;margin-top:14px;padding:12px;border-radius:12px;background:var(--glass);border:1px solid var(--stroke)}
+.form-error{color:var(--bad);font-size:13px;min-height:20px;margin-top:8px}
+.lesson-row{display:flex;gap:14px;align-items:flex-start}
+.lesson-num{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--glass2);color:var(--c1);font-weight:800}
+.kpi{font-size:clamp(25px,4vw,38px);font-weight:800;line-height:1.2}
+footer{width:min(1100px,calc(100% - 24px));margin:-80px auto 120px;text-align:center;color:var(--mut);font-size:12px}
+@media(max-width:800px){.topnav{border-radius:16px}.topnav button{padding:8px 10px;font-size:12px}.topnav .nav-login{margin-left:0}.teacher-card{grid-template-columns:1fr}.teacher-avatar{width:82px;height:82px;border-radius:22px;font-size:30px}footer{margin-bottom:115px}}
+
+/* ===== Login awal, intro sinematik, audio, dan polish responsif ===== */
+body:not(.unlocked)>.hud,body:not(.unlocked)>.topnav,body:not(.unlocked)>main,body:not(.unlocked)>.dock,body:not(.unlocked)>footer{visibility:hidden}body:not(.unlocked){overflow:hidden}
+#authGate{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 15% 15%,rgba(34,225,255,.18),transparent 42%),radial-gradient(ellipse at 90% 85%,rgba(139,108,255,.2),transparent 40%),var(--bg);overflow:auto}
+#authGate:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;background-image:linear-gradient(var(--stroke) 1px,transparent 1px),linear-gradient(90deg,var(--stroke) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent)}
+.auth-layout{position:relative;width:min(980px,100%);display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(22px,5vw,58px);align-items:center}
+.auth-copy{padding:10px 0;animation:authRise .8s both}.auth-mark{display:inline-flex;align-items:center;gap:10px;color:var(--c1);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}.auth-mark b{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;color:white;background:linear-gradient(135deg,var(--c1),var(--c2));font-size:21px;box-shadow:0 10px 35px #22e1ff30}.auth-copy h1{font-size:clamp(40px,6vw,72px);letter-spacing:-3px}.auth-copy p{max-width:44ch;margin-top:18px;font-size:15px}.auth-mini{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.auth-mini span{border:1px solid var(--stroke);background:var(--glass);border-radius:99px;padding:8px 12px;font-size:12px;color:var(--mut)}
+.auth-card{padding:clamp(22px,4vw,36px);animation:authRise .9s .1s both}.auth-card h2{margin-top:8px}.auth-card .field{margin-top:16px}.auth-card input{width:100%;min-height:48px}.auth-card .btn{min-height:48px;width:100%;margin-top:18px}.auth-hint{font-size:11px;line-height:1.55;margin-top:16px;padding:12px;border:1px solid var(--stroke);border-radius:14px;background:var(--glass)}
+@keyframes authRise{from{opacity:0;transform:translateY(24px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+#introSequence{position:fixed;inset:0;z-index:1900;display:none;place-items:center;overflow:hidden;background:#040916;color:#f3f8ff;padding:24px;text-align:center}#introSequence.play{display:grid;animation:introBg .8s both}#introSequence:before,#introSequence:after{content:"";position:absolute;width:60vmax;height:60vmax;border:1px solid #22e1ff30;border-radius:50%;animation:orbit 7s linear infinite}#introSequence:after{width:75vmax;height:75vmax;border-color:#9b5cff28;animation-direction:reverse;animation-duration:11s}.intro-grid{position:absolute;inset:0;background-image:linear-gradient(#ffffff09 1px,transparent 1px),linear-gradient(90deg,#ffffff09 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse,black,transparent 75%)}.intro-content{position:relative;z-index:1;max-width:900px}.intro-kicker{font:600 12px "JetBrains Mono",monospace;letter-spacing:4px;text-transform:uppercase;color:#75eaff;opacity:0;animation:introIn .8s .2s forwards}.intro-title{font-size:clamp(36px,8vw,96px);font-weight:800;line-height:1.04;letter-spacing:-.055em;margin:22px 0 16px;opacity:0;animation:titleIn 1s .55s cubic-bezier(.16,1,.3,1) forwards;text-shadow:0 0 45px #22e1ff25}.intro-title span{display:block;background:linear-gradient(100deg,#fff,#65e9ff 45%,#a78bfa 85%);background-clip:text;-webkit-background-clip:text;color:transparent}.intro-by{font-size:clamp(14px,2vw,20px);letter-spacing:3px;color:#b6c7df;opacity:0;animation:introIn .7s 1.25s forwards}.intro-line{height:2px;width:min(320px,65vw);margin:28px auto;background:linear-gradient(90deg,transparent,#22e1ff,#9b5cff,transparent);transform:scaleX(0);animation:lineIn .7s 1.05s forwards}.intro-exit{animation:introOut .7s 2.7s forwards!important}@keyframes introBg{from{opacity:0}to{opacity:1}}@keyframes orbit{to{transform:rotate(360deg)}}@keyframes introIn{to{opacity:1;transform:none}from{opacity:0;transform:translateY(18px)}}@keyframes titleIn{0%{opacity:0;transform:translateY(40px) scale(.9);filter:blur(12px)}70%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:blur(0)}}@keyframes lineIn{to{transform:scaleX(1)}}@keyframes introOut{to{opacity:0;transform:scale(1.04);filter:blur(10px);visibility:hidden}}
+#soundToggle{font-size:12px;padding:7px 10px;white-space:nowrap}.topnav{scrollbar-width:thin}.topnav::-webkit-scrollbar{height:3px}.topnav::-webkit-scrollbar-thumb{background:var(--c1);border-radius:9px}
+@media(max-width:700px){.auth-layout{grid-template-columns:1fr;gap:20px;max-width:480px}.auth-copy{padding:0}.auth-copy h1{font-size:clamp(38px,11vw,56px);letter-spacing:-2px}.auth-copy p{font-size:13px;margin-top:10px}.auth-mark{margin-bottom:12px}.auth-mini{margin-top:14px}.auth-mini span{padding:6px 9px}.auth-card{padding:22px}.hud{position:relative;top:0;flex-wrap:wrap;border-radius:22px}.hud .xp{order:3;flex-basis:100%}.logo{flex:1}.topnav{margin-top:8px}.hero{padding:22px}.pc{gap:8px}.mon{height:150px;padding:8px}.rack{height:150px;padding:7px 5px;gap:6px}.rack b{height:18px;padding:0 3px}.term{font-size:10px}.intro-title{letter-spacing:-.04em}.dock{bottom:calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(20px)}}
+@media(max-width:380px){.dock button{font-size:9px}.dock button span{font-size:18px}.logo em{display:none}.auth-mini span{font-size:10px}.topnav button{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#introSequence:before,#introSequence:after{animation:none}}
+
+
+/* ===== Premium release layer: dashboard, mission mode, virtual lab ===== */
+:root{--premium-line:rgba(147,197,253,.16)}
+.premium-banner{position:relative;overflow:hidden;padding:clamp(22px,4vw,38px);border:1px solid var(--premium-line);background:linear-gradient(125deg,rgba(13,35,67,.94),rgba(16,24,49,.86) 58%,rgba(36,25,76,.82));}
+.premium-banner:after{content:"";position:absolute;width:340px;height:340px;right:-110px;top:-150px;border-radius:50%;border:1px solid #5de6ff30;box-shadow:0 0 0 34px #5de6ff08,0 0 0 70px #a78bfa08;pointer-events:none}
+.premium-banner>*{position:relative;z-index:1}
+.premium-topline{display:flex;align-items:center;gap:9px;color:#8cecff;font:600 11px 'JetBrains Mono',monospace;letter-spacing:1.6px;text-transform:uppercase}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#48f2ba;box-shadow:0 0 14px #48f2ba;display:inline-block}
+.dashboard-strip{display:grid;grid-template-columns:1.25fr repeat(3,minmax(0,.75fr));gap:12px;margin-top:16px}
+.dash-tile{padding:16px;border-radius:20px;border:1px solid var(--premium-line);background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));min-width:0}
+.dash-tile small{display:block;color:var(--mut);font-size:11px;letter-spacing:.4px}
+.dash-tile strong{display:block;font-size:clamp(19px,3vw,29px);letter-spacing:-.7px;margin-top:5px;overflow-wrap:anywhere}
+.dash-tile .tiny{font-size:12px;font-weight:500;color:var(--mut);letter-spacing:0}
+.premium-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:16px}
+.premium-feature{position:relative;overflow:hidden;padding:21px;border:1px solid var(--premium-line);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));transition:transform .28s,border-color .28s,background .28s;min-width:0}
+.premium-feature:hover{transform:translateY(-5px);border-color:#55dffb70;background:linear-gradient(145deg,rgba(34,225,255,.1),rgba(139,108,255,.06))}
+.premium-feature .feature-icon{width:48px;height:48px;border:1px solid var(--premium-line);background:linear-gradient(135deg,#22e1ff20,#8b6cff26);font-size:24px}
+.premium-feature h3{margin:10px 0 7px}.premium-feature p{font-size:13px;min-height:60px}.feature-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:17px;font-size:12px;color:var(--c1);font-weight:700}
+.section-kicker{font:600 11px 'JetBrains Mono',monospace;letter-spacing:1.6px;text-transform:uppercase;color:var(--c1);margin-bottom:8px}
+.story-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;margin-top:18px;align-items:start}
+.mission-map{display:grid;gap:10px}.mission-node{width:100%;display:flex;gap:13px;align-items:center;text-align:left;padding:15px;border-radius:18px;border:1px solid var(--premium-line);background:var(--glass);color:var(--ink);transition:.25s}.mission-node:hover,.mission-node.active{border-color:var(--c1);background:var(--glass2);transform:translateX(3px)}.mission-node .node-num{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#22e1ff20,#8b6cff25);color:var(--c1);font-weight:800}.mission-node small{display:block;color:var(--mut);font-size:11px}.mission-play{min-height:390px}.mission-choice{width:100%;text-align:left;padding:14px 16px;border:1px solid var(--premium-line);border-radius:16px;background:var(--glass);color:var(--ink);margin-top:9px;transition:.2s}.mission-choice:hover{border-color:var(--c1);transform:translateX(3px)}.mission-choice.correct{background:rgba(61,255,176,.14);border-color:var(--c3)}.mission-choice.incorrect{background:rgba(255,93,122,.12);border-color:var(--bad)}
+.lab-topology{position:relative;min-height:290px;border:1px solid var(--premium-line);border-radius:24px;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,rgba(34,225,255,.08),transparent 60%),rgba(1,8,20,.45);padding:22px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;align-items:center}
+.lab-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.75}.lab-node{z-index:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:82px;padding:10px 5px;border:1px solid #6fe8ff40;border-radius:18px;background:rgba(9,24,45,.92);color:#eaf6ff;box-shadow:0 12px 35px #0002;transition:.25s}.lab-node .lab-icon{font-size:25px}.lab-node small{font-size:11px;color:#9eb7d4}.lab-node.active{border-color:#4fffd0;box-shadow:0 0 0 2px #4fffd022,0 0 28px #22e1ff22;transform:translateY(-3px)}.lab-node[data-node="pc1"]{grid-column:1;grid-row:1}.lab-node[data-node="pc2"]{grid-column:1;grid-row:2}.lab-node[data-node="switch"]{grid-column:2;grid-row:1/3}.lab-node[data-node="router"]{grid-column:3;grid-row:1}.lab-node[data-node="server"]{grid-column:3;grid-row:2}.lab-status{display:flex;align-items:center;gap:9px;padding:12px 14px;border-radius:15px;background:var(--glass);border:1px solid var(--premium-line);font-size:13px;color:var(--mut);margin-top:12px}.lab-status .live-dot{flex:none}
+.leader-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px;border-bottom:1px solid var(--premium-line)}.leader-row:last-child{border-bottom:0}.leader-rank{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;background:var(--glass2);font-weight:800}.leader-name{font-weight:700;overflow-wrap:anywhere}.leader-name small{display:block;color:var(--mut);font-size:11px;font-weight:400}.leader-score{font:600 13px 'JetBrains Mono',monospace;color:var(--c1)}.privacy-note{font-size:11px;color:var(--mut);padding:12px;border-radius:14px;background:var(--glass);margin-top:12px}
+@media(max-width:800px){.dashboard-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-strip .dash-tile:first-child{grid-column:1/-1}.premium-grid{grid-template-columns:1fr}.premium-feature p{min-height:0}.story-layout{grid-template-columns:1fr}.mission-map{grid-template-columns:repeat(2,minmax(0,1fr))}.mission-node{padding:11px;gap:8px}.mission-node .node-num{width:34px;height:34px}.mission-play{min-height:0}}
+@media(max-width:480px){.premium-banner{border-radius:22px}.dashboard-strip{gap:8px}.dash-tile{padding:13px;border-radius:16px}.mission-map{grid-template-columns:1fr}.lab-topology{padding:12px;gap:7px;min-height:250px}.lab-node{min-height:75px;border-radius:14px}.lab-node .lab-icon{font-size:21px}.lab-node small{font-size:10px}.leader-row{grid-template-columns:34px minmax(0,1fr) auto;padding:11px 2px}}
+
+
+:root[data-palette="ocean"] .bg:before{content:"";position:absolute;left:-10%;right:-10%;bottom:-4%;height:35%;opacity:.22;background:radial-gradient(ellipse at 20% 100%,var(--c1),transparent 55%),radial-gradient(ellipse at 75% 100%,var(--c2),transparent 50%);filter:blur(28px);animation:waveDrift 12s ease-in-out infinite alternate}
+@keyframes waveDrift{to{transform:translateX(4%) translateY(-12px) scale(1.06)}}
+.logo b{position:relative;overflow:hidden;box-shadow:0 7px 22px var(--theme-glow);transition:transform .35s cubic-bezier(.2,1.5,.4,1)}
+.logo:hover b{transform:rotate(-8deg) scale(1.1)}
+.logo b:after{content:"";position:absolute;inset:-60% auto -60% -35%;width:35%;background:rgba(255,255,255,.55);transform:rotate(25deg);animation:logoSweep 4s ease-in-out infinite}
+@keyframes logoSweep{0%,55%{left:-40%}100%{left:130%}}
+.dock.glass{background:color-mix(in srgb,var(--bg) 58%,transparent);backdrop-filter:blur(28px) saturate(190%);-webkit-backdrop-filter:blur(28px) saturate(190%);border-color:color-mix(in srgb,var(--stroke) 75%,transparent);box-shadow:0 14px 45px var(--shadow),inset 0 1px 0 var(--glass2)}
+.bar{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}
+.bar span{box-shadow:0 0 14px var(--theme-glow)}
+</style>
+</head>
+<body>
+<div id="authGate" aria-label="Halaman login">
+  <div class="auth-layout">
+    <div class="auth-copy">
+      <div class="auth-mark"><b>N</b> NETQUEST / TJKT</div>
+      <h1>Jaringan itu <span class="grad">seru.</span><br>Naik level.</h1>
+      <p>Masuk ke ruang belajar interaktif Kelompok 1. Jelajahi simulasi jaringan, tantangan subnetting, diagnosis gangguan, dan arena game dalam satu pengalaman.</p>
+      <div class="auth-mini"><span>✦ Interactive learning</span><span>⌘ Network lab</span><span>↗ Mobile friendly</span></div>
+    </div>
+    <div class="auth-card glass">
+      <div class="eyebrow">Akses pembelajaran</div><h2>Selamat datang.</h2><p>Masukkan nama saja untuk memulai pengalaman NetQuest.</p>
+      <form id="gateForm" onsubmit="return window.startNetQuestLogin(event)">
+        <div class="field"><label for="gateName">Nama pengguna</label><input id="gateName" autocomplete="username" placeholder="Contoh: Ivander" maxlength="50" required></div>
+        <div id="gateError" class="form-error" role="status"></div><button class="btn p" type="submit">Mulai belajar <span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="auth-hint">Login cepat untuk presentasi: cukup masukkan nama. Nama disimpan di browser perangkat ini; belum memakai akun online.</div>
+    </div>
+  </div>
+</div>
+<div id="introSequence" aria-hidden="true"><div class="intro-grid"></div><div class="intro-content"><div class="intro-kicker">XI TJKT 2 • MEDIA PEMBELAJARAN INTERAKTIF</div><div class="intro-title"><span>NetQuest TJKT: Smart Network Lab</span></div><div class="intro-line"></div><div class="intro-by">By. Kelompok 1</div></div></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-antenna" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M7.5 7.5a6 6 0 0 0 0 9M16.5 7.5a6 6 0 0 1 0 9M4.5 4.5a10 10 0 0 0 0 15M19.5 4.5a10 10 0 0 1 0 15"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+<symbol id="i-drive" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M5 13l2-8h10l2 8M7 16.5h.01M11 16.5h.01"/></symbol>
+<symbol id="i-branch" viewBox="0 0 24 24"><circle cx="12" cy="19" r="2"/><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><path d="M12 17v-3c0-3-6-2-6-6M12 14c0-3 6-2 6-6"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></symbol>
+<symbol id="i-laptop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="10" rx="2"/><path d="M2 19h20"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/></symbol>
+<symbol id="i-thumb" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-8c2 0 3 1 3 3v3h5a2 2 0 0 1 2 2l-1 6a2 2 0 0 1-2 2H7"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7"/></symbol>
+<symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/></symbol>
+<symbol id="i-pad" viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.2 2L15 14H9l-1.8 2A3 3 0 0 1 2 14v-2a4 4 0 0 1 4-4zM7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></symbol>
+</defs></svg>
+<div class="bg"><i></i><i></i><i></i></div>
+<span class="float" style="left:6%;top:30%"><svg class="i"><use href="#i-monitor"/></svg></span><span class="float" style="right:5%;top:55%;animation-delay:-2s"><svg class="i"><use href="#i-antenna"/></svg></span><span class="float" style="left:12%;bottom:22%;animation-delay:-4s"><svg class="i"><use href="#i-plug"/></svg></span><span class="float" style="right:18%;top:14%;animation-delay:-3s"><svg class="i"><use href="#i-drive"/></svg></span>
+<div id="cur"></div><div id="ring"></div>
+
+<header class="hud glass">
+  <div class="logo"><b>N</b><em style="font-style:normal">NetQuest TJKT</em></div>
+  <div class="xp"><div><span id="rank">Newbie</span><span id="xpt">0 XP</span></div><div class="bar"><span id="xpb"></span></div></div>
+  <button class="btn" id="sessionBtn" data-v="login" style="padding:7px 10px;font-size:12px">Login</button><button class="btn" id="soundToggle" type="button" aria-pressed="false" title="Aktifkan efek suara">♫ Suara: Mati</button><button class="th" id="theme" aria-label="Ganti mode gelap atau terang"><svg class="i"><use href="#i-theme"/></svg></button><button class="btn" id="openDesign" type="button" style="padding:7px 10px;font-size:12px">Tampilan</button>
+</header>
+<nav class="topnav glass" aria-label="Navigasi utama">
+  <button data-v="home" class="active">Beranda</button>
+  <button data-v="about">Tentang Web</button>
+  <button data-v="materials">Materi TJKT</button><button data-v="guide">Panduan</button>
+  <button data-v="story">Story Mode</button>
+  <button data-v="lab">Virtual Lab</button>
+  <button data-v="leaderboard">Leaderboard</button>
+  <button data-v="teacher">Guru Pembimbing</button>
+  <button data-v="game">Arena Game</button>
+  <button data-v="missions">10 Misi</button>
+  <button data-v="classroom">Class Arena</button>
+  <button data-v="certificates">Sertifikat</button>
+  <button data-v="contact">Kontak</button>
+  <button data-v="login" class="nav-login" id="loginNav">Masuk / Login</button>
+</nav>
+
+<main>
+<section class="view on" id="home">
+  <div class="glass hero">
+    <div>
+      <div class="eyebrow">Media Pembelajaran Interaktif • XI TJKT 2</div><h1>Belajar jaringan, <span class="grad">naik level.</span></h1>
+      <p style="margin-top:14px;max-width:46ch">Selamat datang di NetQuest TJKT, media belajar interaktif untuk mengenal jaringan komputer melalui materi, simulasi, latihan, dan game edukatif.</p>
+      <div class="row"><button class="btn p" data-v="vlan">Mulai Misi 1</button><button class="btn" data-v="quiz">Langsung ke kuis</button></div>
+    </div>
+    <div class="pc"><div class="mon"><div class="term cur" id="heroTerm"></div></div><div class="rack"><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b></div></div>
+  </div>
+  <div class="glass premium-banner" style="margin-top:16px;border-radius:28px">
+    <div class="premium-topline"><span class="live-dot"></span> PERSONAL LEARNING CONSOLE</div>
+    <div style="display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:12px">
+      <div><h2 style="font-size:clamp(25px,4vw,38px)">Siap, <span class="grad" id="dashName">Teknisi Jaringan</span>?</h2><p style="margin-top:6px;max-width:55ch">Lanjutkan misi, uji kemampuan, dan bangun skill jaringanmu satu tantangan dalam satu waktu.</p></div>
+      <button class="btn p" data-v="story">Lanjutkan misi <span aria-hidden="true">↗</span></button>
+    </div>
+    <div class="dashboard-strip">
+      <div class="dash-tile"><small>STATUS TEKNISI</small><strong id="dashRank">Newbie</strong><span class="tiny">Progres belajar personal</span></div>
+      <div class="dash-tile"><small>TOTAL XP</small><strong id="dashXP">0</strong><span class="tiny">poin pengalaman</span></div>
+      <div class="dash-tile"><small>MISI SELESAI</small><strong id="dashMissions">0/4</strong><span class="tiny">misi utama</span></div>
+      <div class="dash-tile"><small>STATUS LAB</small><strong style="font-size:19px"><span class="live-dot"></span> Ready</strong><span class="tiny">siap disimulasikan</span></div>
+    </div>
+  </div>
+  <div class="section-head"><div><div class="section-kicker">Your training path</div><h2>Mulai dari mana saja.</h2><p>Pilih pengalaman belajar yang sesuai dengan tantanganmu.</p></div></div>
+  <div class="premium-grid">
+    <button class="premium-feature" data-v="story" style="text-align:left;color:var(--ink)"><div class="feature-icon">◈</div><h3>Story Mode</h3><p>Jadilah teknisi jaringan sekolah. Analisis tiket, temukan akar masalah, dan pulihkan koneksi lewat keputusanmu.</p><div class="feature-foot"><span>4 MISI • XP REWARD</span><span>↗</span></div></button>
+    <button class="premium-feature" data-v="lab" style="text-align:left;color:var(--ink)"><div class="feature-icon">⌘</div><h3>Virtual Network Lab</h3><p>Uji koneksi antarperangkat, kirim paket simulasi, dan pahami alur PC, switch, router, serta server.</p><div class="feature-foot"><span>INTERACTIVE SIMULATION</span><span>↗</span></div></button>
+    <button class="premium-feature" data-v="leaderboard" style="text-align:left;color:var(--ink)"><div class="feature-icon">♜</div><h3>Leaderboard</h3><p>Pantau skor yang tersimpan di browser ini dan lihat progres belajar lokalmu.</p><div class="feature-foot"><span>LOCAL SCOREBOARD</span><span>↗</span></div></button>
+  </div>
+  <div class="grid g4" style="margin-top:20px">
+    <button class="glass card mis" data-v="vlan" id="m-vlan"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-branch"/></svg></span><h3>Misi 1: VLAN</h3><p>Pisahkan jaringan guru, siswa, dan server.</p></button>
+    <button class="glass card mis" data-v="ip" id="m-ip"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-calc"/></svg></span><h3>Misi 2: Subnet</h3><p>Bagi alamat IP menjadi blok yang pas.</p></button>
+    <button class="glass card mis" data-v="fix" id="m-fix"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-wrench"/></svg></span><h3>Misi 3: Diagnosa</h3><p>Cari akar masalah dari bukti, bukan tebakan.</p></button>
+    <button class="glass card mis" data-v="quiz" id="m-quiz"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-trophy"/></svg></span><h3>Misi 4: Kuis</h3><p>20 soal cepat untuk menguji pemahaman jaringan.</p></button>
+  </div>
+  <div class="grid" style="margin-top:18px">
+    <button class="glass card mis" data-v="game"><span class="ic"><svg class="i"><use href="#i-pad"/></svg></span><h3>Arena Game</h3><p>Enam game interaktif: susun kabel T568B, kartu port, subnet sprint, OSI Challenge, Detektif Jaringan, dan Rute Paket.</p></button>
+    <div class="glass card"><h3>Dibuat oleh Kelompok 1</h3><p>Media pembelajaran TJKT oleh anggota berikut.</p><div class="members"><div class="mb"><b>I</b><span>Ivander</span></div><div class="mb"><b>M</b><span>Muh. Hadit Rafanizam</span></div><div class="mb"><b>F</b><span>Muh. Fikron Ainun Najib</span></div><div class="mb"><b>A</b><span>Akhsan Jauhar Santoso</span></div></div></div>
+  </div>
+</section>
+
+
+<section class="view" id="about">
+  <div class="glass hero">
+    <div><div class="eyebrow">Tentang proyek</div><h1>NetQuest <span class="grad">TJKT</span></h1>
+      <p style="margin-top:14px;max-width:55ch">NetQuest TJKT adalah media pembelajaran interaktif yang dirancang untuk membantu siswa memahami dasar jaringan komputer lewat penjelasan, simulasi, kuis, dan permainan edukatif.</p>
+      <div class="row"><button class="btn p" data-v="materials">Mulai belajar</button><button class="btn" data-v="teacher">Guru pembimbing</button></div>
+    </div>
+    <div class="glass card"><div class="eyebrow">Fokus pembelajaran</div><div class="kpi grad">Learn • Try • Review</div><p style="margin-top:10px">Pelajari konsep, coba simulasi, lalu evaluasi pemahaman melalui kuis.</p></div>
+  </div>
+  <div class="grid g2">
+    <div class="glass card"><div class="feature-icon">◎</div><h3>Tujuan</h3><p>Membuat pembelajaran TJKT lebih menarik, mudah dipahami, dan mendorong siswa aktif mencoba.</p></div>
+    <div class="glass card"><div class="feature-icon">⌘</div><h3>Fitur Utama</h3><p>Simulasi VLAN, kalkulator subnet, diagnosis gangguan, kuis, arena game, dan sistem XP untuk motivasi belajar.</p></div>
+    <div class="glass card"><div class="feature-icon">▤</div><h3>Sasaran Pengguna</h3><p>Siswa Teknik Jaringan Komputer dan Telekomunikasi yang ingin mengulang konsep dasar jaringan.</p></div>
+    <div class="glass card"><div class="feature-icon">✦</div><h3>Pengembang</h3><p>Kelompok 1 — Ivander, Muh. Hadit Rafanizam, Muh. Fikron Ainun Najib dan Akhsan Jauhar Santoso.</p></div>
+  </div>
+</section>
+
+<section class="view" id="materials">
+  <div class="eyebrow">Pusat belajar</div><h2>Materi Dasar TJKT</h2><p>Pilih materi untuk membaca ringkasan dan lanjutkan dengan simulasi di NetQuest.</p>
+  <div class="grid g2">
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">01</div><div><h3>Dasar Jaringan Komputer</h3><p>Jaringan komputer menghubungkan dua atau lebih perangkat agar dapat bertukar data dan berbagi sumber daya.</p><div class="pills"><span class="pill">LAN</span><span class="pill">WAN</span><span class="pill">Perangkat jaringan</span></div></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">02</div><div><h3>IP Address & Subnetting</h3><p>Alamat IP mengidentifikasi perangkat pada jaringan. Subnetting membagi jaringan menjadi beberapa jaringan yang lebih kecil.</p><div class="pills"><span class="pill">IPv4</span><span class="pill">Prefix</span><span class="pill">Subnet mask</span></div><button class="btn" data-v="ip" style="margin-top:14px">Buka simulasi subnet →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">03</div><div><h3>VLAN & Switching</h3><p>VLAN membagi satu jaringan switch menjadi beberapa broadcast domain secara logis. Komunikasi lintas VLAN membutuhkan routing Layer 3.</p><div class="pills"><span class="pill">VLAN 10</span><span class="pill">VLAN 20</span><span class="pill">VLAN 30</span></div><button class="btn" data-v="vlan" style="margin-top:14px">Coba simulasi VLAN →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">04</div><div><h3>Troubleshooting</h3><p>Periksa gejala, kumpulkan bukti, uji dugaan, lakukan perbaikan, lalu verifikasi hasilnya.</p><div class="pills"><span class="pill">Kabel</span><span class="pill">IP</span><span class="pill">Ping</span><span class="pill">DNS</span></div><button class="btn" data-v="fix" style="margin-top:14px">Latihan diagnosis →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">05</div><div><h3>Port & Layanan Jaringan</h3><p>Port membantu sistem mengarahkan komunikasi ke layanan yang sesuai. Contoh: HTTP 80, HTTPS 443, SSH 22, dan DNS 53.</p><button class="btn" data-v="game" style="margin-top:14px">Latihan kartu port →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">06</div><div><h3>Evaluasi Pemahaman</h3><p>Uji pemahaman dasar jaringan melalui enam soal pilihan ganda dan dapatkan XP.</p><button class="btn p" data-v="quiz" style="margin-top:14px">Mulai kuis →</button></div></div></article>
+  </div>
+</section>
+
+<section class="view" id="teacher">
+  <div class="eyebrow">Profil pendamping</div><h2>Guru Pembimbing</h2><p>Terima kasih atas arahan dan bimbingan dalam pengembangan media pembelajaran ini.</p>
+  <div class="glass card" style="margin-top:18px">
+    <div class="teacher-card"><div class="teacher-avatar">AM</div><div><span class="pill">Guru Pembimbing</span><h1 style="font-size:clamp(30px,5vw,46px);margin-top:8px">Pak Andy Musly</h1><p style="margin-top:10px">Pembimbing proyek NetQuest TJKT — media pembelajaran interaktif untuk siswa Teknik Jaringan Komputer dan Telekomunikasi.</p><div class="pills"><span class="pill">Pembelajaran TJKT</span><span class="pill">Jaringan Komputer</span><span class="pill">Proyek Kelompok</span></div></div></div>
+    <div class="msg" style="margin-top:22px"><b>Catatan:</b> Guru KKJ 1</div>
+  </div>
+</section>
+
+<section class="view" id="contact">
+  <div class="eyebrow">Informasi proyek</div><h2>Kontak & Informasi</h2><p>Halaman informasi untuk mengenal pembuat dan menyampaikan masukan terkait media pembelajaran.</p>
+  <div class="grid g2">
+    <div class="glass card"><div class="feature-icon">✉</div><h3>Masukan untuk proyek</h3><p>Jika menemukan materi yang perlu diperbaiki, catat topik dan bagian yang dimaksud lalu sampaikan kepada kelompok atau guru pembimbing secara langsung.</p></div>
+    <div class="glass card"><div class="feature-icon">⌂</div><h3>Identitas Proyek</h3><p><b>Nama:</b> NetQuest TJKT</p><p><b>Developer:</b> Ivander</p><p><b>Kelas:</b> XI TJKT 2</p><p><b>Kelompok:</b> Kelompok 1</p><p><b>Guru pembimbing:</b> Pak Andy Musly</p></div>
+  </div>
+  <div class="glass card" style="margin-top:18px"><h3>Anggota Kelompok 1</h3><div class="members"><div class="mb"><b>I</b><span>Ivander</span></div><div class="mb"><b>M</b><span>Muh. Hadit RafaNizam</span></div><div class="mb"><b>F</b><span>Muh. Fikron Ainun Najib</span></div><div class="mb"><b>A</b><span>Akhsan Jauhar Santoso</span></div></div></div>
+</section>
+
+<section class="view" id="login">
+  <div class="login-wrap glass card">
+    <div class="login-brand">NetQuest TJKT</div><h2 style="margin-top:8px">Selamat datang kembali</h2><p>Masukkan nama saja untuk melanjutkan pengalaman belajar.</p>
+    <form id="loginForm">
+      <div class="field"><label for="loginName">Nama pengguna</label><input id="loginName" autocomplete="username" placeholder="Masukkan nama pengguna" required maxlength="50"></div>
+      <div class="row"><button class="btn p" type="submit">Masuk ke NetQuest →</button><button class="btn" type="button" data-v="home">Kembali</button></div>
+      <div id="loginError" class="form-error" role="status"></div>
+    </form>
+    <div class="login-note"><b>Mode demonstrasi sekolah</b><br>Login ini hanya mode demo dan menyimpan nama di browser perangkat ini. Belum memerlukan kata sandi atau akun online.</div>
+  </div>
+</section>
+
+<section class="view" id="game">
+  <h2>Arena Game</h2><p>Enam tantangan interaktif untuk teknisi jaringan. Mainkan, kumpulkan XP, dan buktikan kemampuanmu!</p>
+  <div class="gtabs"><button class="btn p" data-g="g-cable"><svg class="i"><use href="#i-plug"/></svg> Susun Kabel</button><button class="btn" data-g="g-mem"><svg class="i"><use href="#i-drive"/></svg> Kartu Port</button><button class="btn" data-g="g-sp"><svg class="i"><use href="#i-calc"/></svg> Subnet Sprint</button><button class="btn" data-g="g-osi"><svg class="i"><use href="#i-branch"/></svg> OSI Challenge</button><button class="btn" data-g="g-detect"><svg class="i"><use href="#i-wrench"/></svg> Detektif Jaringan</button><button class="btn" data-g="g-route"><svg class="i"><use href="#i-server"/></svg> Rute Paket</button></div>
+  <div class="gp on" id="g-cable"><div class="glass card"><div class="gh"><h3>Susun kabel UTP T568B</h3><span class="chip" id="ctime">0.0 s</span></div><p>Ketuk kabel sesuai urutan pin 1 sampai 8. Waktu mulai berjalan saat ketukan pertama.</p><div class="slots" id="cslots"></div><div class="pool" id="cpool"></div><div class="msg" id="cmsg"></div><div class="row"><button class="btn" id="cre">Acak ulang</button></div></div></div>
+  <div class="gp" id="g-mem"><div class="glass card"><div class="gh"><h3>Kartu pasangan port</h3><span class="chip" id="mmv">0 langkah</span></div><p>Balik dua kartu untuk mencocokkan nomor port dengan nama layanannya.</p><div class="mgrid" id="mgrid"></div><div class="msg" id="mmsg"></div><div class="row"><button class="btn" id="mre">Kocok ulang</button></div></div></div>
+  <div class="gp" id="g-sp"><div class="glass card"><div class="gh"><h3>Subnet Sprint</h3><span class="chip">Skor <b id="ssc">0</b></span></div><p>Jawab sebanyak mungkin dalam 30 detik. Capai 5 jawaban benar untuk mendapat XP.</p><div class="bar" style="margin-top:14px"><span id="sbar" style="width:100%"></span></div><div id="sq"><div class="msg">Tekan Mulai untuk memulai ronde.</div></div><div class="row"><button class="btn p" id="sgo">Mulai</button></div></div></div>
+  <div class="gp" id="g-osi"><div class="glass card"><div class="gh"><h3>OSI Challenge</h3><span class="chip">Soal <b id="osinum">1</b>/6</span></div><p>Pilih layer OSI yang paling tepat untuk setiap situasi. Jawaban benar menambah skor.</p><div class="bar"><span id="osibar" style="width:0%"></span></div><div id="osibox"></div><div class="row"><button class="btn" id="osirestart">Ulangi tantangan</button></div></div></div>
+  <div class="gp" id="g-detect"><div class="glass card"><div class="gh"><h3>Detektif Jaringan</h3><span class="chip">Kasus <b id="detnum">1</b>/5</span></div><p>Baca gejala, lalu pilih pemeriksaan atau solusi yang paling masuk akal.</p><div id="detbox"></div><div class="row"><button class="btn" id="detrestart">Kasus baru dari awal</button></div></div></div>
+  <div class="gp" id="g-route"><div class="glass card"><div class="gh"><h3>Rute Paket</h3><span class="chip">Langkah <b id="rstep">0</b>/3</span></div><p>Bantu paket dari PC menuju server. Pilih perangkat jaringan secara berurutan.</p><div class="grid g3" style="margin:18px 0"><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-monitor"/></svg></div><b>PC Siswa</b></div><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-branch"/></svg></div><b>Switch</b></div><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-server"/></svg></div><b>Server</b></div></div><div id="routebox"></div><div class="row"><button class="btn" id="routerestart">Reset rute</button></div></div></div>
+</section>
+
+<section class="view" id="vlan">
+  <h2>Misi 1: Atur VLAN</h2><p>Ketuk label VLAN pada perangkat untuk mengubahnya. Pilih pengirim dan tujuan, lalu kirim paket.</p>
+  <div class="grid g2">
+    <div class="glass card">
+      <div class="stage" id="stage"><div class="hosts" id="hosts"></div><div class="sw" id="sw"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pkt" id="pkt"></div></div>
+      <div class="row" style="align-items:center"><span>Router Layer 3</span><button class="sw2" id="l3" aria-label="Router Layer 3"></button></div>
+      <div class="row"><button class="btn p" id="send">Kirim paket</button></div>
+      <div id="vmsg" class="msg">Pilih dua perangkat (ketuk kartu: pertama pengirim, kedua tujuan).</div>
+    </div>
+    <div class="glass card"><h3>Konsep singkat</h3><p>VLAN membagi satu switch menjadi beberapa jaringan logis. Perangkat di VLAN berbeda tidak bisa saling kirim paket langsung, kecuali ada perangkat Layer 3 yang melakukan routing.</p><div class="pills"><span class="tag v10">VLAN 10 Guru</span><span class="tag v20">VLAN 20 Siswa</span><span class="tag v30">VLAN 30 Server</span></div><div class="msg"><b>Tantangan:</b> buat PC-Siswa mengirim ke Server dan berhasil, lalu jelaskan dua cara yang bisa kamu pakai.</div></div>
+  </div>
+</section>
+
+<section class="view" id="ip">
+  <h2>Misi 2: Bagi subnet</h2><p>Geser prefix dan lihat bit jaringan (terang) dan bit host (redup) berubah.</p>
+  <div class="grid g2">
+    <div class="glass card">
+      <div class="field"><label for="ipin">Alamat IPv4</label><input id="ipin" value="192.168.10.25"></div>
+      <div class="field"><label for="pre">Prefix: <b id="prel">/24</b></label><input type="range" id="pre" min="8" max="30" value="24"></div>
+      <div class="bits" id="bits"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="glass card"><h3>Tantangan kapasitas</h3><p>Lab TJKT butuh 50 host dalam satu subnet. Prefix terbesar (subnet terkecil) yang masih cukup adalah?</p>
+      <div class="field"><label for="ans">Jawabanmu (angka prefix)</label><input id="ans" type="number" placeholder="contoh: 24"></div>
+      <div class="row"><button class="btn p" id="chk">Periksa</button></div><div id="imsg"></div>
+      <p style="margin-top:14px;font-size:13px">Rumus: host usable = 2<sup>(32 − prefix)</sup> − 2. Dua alamat dipakai untuk network dan broadcast.</p></div>
+  </div>
+</section>
+
+<section class="view" id="fix">
+  <h2>Misi 3: Diagnosa gangguan</h2><p>Jalankan pemeriksaan untuk mengumpulkan bukti, lalu pilih akar masalah.</p>
+  <div class="grid g2">
+    <div class="glass card"><div class="field"><label for="tk">Tiket gangguan</label><select id="tk"></select></div><div class="msg" id="brief"></div><h3 style="margin-top:16px">Pilih akar masalah</h3><div class="opts" id="dx"></div><div id="dmsg"></div></div>
+    <div class="glass card"><h3>Alat uji</h3><div class="pills"><button class="btn" data-p="0">Cek kabel</button><button class="btn" data-p="1">Cek IP</button><button class="btn" data-p="2">Ping</button><button class="btn" data-p="3">Cek DNS</button></div><div class="term big cur" id="out">$ pilih alat uji...</div></div>
+  </div>
+</section>
+
+<section class="view" id="quiz">
+  <h2>Misi 4: Kuis kilat</h2><p>Satu soal per layar. Jawaban benar berturut-turut memberi bonus.</p>
+  <div class="glass card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;font-size:13px"><span id="qn">Soal 1 dari 20</span><span id="qs">Streak 0</span></div><div class="bar"><span id="qb" style="width:0"></span></div><div id="qbox"></div></div>
+</section>
+
+<section class="view" id="story">
+  <div class="section-kicker">Career simulation • Kelompok 1</div><h2>Story Mode: Teknisi Jaringan</h2><p>Empat insiden jaringan di lingkungan sekolah. Baca gejala, pilih langkah terbaik, dan pelajari alasan teknis di balik keputusanmu.</p>
+  <div class="story-layout">
+    <div class="mission-map" id="missionMap">
+      <button class="mission-node active" data-mission="0"><span class="node-num">01</span><span><b>Lab kehilangan koneksi</b><small>Physical layer • Kabel & link</small></span></button>
+      <button class="mission-node" data-mission="1"><span class="node-num">02</span><span><b>IP bertabrakan</b><small>Addressing • DHCP</small></span></button>
+      <button class="mission-node" data-mission="2"><span class="node-num">03</span><span><b>Internet tanpa nama</b><small>DNS • Name resolution</small></span></button>
+      <button class="mission-node" data-mission="3"><span class="node-num">04</span><span><b>Jaringan beda subnet</b><small>Gateway • Routing</small></span></button>
+    </div>
+    <div class="glass card mission-play" id="missionPanel" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="view" id="lab">
+  <div class="section-kicker">Interactive topology • Simulation only</div><h2>Virtual Network Lab</h2><p>Pilih perangkat sumber dan tujuan, lalu jalankan uji paket. Ini simulasi pembelajaran, bukan akses ke jaringan sekolah yang sebenarnya.</p>
+  <div class="grid g2" style="align-items:start">
+    <div class="glass card"><div class="gh"><h3>Topologi jaringan</h3><span class="chip"><span class="live-dot"></span> SIMULATOR</span></div>
+      <div class="lab-topology" id="labTopology">
+        <svg class="lab-lines" viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true"><path d="M95 75 L300 150 L95 225 M300 150 L505 75 M300 150 L505 225" stroke="#4dddf5" stroke-width="2" stroke-dasharray="7 7" fill="none" opacity=".6"/><circle cx="300" cy="150" r="45" fill="#22e1ff" opacity=".035"/></svg>
+        <button class="lab-node" data-node="pc1"><span class="lab-icon">▣</span><b>PC Siswa</b><small>192.168.10.10</small></button>
+        <button class="lab-node" data-node="pc2"><span class="lab-icon">▣</span><b>PC Guru</b><small>192.168.10.20</small></button>
+        <button class="lab-node active" data-node="switch"><span class="lab-icon">⌘</span><b>Switch</b><small>Layer 2</small></button>
+        <button class="lab-node" data-node="router"><span class="lab-icon">◇</span><b>Router</b><small>Gateway .1</small></button>
+        <button class="lab-node" data-node="server"><span class="lab-icon">▤</span><b>Server</b><small>192.168.20.10</small></button>
+      </div>
+      <div class="row"><button class="btn" id="labSource">Pilih sumber</button><button class="btn" id="labTarget">Pilih tujuan</button><button class="btn p" id="labSend">Jalankan ping →</button></div>
+      <div class="lab-status" id="labStatus" role="status"><span class="live-dot"></span><span>Pilih perangkat sumber dan tujuan untuk memulai uji koneksi.</span></div>
+    </div>
+    <div class="glass card"><div class="section-kicker">Packet inspector</div><h3>Hasil pemeriksaan</h3><div class="term big" id="labTerminal">NETQUEST NETWORK CONSOLE
+Status: idle
+Menunggu perintah ping...</div><div class="stats"><div class="stat"><small>Sumber</small><b id="labSourceValue">Belum dipilih</b></div><div class="stat"><small>Tujuan</small><b id="labTargetValue">Belum dipilih</b></div><div class="stat"><small>Hop simulasi</small><b id="labHops">—</b></div><div class="stat"><small>Latensi simulasi</small><b id="labLatency">—</b></div></div><div class="msg" style="margin-top:14px"><b>Catatan:</b> Hasil dibuat oleh aturan simulasi lokal untuk tujuan belajar. Tidak mengirim paket sungguhan.</div></div>
+  </div>
+</section>
+
+<section class="view" id="leaderboard">
+  <div class="section-kicker">Progress & achievements</div><h2>Leaderboard lokal</h2><p>Skor disimpan pada browser perangkat ini. Untuk leaderboard online bersama semua siswa, situs perlu database dan sistem akun online.</p>
+  <div class="grid g2" style="align-items:start">
+    <div class="glass card"><div class="gh"><h3>Klasemen perangkat ini</h3><span class="chip">LOCAL</span></div><div id="leaderboardList"></div><div class="privacy-note">Privasi: data klasemen ini tidak otomatis dikirim ke internet atau terlihat di perangkat teman.</div></div>
+    <div class="glass card"><div class="section-kicker">Your achievements</div><h3>Koleksi lencana</h3><div class="grid g2" style="margin-top:14px">
+      <div class="stat"><div style="font-size:24px">⌁</div><b>Packet Pilot</b><small>Jalankan simulasi paket di Virtual Lab.</small><span class="pill" id="badgeLab">Belum terbuka</span></div>
+      <div class="stat"><div style="font-size:24px">◈</div><b>Case Solver</b><small>Selesaikan satu misi Story Mode.</small><span class="pill" id="badgeStory">Belum terbuka</span></div>
+      <div class="stat"><div style="font-size:24px">▦</div><b>Subnet Scout</b><small>Selesaikan latihan subnetting.</small><span class="pill" id="badgeSubnet">Belum terbuka</span></div>
+      <div class="stat"><div style="font-size:24px">✦</div><b>Network Explorer</b><small>Kumpulkan 100 XP.</small><span class="pill" id="badgeXP">Belum terbuka</span></div>
+    </div><button class="btn p" data-v="story" style="margin-top:16px">Lanjutkan misi →</button></div>
+  </div>
+</section>
+
+<section class="view" id="guide">
+  <div class="eyebrow">Pusat bantuan NetQuest</div>
+  <h2>Panduan Game & Aplikasi</h2>
+  <p>Petunjuk penggunaan untuk siswa, guru, dan angkatan berikutnya.</p>
+  <div class="grid g2">
+    <article class="glass card">
+      <div class="feature-icon"><svg class="i"><use href="#i-pad"/></svg></div>
+      <h3>Panduan Arena Game</h3>
+      <ol class="guide-list">
+        <li>Buka menu <b>Arena Game</b>, lalu pilih salah satu permainan.</li>
+        <li><b>Susun Kabel:</b> pilih warna kabel sesuai urutan standar T568B dari pin 1 sampai 8.</li>
+        <li><b>Kartu Port:</b> buka dua kartu dan cocokkan nomor port dengan layanan jaringan.</li>
+        <li><b>Subnet Sprint:</b> tekan Mulai, lalu pilih jumlah host yang benar sebelum waktu habis.</li>
+        <li><b>OSI Challenge:</b> tentukan layer OSI yang sesuai dengan situasi yang ditampilkan.</li>
+        <li><b>Detektif Jaringan:</b> baca gejala dan pilih langkah diagnosis yang paling masuk akal.</li>
+        <li><b>Rute Paket:</b> jawab pertanyaan untuk membantu paket melewati perangkat jaringan.</li>
+      </ol>
+      <p class="guide-tip">Tips: baca penjelasan setelah menjawab agar memahami alasan teknisnya, bukan hanya mengejar XP.</p>
+    </article>
+    <article class="glass card">
+      <div class="feature-icon"><svg class="i"><use href="#i-book"/></svg></div>
+      <h3>Panduan Penggunaan APK / Web App</h3>
+      <ol class="guide-list">
+        <li>Buka NetQuest melalui browser, lalu masukkan nama pengguna pada halaman awal.</li>
+        <li>Gunakan navigasi atas atau dock bawah untuk berpindah halaman.</li>
+        <li>Pilih <b>Materi TJKT</b> untuk membaca topik, atau gunakan pencarian materi.</li>
+        <li>Atur tema, mode gelap/terang, dan gradient dari menu <b>Tampilan</b>.</li>
+        <li>Progres dan XP pada versi satu-file ini disimpan di browser/perangkat yang digunakan.</li>
+        <li>Untuk memasang sebagai aplikasi, buka menu browser dan pilih “Tambahkan ke layar utama” jika browser mendukungnya.</li>
+      </ol>
+      <p class="guide-tip">Catatan: file HTML offline tidak otomatis menjadi APK Android. Untuk APK native diperlukan proses pembungkusan/build terpisah.</p>
+    </article>
+  </div>
+  <div class="glass card" style="margin-top:18px">
+    <h3>Tips belajar TJKT</h3>
+    <p>Mulai dari konsep dasar perangkat dan media transmisi, lanjut ke IP addressing, switching, routing, layanan jaringan, sistem operasi, keamanan, lalu praktik troubleshooting. Selalu lakukan praktik hanya pada perangkat atau lab yang memang diizinkan.</p>
+  </div>
+</section>
+
+
+<section class="view" id="missions">
+  <div class="eyebrow">TJKT Skill Mastery • learning path</div>
+  <h2>10 Misi NetQuest Academy</h2>
+  <p>Selesaikan materi, tantangan teori, dan aktivitas praktik. Progres tersimpan pada browser/perangkat ini.</p>
+  <div class="glass card nq-progress-card"><div class="nq-progress-head"><b>Perjalanan belajarmu</b><strong id="nqMissionCount">0/10</strong></div><div class="bar"><span id="nqMissionBar" style="width:0%"></span></div><p class="tiny" id="nqMissionHint">Mulai dari misi pertama.</p></div>
+  <div class="nq-mission-layout"><div class="nq-mission-list" id="nqMissionList"></div><article class="glass card nq-mission-work" id="nqMissionWork"><div class="feature-icon"><svg class="i"><use href="#i-book"/></svg></div><h3>Pilih misi untuk memulai</h3><p>Setiap misi berisi ringkasan materi, tiga soal, dan aktivitas belajar yang perlu diselesaikan.</p></article></div>
+</section>
+
+<section class="view" id="classroom">
+  <div class="eyebrow">Live classroom • quiz party</div><h2>NetQuest Class Arena</h2>
+  <p>Mode kuis kelas bergaya permainan cepat. Dalam versi satu-file tanpa server, permainan berjalan di satu layar utama dengan peserta bergiliran. Room lintas perangkat belum tersinkron.</p>
+  <div class="nq-class-grid">
+    <div class="glass card">
+      <div class="nq-card-title"><div><span class="pill">HOST / GURU</span><h3>Buat ruang kelas</h3></div><span class="nq-host-icon"><svg class="i"><use href="#i-laptop"/></svg></span></div>
+      <label for="nqRoomTitle">Nama room</label><input id="nqRoomTitle" maxlength="40" value="TJKT Challenge Class" placeholder="Contoh: Kuis Jaringan XI TJKT">
+      <label for="nqGameMode">Mode permainan</label><select id="nqGameMode"><option value="classic">Classic Quiz — pilihan ganda</option><option value="truefalse">True / False — benar atau salah</option><option value="speed">Speed Run — cepat dan tepat</option></select>
+      <div class="row" style="margin-top:14px"><button class="btn p" id="nqCreateRoom">Buat Room</button><button class="btn" id="nqMusicToggle" aria-pressed="false">♫ Musik: Mati</button></div>
+      <div id="nqRoomPanel" class="nq-room-panel" hidden><div class="nq-room-code-label">KODE ROOM</div><div class="nq-room-code" id="nqRoomCode">------</div><p id="nqRoomNameDisplay"></p><button class="btn" id="nqCopyRoom">Salin kode room</button></div>
+    </div>
+    <div class="glass card">
+      <span class="pill">PLAYER LOBBY</span><h3>Tambah peserta</h3>
+      <p class="tiny">Peserta dapat memilih nama dan karakter. Untuk mode tanpa server ini, host memasukkan peserta pada layar yang sama.</p>
+      <label for="nqPlayerName">Nama pemain</label><input id="nqPlayerName" maxlength="24" placeholder="Nama panggilan / nama asli">
+      <label>Pilih karakter</label><div class="nq-avatar-picks" id="nqAvatarPicks"><button type="button" class="nq-avatar selected" data-avatar="◆">◆</button><button type="button" class="nq-avatar" data-avatar="◈">◈</button><button type="button" class="nq-avatar" data-avatar="●">●</button><button type="button" class="nq-avatar" data-avatar="▲">▲</button><button type="button" class="nq-avatar" data-avatar="✦">✦</button><button type="button" class="nq-avatar" data-avatar="■">■</button></div>
+      <button class="btn p" id="nqAddPlayer" style="margin-top:14px">+ Tambahkan pemain</button>
+      <div class="nq-player-list" id="nqPlayerList"><p class="tiny">Belum ada peserta.</p></div>
+    </div>
+  </div>
+  <div class="glass card" style="margin-top:18px">
+    <div class="nq-card-title"><div><span class="pill">SMARTBOARD / MAIN SCREEN</span><h3 id="nqBoardTitle">Papan permainan kelas</h3></div><span class="nq-live-dot">● READY</span></div>
+    <div id="nqGameStage" class="nq-game-stage"><div class="nq-stage-empty"><svg class="i"><use href="#i-trophy"/></svg><h3>Siap memulai tantangan?</h3><p>Buat room, tambahkan minimal satu peserta, lalu mulai permainan.</p></div></div>
+    <div class="row nq-game-controls"><button class="btn p" id="nqStartGame" disabled>Mulai permainan</button><button class="btn" id="nqNextTurn" hidden>Pemain berikutnya</button><button class="btn" id="nqEndGame" hidden>Akhiri & lihat skor</button><button class="btn" id="nqFullscreen">Layar penuh smartboard</button><button class="btn" id="nqResetGame">Reset room</button></div>
+    <div id="nqLeaderboard" class="nq-leaderboard"></div>
+  </div>
+  <div class="nq-note"><b>Catatan koneksi:</b> kode room dan tautan undangan tidak dapat menyinkronkan jawaban dari HP siswa ke laptop guru tanpa server/signaling. Untuk permainan satu layar, peserta bergiliran menjawab pada smartboard. Untuk room realtime multi-perangkat, kelak perlu layanan realtime kecil; tidak harus memakai database tradisional.</div>
+</section>
+
+<section class="view" id="certificates">
+  <div class="eyebrow">NetQuest Academy • TJKT Skill Mastery</div><h2>Pusat Sertifikat</h2>
+  <p>Masukkan nama yang ingin dicetak pada sertifikat. Gunakan nama asli untuk kebutuhan sekolah, atau nama pilihan jika hanya untuk koleksi pribadi.</p>
+  <div class="glass card nq-certificate-form">
+    <label for="nqCertName">Nama peserta pada sertifikat</label><input id="nqCertName" maxlength="70" placeholder="Tulis nama lengkap / nama pilihan">
+    <div class="nq-cert-status" id="nqCertStatus">Selesaikan 10 misi untuk membuka sertifikat penyelesaian.</div>
+  </div>
+  <div class="nq-cert-grid">
+    <article class="glass card nq-cert-card"><span class="pill">JALUR 1</span><h3>Certificate of Completion</h3><p>Sertifikat penyelesaian 10 misi pembelajaran NetQuest TJKT.</p><div class="nq-cert-preview" id="nqCompletionPreview"><div class="nq-cert-brand">NETQUEST ACADEMY</div><div class="nq-cert-sub">TJKT SKILL MASTERY</div><div class="nq-cert-title">CERTIFICATE<br>OF COMPLETION</div><div class="nq-cert-line">Diberikan kepada</div><div class="nq-cert-person" data-cert-name>Nama Peserta</div><div class="nq-cert-line">Atas penyelesaian 10 misi pembelajaran TJKT</div><div class="nq-cert-seal">NQ</div><div class="nq-cert-foot">NETQUEST ACADEMY • NON-FORMAL LEARNING AWARD</div></div><div class="nq-cert-actions"><button class="btn p" id="nqDownloadCompletion" disabled>Unduh PNG</button><button class="btn" data-print="completion" disabled>Cetak / Simpan PDF</button></div><small id="nqCompletionLock">Belum terbuka — selesaikan 10 misi.</small></article>
+    <article class="glass card nq-cert-card"><span class="pill">JALUR 2</span><h3>Certificate of Skill Achievement</h3><p>Penghargaan hasil evaluasi teori dan proyek praktik dengan standar lebih tinggi.</p><div class="nq-cert-preview nq-cert-skill" id="nqSkillPreview"><div class="nq-cert-brand">NETQUEST ACADEMY</div><div class="nq-cert-sub">TJKT SKILL MASTERY</div><div class="nq-cert-title">CERTIFICATE OF<br>SKILL ACHIEVEMENT</div><div class="nq-cert-line">Diberikan kepada</div><div class="nq-cert-person" data-cert-name>Nama Peserta</div><div class="nq-cert-line">Atas pencapaian evaluasi teori dan proyek keterampilan TJKT</div><div class="nq-cert-seal">★</div><div class="nq-cert-foot">NETQUEST ACADEMY • NON-FORMAL LEARNING AWARD</div></div><div class="nq-cert-actions"><button class="btn p" id="nqDownloadSkill" disabled>Unduh PNG</button><button class="btn" data-print="skill" disabled>Cetak / Simpan PDF</button></div><small id="nqSkillLock">Selesaikan misi, ujian, dan rubrik proyek.</small></article>
+  </div>
+  <div class="glass card nq-skill-eval" style="margin-top:18px"><h3>Evaluasi proyek akhir untuk jalur keterampilan</h3><p>Rancang jaringan kecil untuk laboratorium sekolah. Isi ringkasan dan centang bukti yang sudah kamu siapkan. Penilaian ini tersimpan lokal; mintalah guru memeriksa hasil praktik. Konfirmasi guru dicatat secara lokal dan bukan autentikasi aman karena aplikasi ini tidak memakai server.</p><label for="nqProjectText">Ringkasan proyek (perangkat, topologi, IP, pengujian)</label><textarea id="nqProjectText" rows="4" maxlength="1600" placeholder="Jelaskan rancangan jaringanmu..."></textarea><div class="nq-rubric" id="nqRubric"><label><input type="checkbox" value="diagram"> Diagram topologi dibuat dan diberi label.</label><label><input type="checkbox" value="ip"> IP address, subnet mask, dan gateway dicatat.</label><label><input type="checkbox" value="devices"> Perangkat dan alasan pemilihannya dijelaskan.</label><label><input type="checkbox" value="test"> Pengujian konektivitas dan hasilnya dicatat.</label><label><input type="checkbox" value="safety"> Aspek keamanan dan keselamatan kerja dijelaskan.</label></div><button class="btn p" id="nqSaveProject">Simpan bukti proyek</button> <button class="btn" id="nqTeacherApprove" disabled>Konfirmasi verifikasi guru</button><div id="nqProjectStatus" class="tiny" role="status"></div></div>
+  <div class="nq-note">Sertifikat NetQuest adalah penghargaan pembelajaran non-formal yang diterbitkan oleh proyek NetQuest Academy. Sertifikat ini bukan sertifikasi kompetensi resmi BNSP, Kemendikbud, atau lembaga sertifikasi profesi.</div>
+</section>
+
+</main>
+
+<nav class="dock glass" id="dock">
+  <button class="on" data-v="home"><span><svg class="i"><use href="#i-home"/></svg></span>Beranda</button><button data-v="vlan"><span><svg class="i"><use href="#i-branch"/></svg></span>VLAN</button><button data-v="ip"><span><svg class="i"><use href="#i-calc"/></svg></span>Subnet</button><button data-v="fix"><span><svg class="i"><use href="#i-wrench"/></svg></span>Diagnosa</button><button data-v="quiz"><span><svg class="i"><use href="#i-trophy"/></svg></span>Kuis</button><button data-v="story"><span>◈</span>Misi</button><button data-v="lab"><span>⌘</span>Lab</button><button data-v="game"><span><svg class="i"><use href="#i-pad"/></svg></span>Game</button><button data-v="missions"><span><svg class="i"><use href="#i-book"/></svg></span>Misi</button><button data-v="classroom"><span><svg class="i"><use href="#i-trophy"/></svg></span>Class</button><button data-v="certificates"><span><svg class="i"><use href="#i-trophy"/></svg></span>Badge</button>
+</nav>
+<footer>NetQuest TJKT • Media Pembelajaran Interaktif XI TJKT 2<br>Guru Pembimbing: Pak Andy Musly • Kelompok 1 • Developer: Ivander • Learn • Simulate • Troubleshoot</footer>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+let mx=innerWidth/2,my=innerHeight/2;
+// Kursor desktop yang minimal: satu titik kecil, tanpa lingkaran besar.
+addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;$('#cur').style.transform=`translate(${mx}px,${my}px)`;const t=e.target.closest('.glass');if(t){const r=t.getBoundingClientRect();t.style.setProperty('--mx',(mx-r.left)+'px');t.style.setProperty('--my',(my-r.top)+'px')}});
+// Efek suara ringan dibuat dengan Web Audio, aktif hanya setelah pengguna menyalakannya.
+let soundOn=false,audioCtx=null;
+function sfx(kind='tap'){if(!soundOn)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);const now=audioCtx.currentTime;const tones=kind==='success'?[660,880,1040]:kind==='login'?[440,660,880]:kind==='fail'?[300,190]:kind==='tap'?[520]:[520];o.type=kind==='fail'?'triangle':'sine';o.frequency.setValueAtTime(tones[0],now);tones.slice(1).forEach((n,i)=>o.frequency.setValueAtTime(n,now+(i+1)*.085));g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(kind==='fail'?.06:.045,now+.018);g.gain.exponentialRampToValueAtTime(.0001,now+(kind==='fail'?.32:.26));o.start(now);o.stop(now+(kind==='fail'?.33:.27))}catch(e){}}
+$('#soundToggle').addEventListener('click',()=>{soundOn=!soundOn;$('#soundToggle').textContent=soundOn?'♫ Suara: Nyala':'♫ Suara: Mati';$('#soundToggle').setAttribute('aria-pressed',String(soundOn));if(soundOn)sfx('success')});
+document.addEventListener('click',e=>{const el=e.target.closest('button,[role="button"]');if(el&&!el.matches('[data-q],[data-osi],[data-det],[data-route],[data-mchoice],[data-s]')&&el.id!=='again')sfx('tap')});
+// Login selalu muncul saat halaman dibuka; intro tampil sesudah login berhasil.
+function startNetQuestLogin(event){
+  if(event){event.preventDefault();}
+  const input=$('#gateName'), error=$('#gateError'), gate=$('#authGate'), intro=$('#introSequence');
+  const name=(input?.value||'').trim();
+  if(name.length<2){if(error)error.textContent='Nama minimal 2 karakter ya.';input?.focus();return false;}
+  try{localStorage.setItem('nq_demo_user',name);sessionStorage.setItem('nq_session_user',name);}catch(err){/* Tetap izinkan masuk bila penyimpanan browser dibatasi. */}
+  if(error)error.textContent='';
+  const btn=gate?.querySelector('button[type="submit"]');if(btn){btn.disabled=true;btn.textContent='Menyiapkan ruang belajar…';}
+  document.body.classList.add('unlocked');document.body.style.overflowX='hidden';
+  if(gate){gate.style.transition='opacity .35s ease, transform .35s ease';gate.style.opacity='0';gate.style.transform='scale(.985)';}
+  soundOn=true;const sound=$('#soundToggle');if(sound){sound.textContent='♫ Suara: Nyala';sound.setAttribute('aria-pressed','true');}sfx('login');
+  window.setTimeout(()=>{if(gate)gate.style.display='none';if(intro){intro.style.display='grid';intro.classList.add('play');}sfx('success');},380);
+  const enterHome=()=>{if(intro){intro.classList.remove('play','intro-exit');intro.style.display='none';}if(gate)gate.style.display='none';document.body.classList.add('unlocked');go('home');updateSession();};
+  window.setTimeout(()=>{if(intro)intro.classList.add('intro-exit');window.setTimeout(enterHome,700);},3500);
+  // Failsafe: pastikan overlay tidak tertinggal jika animasi browser gagal.
+  window.setTimeout(enterHome,5200);
+  return false;
+}
+window.startNetQuestLogin=startNetQuestLogin;
+$('#gateForm').addEventListener('submit',startNetQuestLogin);
+
+// XP
+let st={xp:0,got:{}};try{st=JSON.parse(localStorage.getItem('nq')||'')||st}catch(e){}
+const ranks=[[0,'Newbie'],[40,'Teknisi Junior'],[90,'Network Admin'],[150,'NetOps Pro'],[220,'Net Master'],[320,'Legenda Jaringan']];
+function draw(){const r=[...ranks].reverse().find(x=>st.xp>=x[0]);$('#rank').textContent=r[1];$('#xpt').textContent=st.xp+' XP';$('#xpb').style.width=Math.min(100,st.xp/340*100)+'%';['vlan','ip','fix','quiz'].forEach(k=>$('#m-'+k).classList.toggle('ok',!!st.got['done_'+k]));if(window.premiumReady&&typeof refreshPremiumUI==='function')refreshPremiumUI()}
+function gain(key,n,x=mx,y=my){if(st.got[key])return;st.got[key]=1;st.xp+=n;try{localStorage.setItem('nq',JSON.stringify(st))}catch(e){}draw();const f=document.createElement('div');f.className='fx';f.textContent='+'+n+' XP';f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1200)}
+draw();
+// navigasi
+function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id===v));$$('#dock button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.topnav [data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===v));scrollTo({top:0,behavior:'smooth'})}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)go(b.dataset.v)});
+const sessionBtn=$('#sessionBtn'),loginNav=$('#loginNav');
+function updateSession(){let u='';try{u=localStorage.getItem('nq_demo_user')||''}catch(e){}sessionBtn.textContent=u?('Hai, '+u.slice(0,12)):'Login';sessionBtn.dataset.v=u?'home':'login';loginNav.textContent=u?'Beranda pengguna':'Masuk / Login';}
+updateSession();
+$('#loginForm').addEventListener('submit',e=>{e.preventDefault();const name=$('#loginName').value.trim();const err=$('#loginError');if(name.length<2){err.textContent='Nama minimal 2 karakter ya.';return}try{localStorage.setItem('nq_demo_user',name)}catch(e){}err.textContent='';updateSession();if(typeof refreshPremiumUI==='function')refreshPremiumUI();go('home');const note=document.createElement('div');note.className='msg ok';note.style.marginTop='16px';note.innerHTML='<b>Berhasil masuk, '+name.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'!</b> Selamat belajar di NetQuest TJKT.';$('#home').prepend(note);setTimeout(()=>note.remove(),5000);});
+
+// Theme toggle is managed by the enhanced preference controller below.
+// terminal hero
+const lines=['$ ping 192.168.10.1','Reply: time=1ms','$ show vlan brief','10 GURU   aktif','20 SISWA  aktif','30 SERVER aktif','$ semua jaringan OK'];let li=0,ci=0,buf='';
+setInterval(()=>{const L=lines[li];if(ci<L.length){buf+=L[ci++]}else if(ci++>L.length+6){buf+='\n';li++;ci=0;if(li>=lines.length){li=0;buf=''}}$('#heroTerm').textContent=buf},70);
+// VLAN
+const H=[['PC Guru','laptop',10],['PC Siswa','monitor',20],['PC Lab','monitor',20],['Server','server',30]];let src=1,dst=3,l3=false;
+function hosts(){$('#hosts').innerHTML=H.map((h,i)=>`<div class="host ${i===src?'sel':i===dst?'dst':''}" data-i="${i}"><div class="ic">${ic(h[1])}</div><small>${h[0]}</small><br><button class="tag v${h[2]}" data-c="${i}">VLAN ${h[2]}</button></div>`).join('')}
+hosts();
+$('#hosts').addEventListener('click',e=>{const c=e.target.closest('[data-c]');if(c){const h=H[c.dataset.c];h[2]=h[2]===30?10:h[2]+10;hosts();return}const k=e.target.closest('.host');if(!k)return;const i=+k.dataset.i;if(k.classList.contains('sel'))return;if(src===null||dst!==null&&e.shiftKey)src=i;else{dst=i}hosts()});
+$('#hosts').addEventListener('dblclick',e=>{const k=e.target.closest('.host');if(k){src=+k.dataset.i;if(dst===src)dst=null;hosts()}});
+$('#l3').onclick=function(){l3=!l3;this.classList.toggle('on',l3)};
+function center(el,p){const a=el.getBoundingClientRect(),b=p.getBoundingClientRect();return[a.left-b.left+a.width/2-9,a.top-b.top+a.height/2-9]}
+$('#send').onclick=()=>{if(src===null||dst===null||src===dst){$('#vmsg').className='msg no';$('#vmsg').textContent='Pilih pengirim dan tujuan yang berbeda. Ketuk satu kartu untuk tujuan, klik dua kali untuk pengirim.';return}
+const s=H[src],d=H[dst],ok=s[2]===d[2]||l3,stg=$('#stage'),el=$$('.host'),a=center(el[src],stg),m=center($('#sw'),stg),b=center(el[dst],stg),p=$('#pkt');
+const kf=ok?[a,m,b]:[a,m];p.animate(kf.map((c,i)=>({transform:`translate(${c[0]}px,${c[1]}px) scale(${i===kf.length-1&&!ok?.2:1})`,opacity:1})),{duration:1300,easing:'ease-in-out',fill:'forwards'}).finished.then(()=>{p.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});if(!ok){$('#sw').classList.add('bad');setTimeout(()=>$('#sw').classList.remove('bad'),600)}});
+setTimeout(()=>{const same=s[2]===d[2];$('#vmsg').className='msg '+(ok?'ok':'no');$('#vmsg').innerHTML=ok?(same?`<b>Terkirim.</b> ${s[0]} dan ${d[0]} sama-sama di VLAN ${s[2]}.`:`<b>Terkirim lewat router.</b> Paket lintas VLAN diteruskan oleh perangkat Layer 3.`):`<b>Paket ditolak switch.</b> VLAN ${s[2]} dan VLAN ${d[2]} adalah broadcast domain berbeda. Samakan VLAN atau aktifkan router Layer 3.`;
+if(ok&&same)gain('v1',15);if(!ok)gain('v2',10);if(ok&&!same){gain('v3',20);gain('done_vlan',10)}},1300)};
+// Subnet
+const toInt=s=>{const b=s.trim().split('.');return b.length===4&&b.every(x=>/^\d+$/.test(x)&&+x<256)?b.reduce((a,x)=>a*256+ +x,0)>>>0:null},toIp=n=>[n>>>24,n>>>16&255,n>>>8&255,n&255].join('.');
+$('#bits').innerHTML=Array.from({length:4},()=>'<div class="oct">'+'<i></i>'.repeat(8)+'</div>').join('');
+function sub(){const p=+$('#pre').value,n=toInt($('#ipin').value);$('#prel').textContent='/'+p;$$('#bits i').forEach((b,i)=>{b.className=i<p?'':'h';b.textContent=i<p?'N':'H'});if(n===null){$('#stats').innerHTML='<div class="stat" style="grid-column:1/3"><small>Error</small><b>Isi 4 angka 0–255 dipisah titik.</b></div>';return}
+const mask=(0xffffffff<<(32-p))>>>0,net=(n&mask)>>>0,bc=(net|~mask)>>>0,u=Math.pow(2,32-p)-2,S=[['Network',toIp(net)],['Broadcast',toIp(bc)],['Mask',toIp(mask)],['Host usable',u.toLocaleString('id-ID')],['Host pertama',toIp(net+1)],['Host terakhir',toIp(bc-1)]];$('#stats').innerHTML=S.map(x=>`<div class="stat"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}
+$('#pre').oninput=()=>{sub();gain('s1',10)};$('#ipin').oninput=sub;sub();
+$('#chk').onclick=()=>{const a=+$('#ans').value,ok=a===26;$('#imsg').className='msg '+(ok?'ok':'no');$('#imsg').innerHTML=ok?'<b>Tepat.</b> /26 memberi 62 host usable, cukup untuk 50 dan masih ada ruang tumbuh.':a>26?`<b>Terlalu kecil.</b> /${a} hanya menyediakan ${Math.max(0,Math.pow(2,32-a)-2)} host.`:'<b>Belum optimal.</b> Muat, tetapi memboroskan alamat. Coba prefix yang lebih besar.';if(ok){gain('s2',25);gain('done_ip',10)}};
+// Diagnosa
+const T=[{n:'PC pindah port, ping gateway gagal',b:'Setelah dipindah ke port switch lain, link menyala tetapi gateway tidak terjangkau.',o:['Port masuk VLAN yang salah','DNS server mati','Bandwidth penuh'],c:0,pr:['Link UP 1 Gbps full duplex. Kabel sehat.','IP 192.168.20.34/24\nGateway 192.168.20.1\nIP terlihat benar.','Ping gateway: Request timed out\nHost lain di VLAN sama: tidak terlihat.','Tidak relevan: ping memakai alamat IP.']},
+{n:'Ping IP berhasil, nama domain gagal',b:'Client bisa ping 198.51.100.25 tetapi browser gagal membuka nama situs.',o:['Kabel putus','Resolver DNS bermasalah','Trunk VLAN rusak'],c:1,pr:['Link UP, tidak ada error.','IP, mask, dan gateway benar.','Ping 198.51.100.25: reply 12 ms','dig example.test\nconnection timed out ke resolver.\nPeriksa IP DNS dan port 53.']},
+{n:'Bisa akses lokal, tidak bisa antar-subnet',b:'Client mengakses perangkat satu subnet, tetapi semua subnet lain gagal.',o:['Gateway salah atau rute balik hilang','Monitor rusak','Kabel terlalu panjang'],c:0,pr:['Link UP, counter error normal.','IP dan mask sesuai.\nGateway 192.168.10.254, padahal router di .1','Ke subnet lain: Destination unreachable\nKe sesama subnet: reply','Uji memakai IP juga gagal, bukan masalah nama.']}];
+let ti=0;$('#tk').innerHTML=T.map((t,i)=>`<option value="${i}">${t.n}</option>`).join('');
+function tick(){const t=T[ti];$('#brief').textContent=t.b;$('#dx').innerHTML=t.o.map((o,i)=>`<button class="opt" data-a="${i}">${o}</button>`).join('');$('#dmsg').innerHTML='';type('$ pilih alat uji...')}
+let tm;function type(s){clearInterval(tm);let i=0;$('#out').textContent='';tm=setInterval(()=>{$('#out').textContent=s.slice(0,++i);if(i>=s.length)clearInterval(tm)},18)}
+$('#tk').onchange=e=>{ti=+e.target.value;tick()};
+document.addEventListener('click',e=>{const p=e.target.closest('[data-p]');if(p){type('$ '+p.textContent.toLowerCase()+'\n'+T[ti].pr[+p.dataset.p]);gain('p'+ti,5)}
+const a=e.target.closest('[data-a]');if(a){const ok=+a.dataset.a===T[ti].c;a.classList.add(ok?'right':'wrong');$('#dmsg').innerHTML=`<div class="msg ${ok?'ok':'no'}">${ok?'<b>Benar.</b> Jalankan perbaikan, uji ulang, lalu dokumentasikan.':'<b>Belum sesuai bukti.</b> Jalankan alat uji dan cocokkan hasilnya.'}</div>`;if(ok){gain('f'+ti,20);if(['f0','f1','f2'].every(k=>st.got[k]))gain('done_fix',10)}}});
+tick();
+// Kuis
+const Q=[["Fungsi utama VLAN adalah...",["Memisahkan broadcast domain secara logis","Menambah kecepatan internet","Menggantikan firewall"],0],["Host beda VLAN perlu berkomunikasi. Yang dibutuhkan...",["Hub tambahan","Perangkat Layer 3 dengan routing","Kabel lebih pendek"],1],["Prefix /26 memiliki berapa alamat IPv4 total?",["32","64","128"],1],["Ping ke IP berhasil tetapi nama domain gagal. Periksa...",["Konfigurasi DNS","Daya switch","Warna kabel"],0],["PAT/NAT pada router berfungsi untuk...",["Membuat VLAN","Menerjemahkan alamat privat ke publik","Mempercepat DNS"],1],["Langkah troubleshooting yang paling tepat...",["Ubah banyak setting sekaligus","Kumpulkan bukti, uji hipotesis, perbaiki, verifikasi","Langsung ganti semua perangkat"],1],["Perangkat yang meneruskan frame berdasarkan MAC address adalah...",["Switch","Router","Modem"],0],["Alamat IPv4 memiliki panjang...",["16 bit","32 bit","64 bit"],1],["Alamat MAC umumnya memiliki panjang...",["32 bit","48 bit","128 bit"],1],["Perintah Windows untuk melihat konfigurasi IP adalah...",["ipconfig","mkdir","format"],0],["Perintah untuk menguji keterjangkauan host adalah...",["ping","copy","tasklist"],0],["Subnet mask untuk prefix /24 adalah...",["255.255.0.0","255.255.255.0","255.255.255.252"],1],["Port default HTTP adalah...",["21","80","443"],1],["Port default HTTPS adalah...",["25","110","443"],2],["DHCP digunakan untuk...",["Memberikan konfigurasi IP secara otomatis","Mengenkripsi semua trafik","Membuat kabel jaringan"],0],["DNS bertugas untuk...",["Mengubah nama domain menjadi alamat IP","Mengisi daya router","Mengatur kecepatan kipas"],0],["Kabel straight-through biasanya digunakan untuk menghubungkan...",["Perangkat berbeda jenis, misalnya PC ke switch","Dua PC langsung pada perangkat lama tanpa auto MDI-X","Dua konektor listrik"],0],["Jika lampu link switch mati, pemeriksaan awal yang masuk akal adalah...",["Periksa kabel, port, dan daya perangkat","Ubah wallpaper PC","Hapus browser"],0],["Default gateway adalah...",["Alamat perangkat yang menjadi jalan keluar ke jaringan lain","Nama Wi-Fi","Nomor seri keyboard"],0],["Prinsip keamanan akun yang baik adalah...",["Gunakan satu password untuk semua akun","Bagikan password ke teman","Gunakan password kuat dan jangan dibagikan"],2]]
+let qi=0,sc=0,sk=0;
+function q(){if(qi>=Q.length){const pct=Math.round(sc/Q.length*100);$('#qbox').innerHTML=`<div style="text-align:center;padding:30px 0"><div style="font-size:64px;color:var(--c1)">${ic(pct>=80?'trophy':pct>=50?'thumb':'book')}</div><h2>Skor ${sc} dari ${Q.length}</h2><p>${pct>=80?'Mantap, kamu siap praktik di lab.':pct>=50?'Cukup baik. Ulangi misi yang masih ragu.':'Pelajari lagi lewat simulasi, lalu coba ulang.'}</p><div class="row" style="justify-content:center"><button class="btn p" id="again">Ulangi kuis</button></div></div>`;$('#qb').style.width='100%';gain('done_quiz',20);return}
+$('#qn').textContent=`Soal ${qi+1} dari ${Q.length}`;$('#qs').textContent='Streak '+sk;$('#qb').style.width=qi/Q.length*100+'%';const x=Q[qi];$('#qbox').innerHTML=`<h3 style="margin-top:20px;font-size:20px">${x[0]}</h3><div class="opts">${x[1].map((o,i)=>`<button class="opt" data-q="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>`}
+document.addEventListener('click',e=>{if(e.target.id==='again'){qi=sc=sk=0;q();return}const b=e.target.closest('[data-q]');if(!b||b.parentNode.dataset.l)return;b.parentNode.dataset.l=1;const ok=+b.dataset.q===Q[qi][2];b.classList.add(ok?'right':'wrong');if(!ok)b.parentNode.children[Q[qi][2]].classList.add('right');if(ok){sfx('success');sc++;sk++;gain('q'+qi,8+(sk>2?4:0),e.clientX,e.clientY)}else{sfx('fail');sk=0}$('#qs').textContent='Streak '+sk;const fb=document.createElement('p');fb.style.cssText='margin:14px 0 0;color:var(--muted);font-size:14px';fb.textContent=ok?'Benar! Bagus, lanjutkan.':'Belum tepat. Jawaban yang benar ditandai warna hijau.';b.parentNode.appendChild(fb);setTimeout(()=>{qi++;q()},1350)});
+q();
+// Arena Game
+function boom(){const cs=['#22e1ff','#8b6cff','#3dffb0','#ffb454','#ff5d7a'];for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.background=cs[i%5];d.style.left=innerWidth/2+'px';d.style.top=innerHeight/2.5+'px';document.body.appendChild(d);const a=Math.random()*6.28,v=140+Math.random()*260;d.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${Math.cos(a)*v}px,${Math.sin(a)*v+160}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:1300+Math.random()*600,easing:'cubic-bezier(.2,.8,.4,1)'}).finished.then(()=>d.remove())}}
+$$('[data-g]').forEach(b=>b.onclick=()=>{$$('[data-g]').forEach(x=>x.classList.toggle('p',x===b));$$('.gp').forEach(p=>p.classList.toggle('on',p.id===b.dataset.g))});
+const W=[['Putih-Oranye','#ff9a3c',1],['Oranye','#ff9a3c',0],['Putih-Hijau','#2fcf6b',1],['Biru','#3b82f6',0],['Putih-Biru','#3b82f6',1],['Hijau','#2fcf6b',0],['Putih-Cokelat','#a0693b',1],['Cokelat','#a0693b',0]];
+const wc=w=>w[2]?`repeating-linear-gradient(135deg,#fff 0 5px,${w[1]} 5px 10px)`:w[1];
+let ck=0,ct=0,ctm;
+function cable(){clearInterval(ctm);ck=0;ct=0;$('#ctime').textContent='0.0 s';$('#cslots').innerHTML=W.map((w,i)=>`<div class="slot"><small>${i+1}</small></div>`).join('');const o=W.map((w,i)=>i).sort(()=>Math.random()-.5);$('#cpool').innerHTML=o.map(i=>`<button class="wire" data-w="${i}"><i style="background:${wc(W[i])}"></i><small>${W[i][0]}</small></button>`).join('');$('#cmsg').className='msg';$('#cmsg').textContent='Mulai dari pin 1: Putih-Oranye.'}
+$('#cpool').addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;if(!ck&&!ctm){const t0=performance.now();ctm=setInterval(()=>{ct=(performance.now()-t0)/1000;$('#ctime').textContent=ct.toFixed(1)+' s'},100)}
+if(+b.dataset.w===ck){const s=$$('#cslots .slot')[ck];s.insertAdjacentHTML('afterbegin',`<i style="background:${wc(W[ck])}"></i>`);s.classList.add('fill');b.classList.add('gone');ck++;if(ck===8){clearInterval(ctm);ctm=0;$('#cmsg').className='msg ok';$('#cmsg').innerHTML=`<b>Selesai dalam ${ct.toFixed(1)} detik.</b> Kabel straight T568B siap di-crimping.`;boom();gain('g1',25)}}else{b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);$('#cmsg').className='msg no';$('#cmsg').textContent='Urutan belum tepat. Cek pin berikutnya.'}});
+$('#cre').onclick=()=>{ctm=0;cable()};cable();
+const P=[['80','HTTP'],['443','HTTPS'],['22','SSH'],['53','DNS'],['21','FTP'],['25','SMTP']];
+let fl=[],mv=0,mt=0,lock=false;
+function mem(){fl=[];mv=0;mt=0;lock=false;const c=P.flatMap((p,i)=>[[i,p[0],'port'],[i,p[1],'layanan']]).sort(()=>Math.random()-.5);$('#mgrid').innerHTML=c.map(x=>`<button class="fc" data-k="${x[0]}"><span class="fi"><b class="ff">${ic('plug')}</b><b class="fb ${x[2]}">${x[1]}</b></span></button>`).join('');$('#mmv').textContent='0 langkah';$('#mmsg').className='msg';$('#mmsg').textContent='Cocokkan nomor port dengan layanannya.'}
+$('#mgrid').addEventListener('click',e=>{const c=e.target.closest('.fc');if(!c||lock||c.classList.contains('open')||c.classList.contains('hit'))return;c.classList.add('open');fl.push(c);if(fl.length===2){mv++;$('#mmv').textContent=mv+' langkah';const[a,b]=fl;if(a.dataset.k===b.dataset.k){a.classList.add('hit');b.classList.add('hit');fl=[];if(++mt===P.length){$('#mmsg').className='msg ok';$('#mmsg').innerHTML=`<b>Semua pasangan ketemu dalam ${mv} langkah.</b>`;boom();gain('g2',25)}}else{lock=true;setTimeout(()=>{a.classList.remove('open');b.classList.remove('open');fl=[];lock=false},800)}}});
+$('#mre').onclick=mem;mem();
+let sp={on:0,s:0,t:0,a:0};
+function sq(){const p=24+Math.floor(Math.random()*7),c=2**(32-p)-2,o=[...new Set([c,c+2,c*2+2,Math.max(2,Math.floor(c/2)-1)])].sort(()=>Math.random()-.5);sp.a=c;$('#sq').innerHTML=`<h3 style="font-size:22px;margin-top:16px">Host usable pada /${p}?</h3><div class="opts">${o.map(v=>`<button class="opt" data-s="${v}">${v}</button>`).join('')}</div>`}
+function endSp(){sp.on=0;$('#sgo').disabled=false;$('#sq').innerHTML=`<div class="msg ${sp.s>=5?'ok':'no'}"><b>Waktu habis. Skor ${sp.s}.</b> ${sp.s>=5?'Bagus, kamu cepat menghitung subnet.':'Target 5 benar. Coba lagi.'}</div>`;if(sp.s>=5){boom();gain('g3',30)}}
+$('#sgo').onclick=()=>{sp.on=1;sp.s=0;$('#ssc').textContent='0';$('#sgo').disabled=true;const b=$('#sbar');b.style.transition='none';b.style.width='100%';void b.offsetWidth;b.style.transition='width 30s linear';b.style.width='0%';sq();clearTimeout(sp.t);sp.t=setTimeout(endSp,30000)};
+$('#sq').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b||!sp.on)return;if(+b.dataset.s===sp.a){sp.s++;$('#ssc').textContent=sp.s;b.classList.add('right');sfx('success');setTimeout(()=>sp.on&&sq(),250)}else{b.classList.add('wrong');sfx('tap');setTimeout(()=>sp.on&&sq(),300)}});
+// GAME 4: OSI Challenge
+const osiQ=[
+ {q:'Kabel UTP putus sehingga sinyal tidak sampai.',a:'Physical',o:['Physical','Network','Application','Session'],why:'Layer Physical menangani media fisik dan bit.'},
+ {q:'Switch meneruskan frame berdasarkan alamat MAC.',a:'Data Link',o:['Transport','Data Link','Presentation','Network'],why:'Layer Data Link menangani frame dan alamat MAC.'},
+ {q:'Router menentukan jalur paket berdasarkan alamat IP.',a:'Network',o:['Network','Physical','Application','Data Link'],why:'Layer Network menangani pengalamatan IP dan routing.'},
+ {q:'TCP memastikan pengiriman data yang andal.',a:'Transport',o:['Session','Transport','Network','Physical'],why:'Layer Transport mengatur komunikasi end-to-end, termasuk TCP.'},
+ {q:'Browser meminta halaman web melalui HTTP/HTTPS.',a:'Application',o:['Application','Data Link','Physical','Network'],why:'HTTP dan HTTPS merupakan protokol layer Application.'},
+ {q:'Data dienkripsi atau diterjemahkan ke format yang sesuai.',a:'Presentation',o:['Presentation','Transport','Network','Physical'],why:'Layer Presentation berkaitan dengan format, enkripsi, dan kompresi data.'}
+];let oi=0,oscore=0,olock=false;
+function osiRender(){if(oi>=osiQ.length){$('#osibox').innerHTML=`<div class="msg ${oscore>=4?'ok':'no'}"><h3>Tantangan selesai: ${oscore}/${osiQ.length}</h3><p>${oscore>=4?'Mantap! Pemahaman layer OSI kamu bagus.':'Coba lagi dan perhatikan fungsi setiap layer.'}</p><button class="btn p" id="osiplayagain">Main lagi</button></div>`;if(oscore>=4){boom();gain('g-osi',30)}$('#osiplayagain').onclick=osiReset;return}const x=osiQ[oi];$('#osinum').textContent=oi+1;$('#osibar').style.width=(oi/osiQ.length*100)+'%';$('#osibox').innerHTML=`<h3 style="margin:18px 0">${x.q}</h3><div class="opts">${x.o.map(v=>`<button class="opt" data-osi="${v}">${v}</button>`).join('')}</div><div id="osifeed" class="msg" aria-live="polite"></div>`}
+function osiReset(){oi=0;oscore=0;olock=false;osiRender()}$('#osirestart').onclick=osiReset;$('#osibox').addEventListener('click',e=>{const b=e.target.closest('[data-osi]');if(!b||olock)return;olock=true;const x=osiQ[oi];const ok=b.dataset.osi===x.a;if(ok){oscore++;b.classList.add('right');sfx('success')}else{b.classList.add('wrong');sfx('tap')}$('#osifeed').className='msg '+(ok?'ok':'no');$('#osifeed').textContent=(ok?'Benar! ':'Belum tepat. ')+x.why;setTimeout(()=>{oi++;olock=false;osiRender()},1150)});osiRender();
+// GAME 5: Detektif Jaringan
+const detQ=[
+ {q:'Satu PC tidak bisa membuka situs, tetapi PC lain normal.',o:['Periksa kabel/Wi-Fi dan konfigurasi IP PC itu','Matikan semua switch sekolah','Ganti semua kabel di lab'],a:0,why:'Mulai dari perangkat yang bermasalah: koneksi, IP, gateway, dan DNS.'},
+ {q:'PC dapat ping gateway, tetapi tidak dapat membuka nama situs.',o:['Periksa DNS','Ganti monitor','Ubah warna kabel'],a:0,why:'Jika koneksi IP jalan tetapi nama domain gagal, periksa DNS.'},
+ {q:'Lampu port switch mati dan perangkat tidak terhubung.',o:['Periksa kabel, konektor, dan port','Ubah subnet menjadi /8 langsung','Hapus browser'],a:0,why:'Lampu link mati sering menunjukkan masalah fisik atau port.'},
+ {q:'Dua PC punya alamat IP yang sama.',o:['Atasi konflik IP dan tetapkan alamat unik','Tambah volume speaker','Ganti nama file'],a:0,why:'Setiap host pada jaringan yang sama harus memiliki IP yang tidak bentrok.'},
+ {q:'PC berbeda subnet tidak bisa berkomunikasi.',o:['Periksa gateway dan routing','Periksa wallpaper desktop','Ganti keyboard'],a:0,why:'Komunikasi antar-subnet memerlukan gateway dan routing yang benar.'}
+];let di=0,dscore=0,dlock=false;
+function detRender(){if(di>=detQ.length){$('#detbox').innerHTML=`<div class="msg ${dscore>=4?'ok':'no'}"><h3>Kasus selesai: ${dscore}/${detQ.length}</h3><p>${dscore>=4?'Detektif hebat! Kamu memilih langkah diagnosis yang tepat.':'Coba ulangi. Diagnosis jaringan harus dilakukan secara bertahap.'}</p><button class="btn p" id="detagain">Mulai lagi</button></div>`;if(dscore>=4){boom();gain('g-detect',30)}$('#detagain').onclick=detReset;return}const x=detQ[di];$('#detnum').textContent=di+1;$('#detbox').innerHTML=`<div class="glass card" style="margin-top:16px"><div class="feature-icon"><svg class="i"><use href="#i-wrench"/></svg></div><h3>${x.q}</h3><div class="opts">${x.o.map((v,i)=>`<button class="opt" data-det="${i}">${v}</button>`).join('')}</div><div id="detfeed" class="msg"></div></div>`}
+function detReset(){di=0;dscore=0;dlock=false;detRender()}$('#detrestart').onclick=detReset;$('#detbox').addEventListener('click',e=>{const b=e.target.closest('[data-det]');if(!b||dlock)return;dlock=true;const x=detQ[di],ok=+b.dataset.det===x.a;if(ok){dscore++;b.classList.add('right');sfx('success')}else{b.classList.add('wrong');sfx('tap')}$('#detfeed').className='msg '+(ok?'ok':'no');$('#detfeed').textContent=(ok?'Tepat! ':'Belum tepat. ')+x.why;setTimeout(()=>{di++;dlock=false;detRender()},1400)});detRender();
+// GAME 6: Rute Paket
+const routeSteps=[{q:'Langkah pertama: perangkat apa yang menghubungkan PC ke jaringan lokal?',o:['Switch','Printer','Speaker'],a:'Switch',why:'Switch menghubungkan perangkat dalam LAN.'},{q:'Server berada di jaringan berbeda. Perangkat apa yang memilih jalur antarjaringan?',o:['Router','Mouse','Accessori monitor'],a:'Router',why:'Router meneruskan paket antarjaringan berdasarkan alamat IP.'},{q:'Sebelum paket sampai, apa yang perlu dipastikan pada PC?',o:['IP tujuan dan gateway benar','Wallpaper sama','Volume maksimal'],a:'IP tujuan dan gateway benar',why:'Alamat tujuan dan default gateway yang tepat membantu paket menemukan jalurnya.'}];let ri=0,rlock=false;
+function routeRender(){if(ri>=routeSteps.length){$('#rstep').textContent='3';$('#routebox').innerHTML='<div class="msg ok"><h3>Paket berhasil sampai!</h3><p>Kamu menyelesaikan rute PC → Switch → Router → Server.</p><button class="btn p" id="routeagain">Kirim paket lagi</button></div>';boom();gain('g-route',35);$('#routeagain').onclick=routeReset;return}$('#rstep').textContent=ri;const x=routeSteps[ri];$('#routebox').innerHTML=`<h3 style="margin:18px 0">${x.q}</h3><div class="opts">${x.o.map(v=>`<button class="opt" data-route="${v}">${v}</button>`).join('')}</div><div id="routefeed" class="msg"></div>`}
+function routeReset(){ri=0;rlock=false;routeRender()}$('#routerestart').onclick=routeReset;$('#routebox').addEventListener('click',e=>{const b=e.target.closest('[data-route]');if(!b||rlock)return;rlock=true;const x=routeSteps[ri],ok=b.dataset.route===x.a;if(ok){b.classList.add('right');sfx('success')}else{b.classList.add('wrong');sfx('tap')}$('#routefeed').className='msg '+(ok?'ok':'no');$('#routefeed').textContent=(ok?'Benar! ':'Coba lagi. ')+x.why;if(ok)setTimeout(()=>{ri++;rlock=false;routeRender()},1050);else setTimeout(()=>{b.classList.remove('wrong');rlock=false},850)});routeRender();
+
+
+// ===== Premium interactive experiences =====
+const premiumMissions=[
+ {title:'Lab kehilangan koneksi',label:'INCIDENT 01 / PHYSICAL LAYER',story:'Beberapa komputer di lab tidak dapat terhubung. Lampu indikator pada salah satu port switch mati setelah meja dipindahkan.',question:'Apa pemeriksaan pertama yang paling tepat?',choices:['Periksa kabel, konektor, dan port switch','Ubah semua alamat IP menjadi statis','Ganti DNS seluruh lab'],correct:0,explain:'Mulai dari Layer 1: pastikan kabel dan konektor terpasang baik, lalu uji port. Jangan mengubah konfigurasi IP sebelum bukti fisik diperiksa.'},
+ {title:'IP bertabrakan',label:'INCIDENT 02 / ADDRESSING',story:'Dua komputer kadang kehilangan koneksi dan sistem menampilkan peringatan konflik alamat IP.',question:'Apa tindakan yang paling tepat?',choices:['Tetapkan alamat unik dan periksa cakupan DHCP','Ganti kabel HDMI','Matikan semua firewall tanpa pemeriksaan'],correct:0,explain:'Konflik terjadi ketika dua perangkat memakai alamat IP yang sama. Periksa konfigurasi DHCP/reservasi dan pastikan setiap host memperoleh alamat unik.'},
+ {title:'Internet tanpa nama',label:'INCIDENT 03 / DNS',story:'Pengguna dapat melakukan ping ke alamat IP publik, tetapi nama domain tidak bisa dibuka.',question:'Komponen apa yang paling relevan untuk diperiksa?',choices:['DNS resolver dan konfigurasi DNS klien','Ukuran monitor','Nomor VLAN printer saja'],correct:0,explain:'Jika konektivitas IP berhasil tetapi nama domain gagal diterjemahkan, periksa alamat DNS, keterjangkauan resolver, dan respons query.'},
+ {title:'Jaringan beda subnet',label:'INCIDENT 04 / ROUTING',story:'Komputer dapat berkomunikasi dengan perangkat satu subnet, tetapi tidak dapat mencapai server di subnet lain.',question:'Apa yang perlu diverifikasi lebih dulu?',choices:['Default gateway, routing, dan rute balik','Kecepatan refresh monitor','Nama folder pada komputer'],correct:0,explain:'Komunikasi antar-subnet memerlukan gateway Layer 3 serta rute yang sesuai di kedua arah. Verifikasi IP, mask, gateway, dan routing.'}
+];
+let missionIndex=0,missionDone={};
+try{missionDone=JSON.parse(localStorage.getItem('nq_story_done')||'{}')||{}}catch(e){}
+function renderMission(){const m=premiumMissions[missionIndex];const map=$('#missionMap');if(!map)return;$$('#missionMap [data-mission]').forEach(b=>{b.classList.toggle('active',+b.dataset.mission===missionIndex);const n=b.querySelector('.node-num');if(n)n.textContent=missionDone[missionIndex]?'✓':String(+b.dataset.mission+1).padStart(2,'0')});$('#missionPanel').innerHTML=`<div class="section-kicker">${m.label}</div><h2 style="font-size:clamp(23px,3vw,32px)">${m.title}</h2><p style="margin-top:10px">${m.story}</p><div class="msg" style="margin-top:16px"><b>Ticket / Gejala</b><br>${m.question}</div><div id="missionChoices" style="margin-top:12px">${m.choices.map((c,i)=>`<button class="mission-choice" data-mchoice="${i}">${String.fromCharCode(65+i)}. ${c}</button>`).join('')}</div><div id="missionFeedback" aria-live="polite"></div><div class="row"><button class="btn" id="missionPrev" ${missionIndex===0?'disabled':''}>← Sebelumnya</button><button class="btn p" id="missionNext">${missionIndex===3?'Kembali ke misi pertama':'Misi berikutnya →'}</button></div>`;$('#missionPrev').onclick=()=>{missionIndex=Math.max(0,missionIndex-1);renderMission()};$('#missionNext').onclick=()=>{missionIndex=missionIndex===3?0:missionIndex+1;renderMission()}}
+$('#missionMap')?.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(!b)return;missionIndex=+b.dataset.mission;renderMission()});
+$('#missionPanel')?.addEventListener('click',e=>{const b=e.target.closest('[data-mchoice]');if(!b||b.disabled)return;const m=premiumMissions[missionIndex],ok=+b.dataset.mchoice===m.correct;$$('#missionChoices [data-mchoice]').forEach(x=>{x.disabled=true;if(+x.dataset.mchoice===m.correct)x.classList.add('correct')});if(!ok)b.classList.add('incorrect');$('#missionFeedback').innerHTML=`<div class="msg ${ok?'ok':'no'}"><b>${ok?'Keputusan tepat.':'Belum tepat.'}</b><br>${m.explain}</div>`;sfx(ok?'success':'tap');if(ok&&!missionDone[missionIndex]){missionDone[missionIndex]=1;try{localStorage.setItem('nq_story_done',JSON.stringify(missionDone))}catch(e){}gain('story_'+missionIndex,20);refreshPremiumUI()} });
+renderMission();
+
+// Virtual lab topology: interactive source/target selection and simulated packet test.
+const labNodes={pc1:{name:'PC Siswa',ip:'192.168.10.10',net:'10',type:'host'},pc2:{name:'PC Guru',ip:'192.168.10.20',net:'10',type:'host'},switch:{name:'Switch',ip:'Layer 2',net:'lan',type:'switch'},router:{name:'Router',ip:'192.168.10.1 / 192.168.20.1',net:'router',type:'router'},server:{name:'Server',ip:'192.168.20.10',net:'20',type:'server'}};
+let labSource='pc1',labTarget='server',labPick='source';
+function labRender(){if(!$('#labTopology'))return;$$('#labTopology [data-node]').forEach(n=>{n.classList.toggle('active',n.dataset.node===labSource||n.dataset.node===labTarget)});$('#labSourceValue').textContent=labNodes[labSource]?.name||'Belum dipilih';$('#labTargetValue').textContent=labNodes[labTarget]?.name||'Belum dipilih'}
+$('#labSource')?.addEventListener('click',()=>{labPick='source';$('#labStatus').innerHTML='<span class="live-dot"></span><span>Pilih perangkat yang akan menjadi sumber paket.</span>'});
+$('#labTarget')?.addEventListener('click',()=>{labPick='target';$('#labStatus').innerHTML='<span class="live-dot"></span><span>Pilih perangkat tujuan paket.</span>'});
+$('#labTopology')?.addEventListener('click',e=>{const b=e.target.closest('[data-node]');if(!b)return;const id=b.dataset.node;if(labPick==='source'){labSource=id;if(labTarget===labSource)labTarget=id==='server'?'pc1':'server'}else{labTarget=id;if(labTarget===labSource)labSource=id==='server'?'pc1':'server'}labRender();$('#labStatus').innerHTML=`<span class="live-dot"></span><span>${labPick==='source'?'Sumber':'Tujuan'} dipilih: ${labNodes[id].name}.</span>`});
+$('#labSend')?.addEventListener('click',()=>{if(labSource===labTarget){$('#labStatus').innerHTML='<span class="live-dot"></span><span>Pilih sumber dan tujuan yang berbeda.</span>';return}const a=labNodes[labSource],b=labNodes[labTarget];const same=a.net===b.net;const ok=same||labSource==='router'||labTarget==='router'||labSource==='switch'||labTarget==='switch';const hops=(a.net===b.net)?'1 (LAN)':'2 (Switch + Router)';const latency=(same?'1.2':'4.8')+' ms';$('#labHops').textContent=hops;$('#labLatency').textContent=latency;$('#labTerminal').textContent=`NETQUEST NETWORK CONSOLE\n$ ping ${b.ip}\nSource: ${a.name} (${a.ip})\nDestination: ${b.name} (${b.ip})\n\n${ok?'Reply from '+b.ip+': time='+latency+' TTL=64\nReply from '+b.ip+': time='+(same?'1.4':'5.1')+' ms TTL=64\n\nSimulation result: SUCCESS':'Request timed out. Check VLAN and routing.'}\n\nNote: simulated output only.`;$('#labStatus').innerHTML=`<span class="live-dot" style="background:${ok?'#48f2ba':'#ff5d7a'}"></span><span>${ok?'Ping simulasi berhasil.':'Koneksi simulasi gagal. Periksa topologi.'}</span>`;sfx(ok?'success':'tap');if(ok){gain('lab_packet',15);try{localStorage.setItem('nq_lab_done','1')}catch(e){}refreshPremiumUI()}});
+labRender();
+
+// Per-device scoreboard; deliberately labeled local, not a global online leaderboard.
+function refreshPremiumUI(){const name=(()=>{try{return localStorage.getItem('nq_demo_user')||'Teknisi Jaringan'}catch(e){return'Teknisi Jaringan'}})();const dash=$('#dashName');if(dash)dash.textContent=name.split(/[\s_-]+/)[0].slice(0,22);if($('#dashRank'))$('#dashRank').textContent=$('#rank')?.textContent||'Newbie';if($('#dashXP'))$('#dashXP').textContent=String(st?.xp||0);if($('#dashMissions'))$('#dashMissions').textContent=Object.keys(missionDone).filter(k=>missionDone[k]).length+'/4';
+ const allDone=Object.keys(missionDone).filter(k=>missionDone[k]).length;const bd=(id,yes)=>{const el=$(id);if(el){el.textContent=yes?'Terbuka':'Belum terbuka';el.style.color=yes?'var(--c3)':'var(--mut)'}};bd('#badgeLab',(()=>{try{return localStorage.getItem('nq_lab_done')==='1'}catch(e){return false}})());bd('#badgeStory',allDone>0);bd('#badgeSubnet',!!(st&&st.got&&st.got.s2));bd('#badgeXP',(st?.xp||0)>=100);
+ let board=[];try{board=JSON.parse(localStorage.getItem('nq_board')||'[]')||[]}catch(e){}const xp=st?.xp||0;const i=board.findIndex(x=>x.name.toLowerCase()===name.toLowerCase());if(i>=0)board[i].xp=Math.max(board[i].xp||0,xp);else board.push({name,xp});board.sort((a,b)=>b.xp-a.xp);board=board.slice(0,10);try{localStorage.setItem('nq_board',JSON.stringify(board))}catch(e){}const list=$('#leaderboardList');if(list)list.innerHTML=board.length?board.map((x,i)=>`<div class="leader-row"><span class="leader-rank">${i===0?'♛':String(i+1).padStart(2,'0')}</span><span class="leader-name">${String(x.name).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}<small>${i===0?'Top score on this browser':'Local learner'}</small></span><span class="leader-score">${x.xp||0} XP</span></div>`).join(''):'<div class="msg">Belum ada skor. Selesaikan misi untuk mulai mengisi klasemen.</div>'}
+window.premiumReady=true;refreshPremiumUI();
+})();
+</script>
+
+<!-- NetQuest enhancement panel -->
+<div id="designPanel" class="design-panel glass" aria-label="Pengaturan tampilan" aria-hidden="true">
+  <div class="design-head"><div><div class="eyebrow">Personalize workspace</div><h3>Pengaturan Tampilan</h3></div><button class="th" id="closeDesign" aria-label="Tutup pengaturan">×</button></div>
+  <label for="palettePick">Tema warna</label>
+  <select id="palettePick">
+    <option value="default">Default — Network</option>
+    <option value="pink">Pink Cute — Candy</option>
+    <option value="ocean">Biru Putih — Ocean & Sky</option>
+    <option value="red">Merah — Computer Lab</option>
+  </select>
+  <label for="modePick">Mode tampilan</label>
+  <select id="modePick"><option value="dark">Dark</option><option value="light">Light</option></select>
+  <div class="design-toggle"><span>Gradient</span><button id="gradientToggle" class="sw2 on" type="button" aria-pressed="true"></button><small id="gradientState">On</small></div>
+  <p class="guide-tip">Tema, font, warna komponen, dan efek latar mengikuti pilihan ini. Preferensi disimpan pada browser ini.</p>
+</div>
+
+<style>
+/* New theme system */
+:root{--font-ui:Sora,system-ui,sans-serif;--font-display:Sora,system-ui,sans-serif;--theme-glow:rgba(34,225,255,.2)}
+body{font-family:var(--font-ui)}
+h1,h2,h3,.logo{font-family:var(--font-display)}
+:root[data-palette="pink"]{--c1:#ff78b7;--c2:#b58aff;--c3:#ffca72;--b1:#ff9bc9;--b2:#c9a0ff;--b3:#ffd5a6;--warn:#d98242;--bad:#e45d88;--theme-glow:rgba(255,120,183,.24);--font-ui:"Nunito",system-ui,sans-serif;--font-display:"Fredoka",system-ui,sans-serif}
+:root[data-palette="ocean"]{--c1:#55c8ee;--c2:#668be9;--c3:#77d9c4;--b1:#6fc8ed;--b2:#8faeea;--b3:#b3e5ef;--warn:#e7b75e;--bad:#e47b83;--theme-glow:rgba(85,200,238,.22);--font-ui:"Manrope",system-ui,sans-serif;--font-display:"Manrope",system-ui,sans-serif}
+:root[data-palette="red"]{--c1:#ff555f;--c2:#c9233b;--c3:#ff9b72;--b1:#bd2338;--b2:#f04a50;--b3:#7e142c;--warn:#ffb45f;--bad:#ff526c;--theme-glow:rgba(255,65,82,.22);--font-ui:"Rajdhani",system-ui,sans-serif;--font-display:"Rajdhani",system-ui,sans-serif}
+:root[data-palette="pink"][data-theme="light"]{--bg:#fff0f7;--ink:#512d48;--mut:#936a83;--glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.86);--stroke:rgba(255,255,255,.95);--shadow:rgba(175,85,135,.2)}
+:root[data-palette="pink"][data-theme="dark"]{--bg:#241326;--ink:#fff0fa;--mut:#d2a9c4;--glass:rgba(255,221,244,.08);--glass2:rgba(255,221,244,.15);--stroke:rgba(255,220,244,.2);--shadow:rgba(0,0,0,.4)}
+:root[data-palette="ocean"][data-theme="light"]{--bg:#eaf8ff;--ink:#12334c;--mut:#54758d;--glass:rgba(255,255,255,.62);--glass2:rgba(255,255,255,.88);--stroke:rgba(255,255,255,.96);--shadow:rgba(50,120,160,.2)}
+:root[data-palette="ocean"][data-theme="dark"]{--bg:#071a2b;--ink:#e9f8ff;--mut:#9bbccc;--glass:rgba(150,220,255,.08);--glass2:rgba(150,220,255,.15);--stroke:rgba(180,230,255,.2);--shadow:rgba(0,0,0,.4)}
+:root[data-palette="red"][data-theme="light"]{--bg:#fff0f0;--ink:#42151d;--mut:#89545d;--glass:rgba(255,255,255,.62);--glass2:rgba(255,255,255,.88);--stroke:rgba(255,255,255,.96);--shadow:rgba(140,35,50,.2)}
+:root[data-palette="red"][data-theme="dark"]{--bg:#1c090e;--ink:#fff0f1;--mut:#c99ba2;--glass:rgba(255,160,170,.07);--glass2:rgba(255,160,170,.14);--stroke:rgba(255,190,195,.2);--shadow:rgba(0,0,0,.45)}
+:root[data-palette="ocean"] .bg:after{background-image:linear-gradient(160deg,transparent 35%,rgba(105,205,239,.12) 36%,transparent 42%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 45%)}
+:root[data-palette="pink"] .glass{box-shadow:inset 0 1px 0 var(--glass2),0 20px 55px -24px var(--theme-glow)}
+:root[data-gradient="off"] .grad{background:none!important;color:var(--c1)!important;animation:none!important}
+:root[data-gradient="off"] .btn.p,:root[data-gradient="off"] .logo b,:root[data-gradient="off"] .mb b,:root[data-gradient="off"] .teacher-avatar{background:var(--c1)!important}
+:root[data-gradient="off"] .bar span{background:var(--c1)!important;animation:none!important}
+.design-panel{position:fixed;right:18px;top:72px;z-index:1500;width:min(340px,calc(100vw - 28px));padding:20px;display:none;gap:12px}
+.design-panel.open{display:grid;animation:in .25s}
+.design-head{display:flex;justify-content:space-between;align-items:center}
+.design-panel select{width:100%}
+.design-toggle{display:flex;align-items:center;gap:12px;margin-top:8px}.design-toggle span{font-weight:700}.design-toggle small{color:var(--mut)}
+.guide-list{padding-left:22px;margin-top:12px;color:var(--mut)}.guide-list li{padding:5px 0}
+.guide-tip{margin-top:14px;padding:12px;border:1px solid var(--stroke);border-radius:14px;background:var(--glass);font-size:12px}
+.material-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin:18px 0}
+.material-tools input{width:100%}
+.material-results{display:grid;gap:12px;margin-top:14px}
+.material-entry{padding:18px;border:1px solid var(--stroke);border-radius:18px;background:var(--glass)}
+.material-entry h3{color:var(--c1)}
+.material-entry p{margin-top:7px}
+.material-entry .pill{margin-top:10px}
+.bug-form{display:grid;gap:12px}.bug-form textarea{width:100%;min-height:120px;background:var(--glass);border:1px solid var(--stroke);border-radius:14px;padding:12px;color:var(--ink);font:inherit}
+@media(max-width:520px){.material-tools{grid-template-columns:1fr}.design-panel{top:12px;right:12px}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Manrope:wght@400;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script>
+(()=>{
+const root=document.documentElement;
+const $=s=>document.querySelector(s);
+const safeGet=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}};
+const safeSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+function applyDesign(){
+  const palette=safeGet('nq_palette','default');
+  const mode=safeGet('nq_mode','dark');
+  const gradient=safeGet('nq_gradient','on');
+  root.dataset.palette=palette;
+  root.dataset.theme=mode;
+  root.dataset.gradient=gradient;
+  const p=$('#palettePick'),m=$('#modePick'),g=$('#gradientToggle'),gs=$('#gradientState');
+  if(p)p.value=palette;if(m)m.value=mode;
+  if(g){g.classList.toggle('on',gradient==='on');g.setAttribute('aria-pressed',String(gradient==='on'))}
+  if(gs)gs.textContent=gradient==='on'?'On':'Off';
+}
+applyDesign();
+$('#openDesign')?.addEventListener('click',()=>{$('#designPanel').classList.add('open');$('#designPanel').setAttribute('aria-hidden','false')});
+$('#closeDesign')?.addEventListener('click',()=>{$('#designPanel').classList.remove('open');$('#designPanel').setAttribute('aria-hidden','true')});
+$('#palettePick')?.addEventListener('change',e=>{safeSet('nq_palette',e.target.value);applyDesign()});
+$('#modePick')?.addEventListener('change',e=>{safeSet('nq_mode',e.target.value);applyDesign()});
+$('#gradientToggle')?.addEventListener('click',()=>{safeSet('nq_gradient',safeGet('nq_gradient','on')==='on'?'off':'on');applyDesign()});
+$('#theme')?.addEventListener('click',()=>{safeSet('nq_mode',safeGet('nq_mode','dark')==='dark'?'light':'dark');applyDesign()});
+
+// Build a keyword-searchable TJKT knowledge catalogue. Search indexes every paragraph and tag.
+const knowledge=[
+['Ubuntu: pengenalan','Ubuntu adalah distribusi Linux berbasis Debian. Kenali desktop, terminal, file manager, aplikasi, pembaruan, dan konsep pengguna.','Ubuntu Linux sistem operasi software'],
+['Ubuntu: terminal dasar','Terminal menjalankan perintah teks. Perintah pengenalan: pwd untuk lokasi folder, ls untuk melihat isi, cd untuk berpindah direktori, mkdir untuk membuat folder, dan clear untuk membersihkan tampilan.','Ubuntu Linux terminal CLI'],
+['Ubuntu: mematikan komputer','Simpan pekerjaan dan tutup aplikasi terlebih dahulu. Gunakan menu sistem Shut Down, lalu konfirmasi. Tunggu sampai perangkat benar-benar mati sebelum memutus daya.','Ubuntu shutdown cara mematikan komputer dengan benar power off'],
+['Ubuntu: instalasi aplikasi','Gunakan Ubuntu Software atau pengelola paket resmi. Pahami sumber aplikasi dan izin yang diminta; hindari menjalankan perintah dari sumber yang tidak tepercaya.','Ubuntu software install aplikasi paket apt'],
+['Hardware komputer','Komponen utama meliputi motherboard, CPU, RAM, penyimpanan SSD/HDD, PSU, GPU, pendingin, monitor, keyboard, dan mouse. Pelajari fungsi serta kompatibilitas dasarnya.','hardware perangkat keras komputer CPU RAM motherboard'],
+['Perakitan dan perawatan PC','Matikan perangkat dan lepaskan sumber listrik sebelum perawatan. Ikuti panduan pabrikan, cegah listrik statis, pasang komponen sesuai slot, lalu periksa koneksi sebelum menyalakan.','hardware perakitan komputer maintenance'],
+['Software dan sistem operasi','Software mencakup sistem operasi, driver, aplikasi, utilitas, dan firmware. Sistem operasi mengelola perangkat keras, file, proses, memori, serta akun pengguna.','software OS operating system driver aplikasi'],
+['Windows: perawatan dasar','Gunakan pengaturan sistem untuk memeriksa pembaruan, kapasitas penyimpanan, aplikasi startup, dan status keamanan. Cadangkan data penting secara berkala.','Windows maintenance update storage'],
+['Jaringan komputer: dasar','Jaringan menghubungkan perangkat untuk pertukaran data. LAN mencakup area lokal, MAN area metropolitan, dan WAN area geografis luas.','network LAN MAN WAN jaringan komputer'],
+['Topologi jaringan','Topologi menjelaskan susunan hubungan perangkat. Contoh umum: star, bus, ring, mesh, dan tree. Pemilihan dipengaruhi biaya, skalabilitas, dan kebutuhan redundansi.','topologi star bus ring mesh tree'],
+['Kabel UTP dan T568B','Kabel twisted pair digunakan pada Ethernet. Standar T568B pin 1–8: putih-oranye, oranye, putih-hijau, biru, putih-biru, hijau, putih-cokelat, cokelat.','UTP RJ45 T568B crimping kabel LAN'],
+['IP address dan subnetting','IPv4 terdiri dari 32 bit. Subnet mask/prefix menentukan bagian network dan host. Subnetting membagi jaringan menjadi beberapa subnet sesuai kebutuhan.','IP address IPv4 subnetting subnet mask prefix'],
+['VLAN dan switching','VLAN membagi switch menjadi broadcast domain logis. Port access membawa satu VLAN, sedangkan trunk dapat membawa beberapa VLAN dengan tagging sesuai konfigurasi.','Cisco VLAN switch access trunk'],
+['Routing dan gateway','Router meneruskan paket antarjaringan berdasarkan tabel routing. Default gateway adalah jalur keluar host menuju jaringan lain.','router routing default gateway'],
+['Cisco Packet Tracer','Cisco Packet Tracer adalah simulator pembelajaran jaringan untuk menyusun topologi, menghubungkan perangkat, mengatur alamat IP, menguji konektivitas, dan mempelajari konfigurasi.','Cisco Packet Tracer simulator Cisco networking'],
+['Model OSI dan TCP/IP','Model OSI memiliki tujuh layer: Physical, Data Link, Network, Transport, Session, Presentation, Application. Model TCP/IP mengelompokkan fungsi komunikasi internet ke beberapa layer.','OSI TCP IP layer protocol'],
+['Layanan jaringan dan port','Contoh port umum: HTTP 80, HTTPS 443, SSH 22, DNS 53, DHCP 67/68, SMTP 25, dan RDP 3389. Pastikan aturan firewall sesuai kebutuhan.','port protocol DNS DHCP HTTP HTTPS SSH'],
+['DHCP dan DNS','DHCP memberikan konfigurasi IP secara otomatis. DNS menerjemahkan nama domain menjadi alamat IP. Keduanya penting bagi pengalaman akses jaringan.','DHCP DNS server domain'],
+['Troubleshooting jaringan','Lakukan secara bertahap: identifikasi gejala, cek fisik, periksa konfigurasi IP, uji gateway, uji DNS, periksa jalur/routing, catat hasil, lalu verifikasi.','troubleshooting ping ipconfig ip route nslookup'],
+['Keamanan jaringan dasar','Gunakan kata sandi unik, pembaruan rutin, firewall, hak akses minimum, backup, dan edukasi phishing. Praktik keamanan hanya pada sistem yang diizinkan.','cybersecurity firewall backup access control'],
+['Wireless dan access point','Wi-Fi menghubungkan perangkat tanpa kabel melalui access point. Perhatikan cakupan, interferensi, kanal, enkripsi, dan penempatan perangkat.','wireless WiFi access point WLAN'],
+['Fiber optik dan telekomunikasi','Fiber optik mengirim data menggunakan cahaya. Pelajari core, cladding, jenis single-mode/multimode, konektor, redaman, dan keselamatan kerja.','fiber optic FTTH ODP ODC ONT telekomunikasi'],
+['Server dan virtualisasi','Server menyediakan layanan seperti file, web, DNS, DHCP, dan autentikasi. Virtualisasi memungkinkan beberapa mesin virtual berjalan pada satu host fisik.','server virtual machine virtualization'],
+['Linux permissions','Linux mengatur izin file dengan konsep pemilik, grup, dan pengguna lain. Pelajari read, write, execute serta prinsip hak akses minimum.','Linux chmod permission owner group'],
+['Cisco: pengenalan konfigurasi','Pelajari fungsi mode user EXEC, privileged EXEC, global configuration, dan interface configuration melalui dokumentasi resmi dan lab simulasi.','Cisco IOS CLI configuration router switch']
+];
+const materialSection=$('#materials');
+if(materialSection && !$('#materialSearch')){
+ const tool=document.createElement('div');tool.className='glass card';tool.innerHTML='<h3>Telusuri seluruh materi TJKT</h3><p>Cari dengan kata kunci atau pertanyaan. Pencarian memeriksa judul, isi, dan kata kunci terkait.</p><div class="material-tools"><input id="materialSearch" type="search" placeholder="Contoh: cara mematikan komputer dengan benar"><button class="btn p" id="clearMaterialSearch" type="button">Bersihkan</button></div><div id="materialResults" class="material-results" aria-live="polite"></div>';
+ materialSection.insertBefore(tool,materialSection.children[2]||null);
+}
+function showMaterials(query=''){
+ const host=$('#materialResults');if(!host)return;
+ const q=query.trim().toLocaleLowerCase('id');
+ const found=knowledge.filter(x=>!q||x.join(' ').toLocaleLowerCase('id').includes(q));
+ host.innerHTML=found.length?found.map(x=>`<article class="material-entry"><h3>${x[0]}</h3><p>${x[1]}</p><span class="pill">${x[2]}</span></article>`).join(''):'<div class="msg">Belum ditemukan. Coba kata kunci yang lebih umum, misalnya Ubuntu, kabel, IP, Cisco, atau hardware.</div>';
+}
+showMaterials();
+$('#materialSearch')?.addEventListener('input',e=>showMaterials(e.target.value));
+$('#clearMaterialSearch')?.addEventListener('click',()=>{$('#materialSearch').value='';showMaterials();$('#materialSearch').focus()});
+
+// Social links are intentionally placeholders until the project owner supplies verified URLs/usernames.
+const contacts=[
+ ['Ivander','Google / Gmail','Tambahkan akun Google / Gmail',''],
+ ['Ivander','Instagram','@vndee_r','https://www.instagram.com/@vndee_r'],
+ ['Ivander','TikTok','@user02_1413','https://www.tiktok.com/@user02_1413'],
+ ['Ivander','GitHub','Tambahkan akun GitHub',''],
+ ['Ivander','Red Hat','Tambahkan akun Red Hat',''],
+ ['Muh. Hadit Rafanizam','Google / Gmail','Tambahkan akun Google / Gmail',''],
+ ['Muh. Hadit Rafanizam','Instagram','Tambahkan akun Instagram',''],
+ ['Muh. Hadit Rafanizam','TikTok','Tambahkan akun TikTok',''],
+ ['Muh. Hadit Rafanizam','GitHub','Tambahkan akun GitHub',''],
+ ['Muh. Hadit Rafanizam','Red Hat','Tambahkan akun Red Hat',''],
+ ['Muh. Fikron Ainun Najib','Google / Gmail','Tambahkan akun Google / Gmail',''],
+ ['Muh. Fikron Ainun Najib','Instagram','Tambahkan akun Instagram',''],
+ ['Muh. Fikron Ainun Najib','TikTok','Tambahkan akun TikTok',''],
+ ['Muh. Fikron Ainun Najib','GitHub','Tambahkan akun GitHub',''],
+ ['Muh. Fikron Ainun Najib','Red Hat','Tambahkan akun Red Hat',''],
+ ['Akhsan Jauhar Santoso','Google / Gmail','Tambahkan akun Google / Gmail',''],
+ ['Akhsan Jauhar Santoso','Instagram','Tambahkan akun Instagram',''],
+ ['Akhsan Jauhar Santoso','TikTok','Tambahkan akun TikTok',''],
+ ['Akhsan Jauhar Santoso','GitHub','Tambahkan akun GitHub',''],
+ ['Akhsan Jauhar Santoso','Red Hat','Tambahkan akun Red Hat',''],
+ ['Pak Andy Musly','Google / Gmail','Tambahkan akun Google / Gmail',''],
+ ['Pak Andy Musly','Instagram','Tambahkan akun Instagram',''],
+ ['Pak Andy Musly','TikTok','Tambahkan akun TikTok',''],
+ ['Pak Andy Musly','GitHub','Tambahkan akun GitHub',''],
+ ['Pak Andy Musly','Red Hat','Tambahkan akun Red Hat','']
+];
+const contactSection=$('#contact');
+if(contactSection){
+ const social=document.createElement('div');social.className='glass card';social.style.marginTop='18px';
+ social.innerHTML='<h3>Kontak akun anggota & pembimbing</h3><p>Ganti placeholder dengan tautan akun yang benar sebelum situs dipublikasikan.</p><div class="social-list">'+contacts.map(c=>`<div class="social-row"><b>${c[0]}</b><span>${c[1]}</span>${c[3]?`<a href="${c[3]}" target="_blank" rel="noopener noreferrer">${c[2]}</a>`:`<span class="muted-link">${c[2]}</span>`}</div>`).join('')+'</div>';
+ contactSection.appendChild(social);
+ const bug=document.createElement('div');bug.className='glass card';bug.style.marginTop='18px';
+ bug.innerHTML='<div class="feature-icon"><svg class="i"><use href="#i-wrench"/></svg></div><h3>Laporkan Bug / Masalah</h3><p>Isi detail masalah. Tombol akan membuka aplikasi email dengan laporan yang sudah disusun.</p><form class="bug-form" id="bugForm"><label for="bugEmail">Email tujuan pengelola</label><input id="bugEmail" type="email" placeholder="Masukkan Gmail pengelola" required><label for="bugTitle">Judul laporan</label><input id="bugTitle" required maxlength="100" placeholder="Contoh: Pencarian materi tidak bekerja"><label for="bugDetail">Detail masalah</label><textarea id="bugDetail" required maxlength="3000" placeholder="Tuliskan langkah yang dilakukan dan hasil yang muncul..."></textarea><button class="btn p" type="submit">Siapkan laporan email</button><div class="form-error" id="bugStatus" role="status"></div></form><p class="guide-tip">Penting: HTML/CSS/JavaScript statis tidak dapat mengirim email otomatis secara diam-diam atau menyimpan laporan ke Gmail. Ini menggunakan mailto untuk membuka email pengguna; pengiriman tetap perlu dikonfirmasi. Pengiriman otomatis membutuhkan layanan/backend tepercaya.</p>';
+ contactSection.appendChild(bug);
+}
+const socialStyle=document.createElement('style');
+socialStyle.textContent='.social-list{display:grid;gap:8px;margin-top:14px}.social-row{display:grid;grid-template-columns:1fr auto 1.2fr;gap:12px;align-items:center;padding:11px 13px;border:1px solid var(--stroke);border-radius:14px;background:var(--glass)}.social-row a{color:var(--c1);font-weight:700;text-decoration:none;overflow-wrap:anywhere}.social-row a:hover{text-decoration:underline}.muted-link{color:var(--mut);font-size:12px}.bug-form input{width:100%}@media(max-width:520px){.social-row{grid-template-columns:1fr;gap:3px}}';
+document.head.appendChild(socialStyle);
+$('#bugForm')?.addEventListener('submit',e=>{
+ e.preventDefault();
+ const to=$('#bugEmail').value.trim(),subject=$('#bugTitle').value.trim();
+ const body='Laporan Bug NetQuest TJKT\n\nJudul: '+subject+'\nDetail:\n'+$('#bugDetail').value.trim()+'\n\nBrowser: '+navigator.userAgent+'\nWaktu: '+new Date().toLocaleString('id-ID');
+ const url='mailto:'+to+'?subject='+encodeURIComponent('[NetQuest Bug] '+subject)+'&body='+encodeURIComponent(body);
+ $('#bugStatus').textContent='Aplikasi email akan dibuka. Periksa penerima dan tekan Kirim untuk mengirim laporan.';
+ location.href=url;
+});
+})();
+</script>
+
+
+<style>
+/* NetQuest Academy: missions, classroom and printable certificates */
+.nq-progress-card{margin:18px 0}.nq-progress-head,.nq-card-title{display:flex;justify-content:space-between;align-items:center;gap:12px}.nq-progress-head strong{font-size:20px;color:var(--c1)}
+.nq-mission-layout{display:grid;grid-template-columns:minmax(230px,.8fr) minmax(0,1.5fr);gap:16px;align-items:start}.nq-mission-list{display:grid;gap:9px}.nq-mission-item{display:flex;align-items:center;gap:12px;text-align:left;padding:13px;border:1px solid var(--stroke);border-radius:16px;background:var(--glass);color:var(--ink);cursor:pointer}.nq-mission-item.active{border-color:var(--c1);box-shadow:0 0 0 2px color-mix(in srgb,var(--c1) 20%,transparent)}.nq-mission-num{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--glass2);font-weight:900;color:var(--c1);flex-shrink:0}.nq-mission-item.done .nq-mission-num{background:var(--c3);color:#06251c}.nq-mission-item small{display:block;color:var(--mut);font-size:11px}.nq-mission-work{min-height:320px}.nq-question{padding:14px;margin-top:12px;border:1px solid var(--stroke);border-radius:15px;background:var(--glass)}.nq-answer{display:block;width:100%;text-align:left;margin-top:8px;padding:11px 13px;border:1px solid var(--stroke);border-radius:12px;background:var(--glass2);cursor:pointer}.nq-answer:hover{border-color:var(--c1)}.nq-answer.correct{border-color:var(--c3);background:color-mix(in srgb,var(--c3) 13%,transparent)}.nq-answer.wrong{border-color:var(--bad)}.nq-feedback{font-size:12px;color:var(--mut);margin-top:7px}.nq-class-grid,.nq-cert-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.nq-class-grid label,.nq-certificate-form label,.nq-skill-eval label{display:block;margin-top:12px;font-size:12px;color:var(--mut);font-weight:700}.nq-class-grid input,.nq-class-grid select,.nq-certificate-form input,.nq-skill-eval textarea{width:100%;padding:12px;border:1px solid var(--stroke);border-radius:12px;background:var(--glass);color:var(--ink);margin-top:5px}.nq-host-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--glass2);font-size:22px}.nq-room-panel{margin-top:16px;padding:16px;border:1px dashed var(--c1);border-radius:16px;text-align:center}.nq-room-code-label{font-size:10px;letter-spacing:3px;color:var(--mut)}.nq-room-code{font-size:clamp(30px,6vw,46px);font-weight:900;letter-spacing:8px;color:var(--c1)}.nq-avatar-picks{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.nq-avatar{width:42px;height:42px;border:1px solid var(--stroke);border-radius:50%;background:var(--glass2);font-size:20px;cursor:pointer}.nq-avatar.selected{outline:2px solid var(--c1);outline-offset:2px;color:var(--c1)}.nq-player-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.nq-player-chip{padding:7px 10px;border-radius:20px;background:var(--glass2);font-size:12px}.nq-game-stage{min-height:260px;margin-top:16px;padding:20px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--c1) 13%,var(--bg)),color-mix(in srgb,var(--c2) 14%,var(--bg)));border:1px solid var(--stroke);display:grid;align-content:center}.nq-stage-empty{text-align:center;color:var(--mut)}.nq-stage-empty .i{font-size:38px;color:var(--c1)}.nq-stage-empty h3{color:var(--ink);margin:10px 0}.nq-current-player{font-size:12px;color:var(--c1);font-weight:800;letter-spacing:1px}.nq-stage-question{font-size:clamp(21px,4vw,32px);font-weight:900;line-height:1.25;margin:12px 0 18px}.nq-game-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.nq-game-answer{padding:16px 12px;border:0;border-radius:14px;color:white;font-weight:800;cursor:pointer;background:#2463d8;min-height:60px}.nq-game-answer:nth-child(2){background:#9b3aaf}.nq-game-answer:nth-child(3){background:#bd5730}.nq-game-answer:nth-child(4){background:#21866a}.nq-game-answer:disabled{opacity:.75;cursor:default}.nq-live-dot{font-size:11px;color:var(--c3);font-weight:800}.nq-game-controls{margin-top:14px}.nq-leaderboard{margin-top:16px}.nq-score-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--stroke)}.nq-score-row strong{color:var(--c1)}.nq-note{margin-top:16px;padding:14px 16px;border-radius:14px;background:color-mix(in srgb,var(--warn) 12%,var(--glass));border:1px solid color-mix(in srgb,var(--warn) 40%,var(--stroke));font-size:12px;color:var(--mut)}.nq-certificate-form{margin-top:16px}.nq-cert-card h3{margin:10px 0 5px}.nq-cert-preview{aspect-ratio:1.414/1;background:linear-gradient(135deg,#0d2038,#1b3d5c);border:7px double #d9bd72;border-radius:8px;margin:16px 0;padding:6%;color:#fff;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.22)}.nq-cert-preview:before{content:"";position:absolute;inset:10px;border:1px solid rgba(231,205,132,.5);pointer-events:none}.nq-cert-skill{background:linear-gradient(135deg,#1b102d,#243d66);border-color:#d6a9f0}.nq-cert-brand{font-size:clamp(10px,1.4vw,17px);letter-spacing:3px;font-weight:900;color:#f2d98d}.nq-cert-sub{font-size:clamp(7px,1vw,11px);letter-spacing:2px;margin-top:3px;color:#d9e8f7}.nq-cert-title{font-family:Georgia,serif;font-size:clamp(16px,2.6vw,30px);line-height:1.1;margin:7% 0 4%;letter-spacing:1px}.nq-cert-line{font-size:clamp(7px,1vw,11px);color:#dbe7f4}.nq-cert-person{font-family:Georgia,serif;font-size:clamp(14px,2.3vw,25px);font-style:italic;color:#f6d98a;border-bottom:1px solid #d9bd72;padding:3px 12px;margin:5px 0;max-width:90%;overflow-wrap:anywhere}.nq-cert-seal{margin-top:6px;border:2px solid #d9bd72;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;color:#f2d98d;font-weight:900}.nq-cert-foot{font-size:clamp(6px,.8vw,9px);letter-spacing:1px;color:#c4d1df;margin-top:5px}.nq-cert-actions{display:flex;gap:8px;flex-wrap:wrap}.nq-cert-card small{display:block;color:var(--mut);margin-top:8px}.nq-cert-card button:disabled,.nq-game-controls button:disabled{opacity:.4;cursor:not-allowed}.nq-skill-eval textarea{resize:vertical}.nq-rubric{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.nq-rubric label{display:flex;align-items:center;gap:8px;margin:0;padding:9px;border:1px solid var(--stroke);border-radius:10px;background:var(--glass)}.nq-rubric input{accent-color:var(--c1)}
+@media(max-width:760px){.nq-mission-layout,.nq-class-grid,.nq-cert-grid{grid-template-columns:1fr}.nq-mission-list{grid-template-columns:1fr 1fr}.nq-mission-item{padding:9px}.nq-rubric{grid-template-columns:1fr}.nq-cert-preview{max-width:100%}.nq-game-answers{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.nq-mission-list{grid-template-columns:1fr}.nq-game-answers{grid-template-columns:1fr}.nq-room-code{letter-spacing:5px}}
+@media print{body *{visibility:hidden!important}#nqPrintSheet,#nqPrintSheet *{visibility:visible!important}#nqPrintSheet{display:flex!important;position:fixed;inset:0;width:100vw;height:100vh;align-items:center;justify-content:center;background:#fff!important}#nqPrintSheet .nq-cert-preview{width:95vw;max-height:90vh;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+#nqPrintSheet{display:none}
+</style>
+<div id="nqPrintSheet" aria-hidden="true"></div>
+<script>
+(()=>{
+'use strict';
+const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+const safeRead=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(_){return d}};
+const safeWrite=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// 10 misi, masing-masing tiga soal pilihan ganda. Dua jawaban benar dari tiga diperlukan.
+const missions=[
+{t:'Penjelajah TJKT',tag:'Orientasi bidang',m:'TJKT mempelajari komputer, jaringan, telekomunikasi, layanan digital, dan dukungan teknis. Teknisi harus menggabungkan teori, praktik, dokumentasi, serta keselamatan kerja.',task:'Baca pengantar TJKT dan tulis tiga bidang pekerjaan yang menarik bagimu.',qs:[['Kepanjangan TJKT adalah…',['Teknik Jaringan Komputer dan Telekomunikasi','Teknologi Jasa Komputer Terpadu','Teknik Java Komputer Terapan','Teknologi Jaringan Kabel Terpadu'],0,'TJKT adalah Teknik Jaringan Komputer dan Telekomunikasi.'],['Sikap kerja teknisi yang baik adalah…',['Mengabaikan dokumentasi','Mencatat perubahan dan hasil pemeriksaan','Mencabut kabel saat perangkat aktif tanpa prosedur','Membagikan kata sandi'],1,'Dokumentasi membantu pekerjaan dapat ditelusuri dan diperiksa.'],['Sebelum praktik, hal penting yang perlu dilakukan adalah…',['Membaca instruksi dan menyiapkan keselamatan','Menebak fungsi alat','Mengabaikan risiko','Mengubah semua konfigurasi'],0,'Pahami instruksi, alat, dan risiko sebelum mulai.']]},
+{t:'Anatomi Komputer',tag:'Hardware',m:'Komputer tersusun dari CPU, motherboard, RAM, penyimpanan, PSU, pendingin, serta perangkat input/output. Setiap komponen memiliki fungsi dan kompatibilitas tertentu.',task:'Identifikasi minimal lima komponen komputer di materi atau perangkat yang tersedia dan jelaskan fungsinya.',qs:[['Komponen yang mengeksekusi instruksi program adalah…',['RAM','CPU','PSU','Monitor'],1,'CPU menjalankan instruksi dan operasi pemrosesan.'],['RAM berfungsi sebagai…',['Penyimpanan sementara saat sistem bekerja','Sumber listrik utama','Pengolah grafis permanen','Kabel jaringan'],0,'RAM menyimpan data sementara yang sedang digunakan.'],['Komponen yang memasok daya ke perangkat adalah…',['SSD','Motherboard','PSU','NIC'],2,'PSU mengubah dan menyalurkan daya ke komponen.']]},
+{t:'Perakitan dan Perawatan',tag:'Praktik hardware',m:'Perakitan harus mengikuti panduan pabrikan. Pastikan perangkat tidak terhubung ke listrik, gunakan prosedur antistatis, cocokkan soket, dan periksa konektor sebelum menyalakan.',task:'Susun urutan perakitan secara tertulis dan sebutkan tiga langkah keselamatan.',qs:[['Sebelum membuka casing PC, sebaiknya…',['Pastikan daya terputus','Jalankan game berat','Lepas RAM saat menyala','Siram casing'],0,'Putuskan sumber daya dan ikuti prosedur keselamatan.'],['CPU dipasang pada…',['Slot RAM','Socket CPU pada motherboard','Port HDMI','Konektor SATA daya'],1,'CPU harus cocok dengan socket motherboard.'],['Tujuan tindakan antistatis adalah…',['Mempercepat internet','Mengurangi risiko kerusakan akibat listrik statis','Menambah kapasitas RAM','Membersihkan layar'],1,'Listrik statis dapat merusak komponen elektronik.']]},
+{t:'Sistem Operasi',tag:'Windows dan Linux',m:'Sistem operasi mengelola proses, memori, perangkat, akun, dan file. Pembaruan serta pemasangan aplikasi sebaiknya dilakukan dari sumber tepercaya.',task:'Bandingkan satu fungsi Windows dan Linux, lalu catat cara mematikan komputer dengan benar.',qs:[['Sistem operasi bertugas untuk…',['Mengelola sumber daya komputer','Mengubah monitor menjadi router','Menyediakan listrik rumah','Mengganti fungsi CPU'],0,'OS menjadi pengelola perangkat keras dan aplikasi.'],['Perintah Linux untuk melihat lokasi direktori aktif adalah…',['pwd','mkdir','clear','exit'],0,'pwd menampilkan working directory.'],['Sumber aplikasi yang paling aman adalah…',['Lampiran acak','Situs tidak dikenal','Repositori atau toko aplikasi tepercaya','Tautan pop-up'],2,'Gunakan sumber resmi/tepercaya dan periksa izin aplikasi.']]},
+{t:'Dasar Jaringan',tag:'LAN, WAN, topologi',m:'Jaringan menghubungkan perangkat untuk bertukar data. LAN mencakup area lokal, WAN menjangkau area luas. Topologi star sering memakai switch pusat.',task:'Gambar topologi star sederhana dengan tiga PC, satu switch, dan satu router.',qs:[['LAN biasanya digunakan untuk…',['Area lokal seperti lab sekolah','Seluruh dunia tanpa perangkat penghubung','Satu aplikasi saja','Mengganti sistem operasi'],0,'LAN melayani area terbatas seperti rumah, kantor, atau laboratorium.'],['Perangkat yang menghubungkan banyak host dalam LAN adalah…',['Switch','Keyboard','Printer saja','Speaker'],0,'Switch meneruskan frame di jaringan lokal.'],['Pada topologi star, perangkat ujung terhubung ke…',['Satu titik pusat','Lingkaran tertutup saja','Kabel tanpa perangkat','Satelit wajib'],0,'Topologi star menggunakan perangkat pusat seperti switch.']]},
+{t:'Kabel dan Media Transmisi',tag:'UTP dan fiber',m:'Kabel UTP membawa sinyal Ethernet melalui pasangan kabel terpilin. RJ45 umum dipakai pada Ethernet tembaga. Fiber optik mengirim data menggunakan cahaya.',task:'Pelajari urutan T568B dan jelaskan perbedaan dasar kabel tembaga dengan fiber optik.',qs:[['Konektor Ethernet tembaga yang umum adalah…',['RJ45','USB-C','HDMI','VGA'],0,'RJ45 (8P8C) umum digunakan pada kabel Ethernet.'],['Standar urutan T568B pin 1 dimulai dengan…',['Putih-oranye','Putih-hijau','Biru','Cokelat'],0,'Pin pertama T568B adalah putih-oranye.'],['Fiber optik mengirimkan data dengan…',['Cahaya','Gelombang suara','Air bertekanan','Arus mekanis'],0,'Fiber menggunakan cahaya di dalam serat optik.']]},
+{t:'IP Address dan Subnet',tag:'IPv4',m:'IPv4 memiliki panjang 32 bit. Subnet mask atau prefix memisahkan bagian network dan host. Default gateway menjadi jalur menuju jaringan lain.',task:'Catat contoh alamat IP privat, subnet mask, dan default gateway untuk sebuah PC simulasi.',qs:[['Panjang alamat IPv4 adalah…',['16 bit','32 bit','64 bit','128 bit'],1,'IPv4 menggunakan 32 bit.'],['Contoh alamat privat IPv4 adalah…',['192.168.1.10','8.8.8.8','1.1.1.1','203.0.113.8'],0,'192.168.0.0/16 termasuk ruang alamat privat.'],['Default gateway digunakan untuk…',['Keluar menuju jaringan lain','Mengubah resolusi layar','Menyimpan file','Menambah RAM'],0,'Gateway mengarahkan trafik ke jaringan di luar subnet lokal.']]},
+{t:'Switching dan Routing',tag:'VLAN',m:'Switch meneruskan frame dalam LAN. VLAN memisahkan broadcast domain secara logis. Router atau switch Layer 3 dapat melakukan routing antarjaringan.',task:'Buat rancangan tiga VLAN: Guru, Siswa, dan Server. Jelaskan mengapa segmentasi berguna.',qs:[['VLAN digunakan untuk…',['Segmentasi jaringan secara logis','Meningkatkan kapasitas SSD','Mengganti kabel listrik','Menyimpan kata sandi'],0,'VLAN memisahkan broadcast domain secara logis.'],['Port trunk umumnya membawa…',['Beberapa VLAN','Satu alamat MAC saja','Daya listrik utama','Sinyal monitor'],0,'Trunk membawa trafik beberapa VLAN dengan tagging.'],['Routing diperlukan untuk…',['Meneruskan paket antarjaringan','Mengubah nama file','Menyusun kabel keyboard','Mengatur kecerahan'],0,'Router meneruskan paket antar jaringan IP.']]},
+{t:'Layanan dan Troubleshooting',tag:'DHCP, DNS, diagnosis',m:'DHCP memberikan konfigurasi IP secara otomatis. DNS menerjemahkan nama domain ke alamat IP. Troubleshooting dilakukan bertahap berdasarkan bukti.',task:'Buat checklist diagnosis saat komputer tidak dapat membuka situs web.',qs:[['DNS berfungsi untuk…',['Menerjemahkan nama domain ke alamat IP','Memberi daya ke switch','Membuat kabel UTP','Menyimpan video'],0,'DNS membantu menemukan alamat IP dari nama domain.'],['DHCP membantu perangkat memperoleh…',['Konfigurasi IP otomatis','Kartu grafis','Kabel fiber','Akun media sosial'],0,'DHCP dapat memberikan IP, gateway, dan DNS secara otomatis.'],['Langkah troubleshooting yang baik adalah…',['Identifikasi gejala lalu uji dari yang sederhana','Ubah semua konfigurasi sekaligus','Hapus semua file','Langsung mengganti router'],0,'Gunakan urutan sistematis dan verifikasi hasil.']]},
+{t:'Proyek Akhir Teknisi',tag:'Integrasi keterampilan',m:'Gabungkan konsep perangkat, topologi, IP, layanan, keamanan, dan dokumentasi untuk merancang jaringan kecil yang sesuai kebutuhan.',task:'Buat proyek mini jaringan laboratorium: diagram, daftar perangkat, rencana IP, pengujian koneksi, dan catatan keamanan. Simpan ringkasan di menu Sertifikat.',qs:[['Dokumen proyek jaringan sebaiknya memuat…',['Topologi, IP, perangkat, dan hasil pengujian','Hanya nama pembuat','Kata sandi semua pengguna','Data pribadi yang tidak relevan'],0,'Dokumentasi teknis memuat rancangan dan bukti pengujian.'],['Setelah konfigurasi jaringan diubah, teknisi perlu…',['Memverifikasi konektivitas dan mencatat hasil','Menganggap pasti berhasil','Mematikan semua firewall tanpa alasan','Menghapus dokumentasi'],0,'Verifikasi memastikan perubahan memberi hasil yang diharapkan.'],['Prinsip keamanan yang baik adalah…',['Hak akses minimum dan kata sandi kuat','Satu kata sandi untuk semua','Membagikan kredensial','Menonaktifkan pembaruan'],0,'Batasi hak akses sesuai kebutuhan dan jaga kredensial.']]}
+];
+let missionState=safeRead('nq_academy_missions',{done:{},scores:{}}),activeMission=0,missionAnswers={};
+let projectSaved=safeRead('nq_academy_project',{text:'',checks:[],teacherApproved:false,teacherName:''});
+function renderMissionList(){const host=q('#nqMissionList');if(!host)return;host.innerHTML=missions.map((m,i)=>`<button class="nq-mission-item ${i===activeMission?'active':''} ${missionState.done[i]?'done':''}" data-mission="${i}"><span class="nq-mission-num">${missionState.done[i]?'✓':String(i+1).padStart(2,'0')}</span><span><b>${esc(m.t)}</b><small>${esc(m.tag)} • ${missionState.done[i]?'Selesai':'Belum selesai'}</small></span></button>`).join('');const n=Object.keys(missionState.done).filter(k=>missionState.done[k]).length;q('#nqMissionCount').textContent=n+'/10';q('#nqMissionBar').style.width=(n*10)+'%';q('#nqMissionHint').textContent=n===10?'Semua misi selesai. Sertifikat penyelesaian terbuka.':`Selesaikan ${10-n} misi lagi untuk membuka sertifikat penyelesaian.`;updateCertificateUI();}
+function openMission(i){activeMission=i;missionAnswers={};renderMissionList();const m=missions[i],host=q('#nqMissionWork');host.innerHTML=`<span class="pill">MISI ${i+1} / 10 • ${esc(m.tag)}</span><h2 style="margin-top:10px">${esc(m.t)}</h2><p style="margin-top:10px">${esc(m.m)}</p><div class="nq-question"><b>Aktivitas praktik</b><p>${esc(m.task)}</p><label class="tiny" style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="nqTaskRead"> Saya sudah membaca materi dan melakukan aktivitas / mencatat hasilnya.</label></div><h3 style="margin-top:18px">Uji pemahaman (minimal 2 dari 3 benar)</h3><div id="nqMissionQuestions"></div><div class="row" style="margin-top:16px"><button class="btn p" id="nqSubmitMission">Periksa jawaban & selesaikan</button><button class="btn" id="nqClearMission">Ulangi soal</button></div><div id="nqMissionFeedback" class="nq-feedback" role="status"></div>`;const qs=q('#nqMissionQuestions');qs.innerHTML=m.qs.map((item,j)=>`<div class="nq-question" data-q="${j}"><b>${j+1}. ${esc(item[0])}</b>${item[1].map((a,k)=>`<button type="button" class="nq-answer" data-answer="${k}">${String.fromCharCode(65+k)}. ${esc(a)}</button>`).join('')}<div class="nq-feedback" id="nqFeedback${j}"></div></div>`).join('');}
+q('#nqMissionList')?.addEventListener('click',e=>{const b=e.target.closest('[data-mission]');if(b)openMission(Number(b.dataset.mission));});
+q('#nqMissionQuestions')?.addEventListener('click',e=>{const b=e.target.closest('[data-answer]');if(!b)return;const card=b.closest('[data-q]'),j=Number(card.dataset.q);missionAnswers[j]=Number(b.dataset.answer);card.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));});
+q('#nqMissionWork')?.addEventListener('click',e=>{if(e.target.id==='nqClearMission')openMission(activeMission);if(e.target.id==='nqSubmitMission'){const m=missions[activeMission];if(!q('#nqTaskRead')?.checked){q('#nqMissionFeedback').textContent='Centang konfirmasi setelah membaca materi dan melakukan aktivitas.';return;}if(m.qs.some((_,i)=>missionAnswers[i]===undefined)){q('#nqMissionFeedback').textContent='Jawab ketiga soal terlebih dahulu.';return;}let score=0;m.qs.forEach((item,i)=>{const card=q(`[data-q="${i}"]`),ok=missionAnswers[i]===item[2];if(ok)score++;card.querySelectorAll('button').forEach((b,k)=>{b.disabled=true;if(k===item[2])b.classList.add('correct');else if(k===missionAnswers[i])b.classList.add('wrong')});q('#nqFeedback'+i).textContent=(ok?'Benar. ':'Belum tepat. ')+item[3];});if(score>=2){missionState.done[activeMission]=true;missionState.scores[activeMission]=score;safeWrite('nq_academy_missions',missionState);q('#nqMissionFeedback').textContent=`Bagus! Nilai ${score}/3. Misi berhasil diselesaikan.`;renderMissionList();}else{q('#nqMissionFeedback').textContent=`Nilai ${score}/3. Kamu perlu minimal 2 jawaban benar. Pelajari pembahasan lalu ulangi misi.`;}}});
+renderMissionList();openMission(0);
+
+// Classroom game: host-led turn-taking on one screen; no remote synchronization without a server.
+const quizBank=[
+['Perangkat yang meneruskan frame dalam LAN adalah…',['Switch','Monitor','Keyboard','Speaker'],0,'Switch meneruskan frame berdasarkan MAC address.'],
+['Port default HTTPS adalah…',['21','53','443','8080'],2,'HTTPS umumnya menggunakan TCP port 443.'],
+['DNS menerjemahkan…',['Nama domain ke alamat IP','IP ke tegangan listrik','Kabel ke sinyal radio','File ke folder'],0,'DNS menyelesaikan nama domain menjadi alamat IP.'],
+['Perangkat yang menghubungkan jaringan berbeda adalah…',['Router','Mouse','RAM','Repeater USB'],0,'Router meneruskan paket antarjaringan.'],
+['Berapa layer pada model OSI?',['4','5','6','7'],3,'Model OSI memiliki tujuh layer.'],
+['Kabel fiber optik mengirim data menggunakan…',['Cahaya','Suara','Air','Gelombang panas'],0,'Informasi dikirim dalam bentuk pulsa cahaya.'],
+['DHCP digunakan untuk…',['Memberikan konfigurasi IP otomatis','Mengenkripsi file','Mengukur suhu CPU','Mengganti nama host'],0,'DHCP mengalokasikan konfigurasi jaringan secara otomatis.'],
+['Subnet mask /24 setara dengan…',['255.255.0.0','255.255.255.0','255.0.0.0','255.255.255.255'],1,'Prefix /24 memiliki 24 bit network mask.'],
+['VLAN berfungsi untuk…',['Segmentasi jaringan logis','Menambah RAM','Menyimpan backup','Mengganti DNS publik'],0,'VLAN membagi broadcast domain secara logis.'],
+['Perintah untuk menguji konektivitas IP adalah…',['ping','mkdir','copy','format'],0,'ping menguji jangkauan host melalui ICMP.'],
+['Port SSH adalah…',['20','22','25','110'],1,'SSH umumnya menggunakan TCP port 22.'],
+['Alamat IPv4 memiliki panjang…',['16 bit','32 bit','64 bit','128 bit'],1,'IPv4 terdiri dari 32 bit.']
+];
+let room=null,players=[],selectedAvatar='◆',turn=0,questionIndex=0,gameActive=false,mode='classic',musicTimer=null,audioCtx=null,musicOn=false,questionTimer=null,secondsLeft=15;
+const randCode=()=>String(Math.floor(100000+Math.random()*900000));
+function updatePlayers(){const el=q('#nqPlayerList');if(!el)return;el.innerHTML=players.length?players.map((p,i)=>`<span class="nq-player-chip">${esc(p.avatar)} ${esc(p.name)} <button type="button" data-remove-player="${i}" aria-label="Hapus ${esc(p.name)}" style="border:0;background:none;color:var(--bad);cursor:pointer">×</button></span>`).join(''):'<p class="tiny">Belum ada peserta.</p>';q('#nqStartGame').disabled=!room||players.length<1||gameActive;}
+q('#nqAvatarPicks')?.addEventListener('click',e=>{const b=e.target.closest('[data-avatar]');if(!b)return;selectedAvatar=b.dataset.avatar;qa('.nq-avatar').forEach(x=>x.classList.toggle('selected',x===b));});
+q('#nqAddPlayer')?.addEventListener('click',()=>{const name=q('#nqPlayerName').value.trim();if(name.length<2){alert('Nama pemain minimal 2 karakter.');return;}if(players.some(p=>p.name.toLowerCase()===name.toLowerCase())){alert('Nama pemain tersebut sudah digunakan di room ini.');return;}players.push({name,avatar:selectedAvatar,score:0});q('#nqPlayerName').value='';updatePlayers();});
+q('#nqPlayerName')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();q('#nqAddPlayer').click();}});
+q('#nqPlayerList')?.addEventListener('click',e=>{const b=e.target.closest('[data-remove-player]');if(!b||gameActive)return;players.splice(Number(b.dataset.removePlayer),1);updatePlayers();});
+q('#nqCreateRoom')?.addEventListener('click',()=>{room={code:randCode(),title:q('#nqRoomTitle').value.trim()||'TJKT Challenge Class'};mode=q('#nqGameMode').value;q('#nqRoomCode').textContent=room.code;q('#nqRoomNameDisplay').textContent=room.title;q('#nqRoomPanel').hidden=false;q('#nqBoardTitle').textContent=room.title;updatePlayers();q('#nqGameStage').innerHTML='<div class="nq-stage-empty"><h3>Room dibuat!</h3><p>Tambahkan nama peserta pada panel lobby. Host dapat menampilkan layar ini di proyektor atau smartboard.</p></div>';});
+q('#nqCopyRoom')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('NetQuest Class Arena — Room '+(room?.code||''));q('#nqCopyRoom').textContent='Kode disalin!';}catch(_){q('#nqCopyRoom').textContent='Kode: '+(room?.code||'');}});
+function renderScores(){const el=q('#nqLeaderboard');if(!el)return;const sorted=[...players].sort((a,b)=>b.score-a.score);el.innerHTML=sorted.length?'<h3>Leaderboard kelas</h3>'+sorted.map((p,i)=>`<div class="nq-score-row"><span>${i+1}. ${esc(p.avatar)} ${esc(p.name)}</span><strong>${p.score} poin</strong></div>`).join(''):'';}
+function startQuestionTimer(){if(questionTimer)clearInterval(questionTimer);secondsLeft=15;const clock=q('#nqCountdown');if(clock)clock.textContent=secondsLeft;questionTimer=setInterval(()=>{secondsLeft--;const node=q('#nqCountdown');if(node)node.textContent=secondsLeft;if(secondsLeft<=0){clearInterval(questionTimer);questionTimer=null;const feedback=q('#nqAnswerFeedback');if(feedback)feedback.textContent='Waktu habis! Tidak ada poin untuk soal ini.';q('#nqGameStage')?.querySelectorAll('button').forEach(b=>b.disabled=true);advance();}},1000);}
+function nextQuestion(){if(questionIndex>=8){finishGame();return;}const player=players[turn];const data=quizBank[(questionIndex*5+1)%quizBank.length];let choices=data[1].map((x,i)=>({x,i}));if(mode==='truefalse'){const isTrue=(questionIndex%2===0);const prompt=isTrue?data[0]:data[1][(data[2]+1)%data[1].length]+' — apakah ini jawaban yang tepat?';q('#nqGameStage').innerHTML=`<div class="nq-current-player">GILIRAN ${esc(player.avatar)} ${esc(player.name)} • SOAL ${questionIndex+1}/8 • WAKTU <span id="nqCountdown">15</span>s</div><div class="nq-stage-question">${esc(prompt)}</div><div class="nq-game-answers"><button class="nq-game-answer" data-tf="true">BENAR</button><button class="nq-game-answer" data-tf="false">SALAH</button></div><div class="nq-feedback" id="nqAnswerFeedback">Pilih jawabanmu.</div>`;q('#nqGameStage').dataset.answer=String(isTrue);}
+else{if(mode==='speed')choices=choices.sort(()=>Math.random()-.5);q('#nqGameStage').innerHTML=`<div class="nq-current-player">GILIRAN ${esc(player.avatar)} ${esc(player.name)} • SOAL ${questionIndex+1}/8 • WAKTU <span id="nqCountdown">15</span>s</div><div class="nq-stage-question">${esc(data[0])}</div><div class="nq-game-answers">${choices.map((c,i)=>`<button class="nq-game-answer" data-choice="${c.i}">${String.fromCharCode(65+i)}. ${esc(c.x)}</button>`).join('')}</div><div class="nq-feedback" id="nqAnswerFeedback">Pilih satu jawaban.</div>`;q('#nqGameStage').dataset.answer=String(data[2]);}q('#nqNextTurn').hidden=true;q('#nqEndGame').hidden=false;startQuestionTimer();}
+function advance(){if(questionTimer){clearInterval(questionTimer);questionTimer=null;}questionIndex++;turn=(turn+1)%players.length;if(questionIndex>=8){finishGame();return;}q('#nqNextTurn').hidden=false;q('#nqNextTurn').textContent='Lanjut ke pemain berikutnya';q('#nqGameStage').querySelectorAll('button').forEach(b=>b.disabled=true);}
+q('#nqGameStage')?.addEventListener('click',e=>{const b=e.target.closest('[data-choice],[data-tf]');if(!b||!gameActive||b.disabled)return;const expected=q('#nqGameStage').dataset.answer;let correct;if(b.hasAttribute('data-choice'))correct=String(b.dataset.choice)===expected;else correct=b.dataset.tf===expected;if(correct){players[turn].score+=mode==='speed'?120:100;q('#nqAnswerFeedback').textContent='Tepat! +'+(mode==='speed'?120:100)+' poin.';}else{q('#nqAnswerFeedback').textContent='Belum tepat. Tetap semangat, lanjut ke soal berikutnya.';}q('#nqGameStage').querySelectorAll('button').forEach(x=>{x.disabled=true;if((x.dataset.choice!==undefined&&x.dataset.choice===expected)||(x.dataset.tf!==undefined&&x.dataset.tf===expected))x.style.outline='3px solid #7bf0ba';});renderScores();advance();});
+q('#nqStartGame')?.addEventListener('click',()=>{if(!room||!players.length)return;players.forEach(p=>p.score=0);turn=0;questionIndex=0;gameActive=true;q('#nqStartGame').hidden=true;q('#nqEndGame').hidden=false;nextQuestion();renderScores();});
+q('#nqNextTurn')?.addEventListener('click',()=>{if(gameActive)nextQuestion();});
+function finishGame(){if(questionTimer){clearInterval(questionTimer);questionTimer=null;}gameActive=false;q('#nqGameStage').innerHTML='<div class="nq-stage-empty"><h2>Ronde selesai!</h2><p>Terima kasih sudah bermain. Periksa peringkat kelas di bawah.</p></div>';q('#nqNextTurn').hidden=true;q('#nqEndGame').hidden=true;q('#nqStartGame').hidden=false;q('#nqStartGame').textContent='Main lagi';renderScores();}
+q('#nqEndGame')?.addEventListener('click',finishGame);
+q('#nqFullscreen')?.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen();}catch(_){q('#nqFullscreen').textContent='Mode layar penuh tidak didukung';}});
+q('#nqResetGame')?.addEventListener('click',()=>{if(questionTimer){clearInterval(questionTimer);questionTimer=null;}stopMusic();room=null;players=[];gameActive=false;turn=0;questionIndex=0;q('#nqRoomPanel').hidden=true;q('#nqGameStage').innerHTML='<div class="nq-stage-empty"><h3>Room direset</h3><p>Buat room baru untuk memulai sesi selanjutnya.</p></div>';q('#nqStartGame').hidden=false;q('#nqStartGame').textContent='Mulai permainan';q('#nqEndGame').hidden=true;q('#nqNextTurn').hidden=true;q('#nqLeaderboard').innerHTML='';updatePlayers();});
+
+// Musik orisinal sederhana berbasis Web Audio; hanya aktif setelah tombol ditekan.
+function startMusic(){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;try{audioCtx=audioCtx||new C();audioCtx.resume();const notes=[523.25,659.25,783.99,659.25,587.33,698.46,880,698.46];let n=0;musicTimer=setInterval(()=>{if(!audioCtx||audioCtx.state!=='running')return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='triangle';osc.frequency.value=notes[n++%notes.length];gain.gain.setValueAtTime(.0001,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.035,audioCtx.currentTime+.03);gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.24);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+.25);},270);musicOn=true;q('#nqMusicToggle').textContent='♫ Musik: Nyala';q('#nqMusicToggle').setAttribute('aria-pressed','true');}catch(_){q('#nqMusicToggle').textContent='Audio tidak tersedia';}}
+function stopMusic(){if(musicTimer)clearInterval(musicTimer);musicTimer=null;musicOn=false;if(q('#nqMusicToggle')){q('#nqMusicToggle').textContent='♫ Musik: Mati';q('#nqMusicToggle').setAttribute('aria-pressed','false');}}
+q('#nqMusicToggle')?.addEventListener('click',()=>musicOn?stopMusic():startMusic());
+
+// Certificate rendering, PNG download and print-to-PDF via browser print dialog.
+const allMissionsDone=()=>Object.keys(missionState.done).filter(k=>missionState.done[k]).length===10;
+function updateCertificateUI(){const done=allMissionsDone(),skill=done&&Object.keys(missionState.scores).filter(k=>missionState.scores[k]>=3).length>=8&&projectSaved.checks?.length===5&&String(projectSaved.text||'').trim().length>=80;const n=q('#nqCertName')?.value.trim()||safeRead('nq_academy_cert_name','');q('#nqCertStatus').textContent=done?'Sertifikat penyelesaian terbuka. Jalur keterampilan memerlukan hasil teori yang kuat dan proyek akhir lengkap.':'Selesaikan '+Object.keys(missionState.done).filter(k=>missionState.done[k]).length+'/10 misi untuk membuka sertifikat penyelesaian.';qa('[data-cert-name]').forEach(el=>el.textContent=n||'Nama Peserta');['nqDownloadCompletion','nqCompletionPrint'].forEach(id=>{const b=q('#'+id);if(b)b.disabled=!done||!n;});q('#nqDownloadCompletion').disabled=!done||!n;qa('[data-print="completion"]').forEach(b=>b.disabled=!done||!n);q('#nqDownloadSkill').disabled=!skill||!n;qa('[data-print="skill"]').forEach(b=>b.disabled=!skill||!n);q('#nqCompletionLock').textContent=done?'Terbuka — siap dicetak atau diunduh.':'Belum terbuka — selesaikan 10 misi.';q('#nqSkillLock').textContent=skill?'Terbuka — diverifikasi oleh '+projectSaved.teacherName+'.':'Butuh 10 misi, minimal 8 misi bernilai 3/3, ringkasan proyek minimal 80 karakter, lima bukti rubrik, dan konfirmasi guru.';if(q('#nqTeacherApprove'))q('#nqTeacherApprove').disabled=!projectReady||projectSaved.teacherApproved===true;}
+q('#nqCertName')?.addEventListener('input',()=>{safeWrite('nq_academy_cert_name',q('#nqCertName').value.trim());updateCertificateUI();});
+q('#nqCertName').value=safeRead('nq_academy_cert_name','');
+q('#nqProjectText').value=projectSaved.text||'';qa('#nqRubric input').forEach(c=>c.checked=(projectSaved.checks||[]).includes(c.value));
+q('#nqSaveProject')?.addEventListener('click',()=>{const text=q('#nqProjectText').value.trim(),checks=qa('#nqRubric input:checked').map(c=>c.value);if(text.length<80||checks.length!==5){q('#nqProjectStatus').textContent='Lengkapi ringkasan minimal 80 karakter dan centang kelima bukti proyek.';return;}projectSaved={text,checks,teacherApproved:false,teacherName:''};safeWrite('nq_academy_project',projectSaved);q('#nqProjectStatus').textContent='Bukti proyek tersimpan pada browser ini. Guru perlu memeriksa hasil praktik sebelum memberi verifikasi.';updateCertificateUI();});
+q('#nqTeacherApprove')?.addEventListener('click',()=>{if(projectSaved.checks?.length!==5||String(projectSaved.text||'').trim().length<80){q('#nqProjectStatus').textContent='Simpan proyek lengkap terlebih dahulu.';return;}const teacher=window.prompt('Nama guru yang telah memeriksa proyek secara langsung:');if(!teacher||teacher.trim().length<2)return;if(!window.confirm('Konfirmasi: '+teacher.trim()+' sudah memeriksa bukti praktik peserta secara langsung?'))return;projectSaved.teacherApproved=true;projectSaved.teacherName=teacher.trim();safeWrite('nq_academy_project',projectSaved);q('#nqProjectStatus').textContent='Verifikasi guru dicatat pada browser ini. Catatan ini tidak memakai tanda tangan digital atau autentikasi server.';updateCertificateUI();});
+function certificateSVG(kind,name){const skill=kind==='skill',title=skill?'CERTIFICATE OF SKILL ACHIEVEMENT':'CERTIFICATE OF COMPLETION',sub=skill?'Atas pencapaian evaluasi teori dan proyek keterampilan TJKT':'Atas penyelesaian 10 misi pembelajaran TJKT';const safeName=esc(name);return `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1131" viewBox="0 0 1600 1131"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${skill?'#1b102d':'#0d2038'}"/><stop offset="1" stop-color="${skill?'#243d66':'#1b3d5c'}"/></linearGradient></defs><rect width="1600" height="1131" fill="url(#bg)"/><rect x="28" y="28" width="1544" height="1075" rx="16" fill="none" stroke="#d9bd72" stroke-width="12"/><rect x="55" y="55" width="1490" height="1021" rx="8" fill="none" stroke="#d9bd72" stroke-width="2"/><text x="800" y="205" text-anchor="middle" font-family="Arial" font-size="44" font-weight="bold" letter-spacing="8" fill="#f2d98d">NETQUEST ACADEMY</text><text x="800" y="255" text-anchor="middle" font-family="Arial" font-size="24" letter-spacing="6" fill="#d9e8f7">TJKT SKILL MASTERY</text><text x="800" y="420" text-anchor="middle" font-family="Georgia" font-size="76" fill="#ffffff">${title}</text><text x="800" y="520" text-anchor="middle" font-family="Arial" font-size="28" fill="#dbe7f4">Diberikan kepada</text><text x="800" y="630" text-anchor="middle" font-family="Georgia" font-size="68" font-style="italic" fill="#f6d98a">${safeName}</text><path d="M360 655H1240" stroke="#d9bd72" stroke-width="2"/><text x="800" y="735" text-anchor="middle" font-family="Arial" font-size="27" fill="#dbe7f4">${sub}</text><circle cx="800" cy="860" r="55" fill="none" stroke="#d9bd72" stroke-width="4"/><text x="800" y="878" text-anchor="middle" font-family="Georgia" font-size="42" fill="#f2d98d">${skill?'★':'NQ'}</text><text x="800" y="1010" text-anchor="middle" font-family="Arial" font-size="20" letter-spacing="4" fill="#c4d1df">NETQUEST ACADEMY • NON-FORMAL LEARNING AWARD</text></svg>`;}
+async function downloadCertificate(kind){const name=q('#nqCertName').value.trim();if(!name)return;const svg=certificateSVG(kind,name),blob=new Blob([svg],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1131;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);URL.revokeObjectURL(url);canvas.toBlob(png=>{if(!png)return;const a=document.createElement('a');a.href=URL.createObjectURL(png);a.download=(kind==='skill'?'NetQuest-Skill-Achievement-':'NetQuest-Completion-')+name.trim().replace(/[^a-z0-9]+/gi,'-')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},'image/png');};img.onerror=()=>{URL.revokeObjectURL(url);alert('Browser tidak dapat membuat gambar sertifikat. Coba fitur Cetak / Simpan PDF.');};img.src=url;}
+q('#nqDownloadCompletion')?.addEventListener('click',()=>downloadCertificate('completion'));q('#nqDownloadSkill')?.addEventListener('click',()=>downloadCertificate('skill'));
+qa('[data-print]').forEach(b=>b.addEventListener('click',()=>{const kind=b.dataset.print,name=q('#nqCertName').value.trim();if(!name)return;const sheet=q('#nqPrintSheet');sheet.innerHTML=`<div class="nq-cert-preview ${kind==='skill'?'nq-cert-skill':''}"><div class="nq-cert-brand">NETQUEST ACADEMY</div><div class="nq-cert-sub">TJKT SKILL MASTERY</div><div class="nq-cert-title">${kind==='skill'?'CERTIFICATE OF<br>SKILL ACHIEVEMENT':'CERTIFICATE<br>OF COMPLETION'}</div><div class="nq-cert-line">Diberikan kepada</div><div class="nq-cert-person">${esc(name)}</div><div class="nq-cert-line">${kind==='skill'?'Atas pencapaian evaluasi teori dan proyek keterampilan TJKT':'Atas penyelesaian 10 misi pembelajaran TJKT'}</div><div class="nq-cert-seal">${kind==='skill'?'★':'NQ'}</div><div class="nq-cert-foot">NETQUEST ACADEMY • NON-FORMAL LEARNING AWARD</div></div>`;window.print();}));
+updateCertificateUI();
+})();
+</script>
+
+</body>
+</html>
