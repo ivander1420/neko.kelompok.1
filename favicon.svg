@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#145b9d"/>
+      <stop offset="1" stop-color="#38b8e9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+  <circle cx="392" cy="116" r="58" fill="#fff" opacity=".1"/>
+  <rect x="139" y="88" width="234" height="158" rx="24" fill="#f8fdff"/>
+  <rect x="157" y="106" width="198" height="120" rx="12" fill="#155c98"/>
+  <path d="M184 194h36l24-42 28 28 21-32h31" fill="none" stroke="#7fe4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="184" cy="194" r="7" fill="#fff"/>
+  <circle cx="323" cy="148" r="7" fill="#fff"/>
+  <path d="M256 246v30m-55 12h110l-15-12h-80z" fill="#f8fdff" stroke="#f8fdff" stroke-linejoin="round" stroke-width="10"/>
+  <path d="M74 310c62-18 126-7 182 30 56-37 120-48 182-30v116c-65-18-126-7-182 30-56-37-117-48-182-30z" fill="#f8fdff" stroke="#d7f3ff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M256 340v142M101 341c45-11 91-6 133 15m-133 19c45-11 91-6 133 15m177-49c-45-11-91-6-133 15m133 19c-45-11-91-6-133 15" fill="none" stroke="#75bce5" stroke-width="8" stroke-linecap="round"/>
+</svg>
