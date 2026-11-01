@@ -1,6 +1,7 @@
 {
-  "name": "NetQuest TJKT - SMKN 3 Kendari",
-  "short_name": "NetQuest",
+  "name": "Neko - SMKN 3 Kendari",
+  "short_name": "Neko",
+  "version": "1.4.13",
   "description": "Media pembelajaran interaktif TJKT",
   "start_url": "./",
   "scope": "./",
