@@ -1,0 +1,19 @@
+{
+  "name": "Neko - SMKN 3 Kendari",
+  "short_name": "Neko",
+  "version": "1.4.13",
+  "description": "Media pembelajaran interaktif TJKT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eaf6ff",
+  "theme_color": "#1976bd",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
