@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id" data-palette="default" data-theme="dark" data-gradient="on">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Neko — Interactive Network Learning Lab</title>
+<meta name="description" content="Neko adalah platform pembelajaran jaringan komputer interaktif: simulasi VLAN, subnetting, troubleshooting, story mode, dan virtual network lab.">
+<meta name="theme-color" content="#07101f">
+<meta name="application-name" content="Neko">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="apple-touch-icon" href="./favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" href="./assets/app.css?v=1.4.13">
+</head>
+<body>
+<div id="networkLoader" class="network-loader" role="status" aria-live="polite"><div class="network-loader-content"><img class="network-loader-logo" src="./loading-logo.svg" alt=""><span>Loading...</span></div></div>
+<div id="authGate" aria-label="Halaman login">
+  <div class="auth-layout">
+    <div class="auth-copy">
+      <div class="auth-mark"><b>N</b> NEKO</div>
+      <h1>Belajar TJKT.<br><span class="grad">Main dan berkembang.</span></h1>
+    </div>
+    <div class="auth-card glass">
+      <div class="eyebrow">Akun Neko</div><h2>Masuk atau daftar</h2>
+      <form id="gateForm" data-auth-form>
+        <div class="field"><label for="gateUsername">Username</label><input id="gateUsername" name="username" autocomplete="username" placeholder="Username" maxlength="24" required></div>
+        <div class="field"><label for="gateDisplayName">Nama tampilan</label><input id="gateDisplayName" name="displayName" autocomplete="name" placeholder="Nama yang ditampilkan" maxlength="50"></div>
+        <div class="field"><label for="gatePin">PIN (6–12 angka)</label><input id="gatePin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" minlength="6" maxlength="12" pattern="[0-9]{6,12}" required></div>
+        <div id="gateError" class="form-error" role="status"></div>
+        <button class="btn p" type="submit" data-auth-action="login">Masuk</button>
+        <button class="btn auth-register" type="button" data-auth-action="register">Buat akun</button>
+      </form>
+      <div class="auth-hint">Akun disimpan di perangkat ini. Login tidak memerlukan internet.</div>
+    </div>
+  </div>
+</div>
+<div id="introSequence" aria-hidden="true"><div class="intro-grid"></div><div class="intro-content"><div class="intro-kicker">XI TJKT 2 • MEDIA PEMBELAJARAN INTERAKTIF</div><div class="intro-title"><span>Neko TJKT: Smart Network Lab</span></div><div class="intro-line"></div><div class="intro-by">By. Kelompok 1</div></div></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-antenna" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M7.5 7.5a6 6 0 0 0 0 9M16.5 7.5a6 6 0 0 1 0 9M4.5 4.5a10 10 0 0 0 0 15M19.5 4.5a10 10 0 0 1 0 15"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+<symbol id="i-drive" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M5 13l2-8h10l2 8M7 16.5h.01M11 16.5h.01"/></symbol>
+<symbol id="i-branch" viewBox="0 0 24 24"><circle cx="12" cy="19" r="2"/><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><path d="M12 17v-3c0-3-6-2-6-6M12 14c0-3 6-2 6-6"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></symbol>
+<symbol id="i-laptop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="10" rx="2"/><path d="M2 19h20"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/></symbol>
+<symbol id="i-thumb" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-8c2 0 3 1 3 3v3h5a2 2 0 0 1 2 2l-1 6a2 2 0 0 1-2 2H7"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7"/></symbol>
+<symbol id="i-tjkt" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="7" rx="1.5"/><path d="M10 12h4M12 9.5V12M3 15c3-1 6-.6 9 2 3-2.6 6-3 9-2v5c-3-1-6-.6-9 2-3-2.6-6-3-9-2zM12 14v5M7 15.5h.01M17 15.5h.01"/></symbol>
+<symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" fill="currentColor"/></symbol>
+<symbol id="i-pad" viewBox="0 0 24 24"><path d="M6 8h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.2 2L15 14H9l-1.8 2A3 3 0 0 1 2 14v-2a4 4 0 0 1 4-4zM7 11v3M5.5 12.5h3M16 12h.01M18 13.5h.01"/></symbol>
+<symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+<symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.6.9l-.3 1.9h-2.8l-.3-1.9a8 8 0 0 1-1.6-.9l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.9l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.6-.9l.3-1.9h2.8l.3 1.9a8 8 0 0 1 1.6.9l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1-.1 1.8z" transform="translate(-1 -2)"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-4 0h8"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></symbol>
+<symbol id="i-network" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="6" rx="2"/><rect x="2" y="16" width="8" height="6" rx="2"/><rect x="14" y="16" width="8" height="6" rx="2"/><path d="M12 8v4M6 16v-4h12v4"/></symbol>
+<symbol id="i-spy" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/><circle cx="13" cy="11" r=".8" fill="currentColor" stroke="none"/></symbol>
+</defs></svg>
+<div class="bg"><i></i><i></i><i></i><div class="ocean-layer" aria-hidden="true"><span class="ocean-sun"></span><div class="ocean-wave ocean-wave-back"></div><div class="ocean-wave ocean-wave-front"></div></div><div class="pink-layer" aria-hidden="true"><span class="pink-bow pink-bow-one"><b></b><i></i></span><span class="pink-bow pink-bow-two"><b></b><i></i></span></div><div class="forest-layer" aria-hidden="true"><span class="forest-sun"></span><span class="forest-tree forest-tree-one"></span><span class="forest-tree forest-tree-two"></span><span class="forest-tree forest-tree-three"></span><span class="forest-tree forest-tree-four"></span><span class="forest-hill forest-hill-back"></span><span class="forest-hill forest-hill-front"></span><i class="forest-leaf forest-leaf-one"></i><i class="forest-leaf forest-leaf-two"></i><i class="forest-leaf forest-leaf-three"></i></div></div>
+<span class="float" style="left:6%;top:30%"><svg class="i"><use href="#i-monitor"/></svg></span><span class="float" style="right:5%;top:55%;animation-delay:-2s"><svg class="i"><use href="#i-antenna"/></svg></span><span class="float" style="left:12%;bottom:22%;animation-delay:-4s"><svg class="i"><use href="#i-plug"/></svg></span><span class="float" style="right:18%;top:14%;animation-delay:-3s"><svg class="i"><use href="#i-drive"/></svg></span>
+<div id="cur" aria-hidden="true"></div>
+
+<header class="hud glass">
+  <div class="logo"><b aria-hidden="true"><img src="./favicon.svg" alt=""></b><span class="brand-copy"><strong>Neko</strong></span></div>
+  <div class="xp"><div><span id="rank">Newbie</span><span id="xpt">0 XP</span></div><div class="bar"><span id="xpb"></span></div></div>
+  <div class="hud-actions"><button class="btn hud-action hud-user" id="sessionBtn" data-v="login" aria-label="Login">Login</button><button class="btn hud-action hud-icon" id="soundToggle" type="button" aria-pressed="false" aria-label="Aktifkan efek suara" title="Aktifkan efek suara"><svg class="i"><use href="#i-volume"/></svg></button><button class="btn hud-action hud-icon" id="musicToggle" type="button" aria-pressed="false" aria-label="Putar musik lembut" title="Putar musik lembut"><svg class="i"><use href="#i-music"/></svg></button><button class="th hud-action hud-icon" id="theme" aria-label="Ganti mode gelap atau terang"><svg class="i"><use href="#i-theme"/></svg></button><button class="btn hud-action hud-settings hud-icon" id="openDesign" type="button" aria-label="Pengaturan" title="Pengaturan"><svg class="i" aria-hidden="true"><use href="#i-settings"/></svg></button></div>
+</header>
+<nav class="topnav glass" aria-label="Navigasi utama">
+  <button data-v="home" class="active" data-i18n-en="Home">Beranda</button>
+  <button data-v="about" data-i18n-en="About">Tentang Web</button>
+  <button data-v="materials" data-i18n-en="TJKT Materials">Materi TJKT</button><button data-v="guide" data-i18n-en="Guide">Panduan</button>
+  <button data-v="classroom"><span data-i18n-en="Live Classroom">Kelas Live</span> <span class="nav-beta-badge">BETA</span></button>
+  <button data-v="contact" data-i18n-en="Contact">Kontak</button>
+  <button data-v="login" class="nav-login" id="loginNav" data-i18n-en="Sign in / Login">Masuk / Login</button>
+</nav>
+
+<main>
+<section class="view on" id="home">
+  <div class="glass hero">
+    <div>
+      <div class="eyebrow" data-i18n-en="Interactive Learning • Grade XI TJKT 2">Media Pembelajaran Interaktif • XI TJKT 2</div><h1>Belajar jaringan, <span class="grad">naik level.</span></h1>
+      <p style="margin-top:14px;max-width:46ch" data-i18n-en="Welcome to Neko, an interactive learning app for exploring computer networks through lessons, simulations, practice, and educational games.">Selamat datang di Neko, media belajar interaktif untuk mengenal jaringan komputer melalui materi, simulasi, latihan, dan game edukatif.</p>
+      <div class="row"><button class="btn p" data-v="vlan">Mulai Misi 1</button><button class="btn" data-v="quiz">Langsung ke kuis</button></div>
+    </div>
+    <div class="pc"><div class="mon"><div class="term cur" id="heroTerm"></div></div><div class="rack"><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b><b><i></i><i></i><i></i></b></div></div>
+  </div>
+  <div class="glass premium-banner" style="margin-top:16px;border-radius:28px">
+    <div class="premium-topline"><span class="live-dot"></span> PERSONAL LEARNING CONSOLE</div>
+    <div style="display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:12px">
+      <div><h2 style="font-size:clamp(25px,4vw,38px)">Siap, <span class="grad" id="dashName">Teknisi Jaringan</span>?</h2><p style="margin-top:6px;max-width:55ch">Lanjutkan misi, uji kemampuan, dan bangun skill jaringanmu satu tantangan dalam satu waktu.</p></div>
+      <button class="btn p" data-v="story">Lanjutkan misi <span aria-hidden="true">↗</span></button>
+    </div>
+    <div class="dashboard-strip">
+      <div class="dash-tile"><small>STATUS TEKNISI</small><strong id="dashRank">Newbie</strong><span class="tiny">Progres belajar personal</span></div>
+      <div class="dash-tile"><small>TOTAL XP</small><strong id="dashXP">0</strong><span class="tiny">poin pengalaman</span></div>
+      <div class="dash-tile"><small>MISI SELESAI</small><strong id="dashMissions">0/4</strong><span class="tiny">misi utama</span></div>
+      <div class="dash-tile"><small>STATUS LAB</small><strong style="font-size:19px"><span class="live-dot"></span> Ready</strong><span class="tiny">siap disimulasikan</span></div>
+    </div>
+  </div>
+  <div class="glass card checkin-card" aria-labelledby="checkinTitle">
+    <div class="checkin-heading"><div><div class="section-kicker">Daily reward</div><h3 id="checkinTitle">Check-in 7 hari</h3><p>Klaim XP gratis setiap hari. Jaga streak untuk mendapat hadiah terbesar pada hari ke-7.</p></div><strong id="checkinProgress">0/7 hari</strong></div>
+    <div class="checkin-days" id="checkinDays" aria-label="Progres check-in tujuh hari"></div>
+    <div class="checkin-actions"><button class="btn p" id="claimCheckin" type="button">Klaim XP hari ini</button><span id="checkinStatus" role="status" aria-live="polite"></span></div>
+  </div>
+  <div class="section-head"><div><div class="section-kicker">Your training path</div><h2>Mulai dari mana saja.</h2><p>Pilih pengalaman belajar yang sesuai dengan tantanganmu.</p></div></div>
+  <div class="premium-grid">
+    <button class="premium-feature" data-v="story" style="text-align:left;color:var(--ink)"><div class="feature-icon">◈</div><h3>Story Mode</h3><p>Jadilah teknisi jaringan sekolah. Analisis tiket, temukan akar masalah, dan pulihkan koneksi lewat keputusanmu.</p><div class="feature-foot"><span>4 MISI • XP REWARD</span><span>↗</span></div></button>
+    <button class="premium-feature" data-v="lab" style="text-align:left;color:var(--ink)"><div class="feature-icon">⌘</div><h3>Virtual Network Lab</h3><p>Uji koneksi antarperangkat, kirim paket simulasi, dan pahami alur PC, switch, router, serta server.</p><div class="feature-foot"><span>INTERACTIVE SIMULATION</span><span>↗</span></div></button>
+    <button class="premium-feature" data-v="materials" style="text-align:left;color:var(--ink)"><div class="feature-icon"><svg class="i"><use href="#i-book"/></svg></div><h3>Materi TJKT</h3><p>Pelajari jaringan, Cisco, desain visual, pemrograman web, dan keterampilan praktik dasar.</p><div class="feature-foot"><span>144 MATERI</span><span>↗</span></div></button>
+  </div>
+  <div class="grid g4" style="margin-top:20px">
+    <button class="glass card mis" data-v="vlan" id="m-vlan"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-branch"/></svg></span><h3>Misi 1: VLAN</h3><p>Pisahkan jaringan guru, siswa, dan server.</p></button>
+    <button class="glass card mis" data-v="ip" id="m-ip"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-calc"/></svg></span><h3>Misi 2: Subnet</h3><p>Bagi alamat IP menjadi blok yang pas.</p></button>
+    <button class="glass card mis" data-v="fix" id="m-fix"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-wrench"/></svg></span><h3>Misi 3: Diagnosa</h3><p>Cari akar masalah dari bukti, bukan tebakan.</p></button>
+    <button class="glass card mis" data-v="quiz" id="m-quiz"><span class="done">Selesai</span><span class="ic"><svg class="i"><use href="#i-trophy"/></svg></span><h3>Misi 4: Kuis</h3><p>35 soal cepat untuk menguji pemahaman jaringan.</p></button>
+  </div>
+  <div class="grid" style="margin-top:18px">
+    <button class="glass card mis" data-v="game"><span class="ic"><svg class="i"><use href="#i-pad"/></svg></span><h3>Arena Game</h3><p>Sembilan game interaktif: kabel, kartu port, subnet, OSI, diagnosis, rute paket, port, Wi-Fi, dan Spy.</p></button>
+    <div class="glass card"><h3>Dibuat oleh Kelompok 1</h3><p>Media pembelajaran TJKT oleh anggota berikut.</p><div class="members"><div class="mb"><b>I</b><span>Ivander</span></div><div class="mb"><b>M</b><span>Muh. Hadit Rafanizam</span></div><div class="mb"><b>F</b><span>Muh. Fikron Ainun Najib</span></div><div class="mb"><b>A</b><span>Akhsan Jauhar Santoso</span></div></div></div>
+  </div>
+</section>
+
+
+<section class="view" id="about">
+  <div class="glass hero">
+    <div><div class="eyebrow">Tentang proyek</div><h1>Neko <span class="grad">TJKT</span></h1>
+      <p style="margin-top:14px;max-width:55ch">Neko adalah media pembelajaran interaktif yang dirancang untuk membantu siswa memahami dasar jaringan komputer lewat penjelasan, simulasi, kuis, dan permainan edukatif.</p>
+      <div class="row"><button class="btn p" data-v="materials">Mulai belajar</button><button class="btn" data-v="contact">Kontak Guru Pembimbing</button></div>
+    </div>
+    <div class="glass card"><div class="eyebrow">Fokus pembelajaran</div><div class="kpi grad">Learn • Try • Review</div><p style="margin-top:10px">Pelajari konsep, coba simulasi, lalu evaluasi pemahaman melalui kuis.</p></div>
+  </div>
+  <div class="grid g2">
+    <div class="glass card"><div class="feature-icon">◎</div><h3>Tujuan</h3><p>Membuat pembelajaran TJKT lebih menarik, mudah dipahami, dan mendorong siswa aktif mencoba.</p></div>
+    <div class="glass card"><div class="feature-icon">⌘</div><h3>Fitur Utama</h3><p>Simulasi VLAN, kalkulator subnet, diagnosis gangguan, kuis, arena game, dan sistem XP untuk motivasi belajar.</p></div>
+    <div class="glass card"><div class="feature-icon">▤</div><h3>Sasaran Pengguna</h3><p>Siswa Teknik Jaringan Komputer dan Telekomunikasi yang ingin mengulang konsep dasar jaringan.</p></div>
+    <div class="glass card"><div class="feature-icon">✦</div><h3>Pengembang</h3><p>Kelompok 1 — Ivander, Muh. Hadit Rafanizam, Muh. Fikron Ainun Najib dan Akhsan Jauhar Santoso.</p></div>
+  </div>
+</section>
+
+<section class="view" id="materials">
+  <div class="eyebrow" data-i18n-en="Learning Hub">Pusat belajar</div><h2 data-i18n-en="TJKT Fundamentals">Materi Dasar TJKT</h2><p data-i18n-en="Choose a lesson to read a summary, then continue with a Neko simulation.">Pilih materi untuk membaca ringkasan dan lanjutkan dengan simulasi di Neko.</p>
+  <div class="grid g2">
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">01</div><div><h3>Dasar Jaringan Komputer</h3><p>Jaringan komputer menghubungkan dua atau lebih perangkat agar dapat bertukar data dan berbagi sumber daya.</p><div class="pills"><span class="pill">LAN</span><span class="pill">WAN</span><span class="pill">Perangkat jaringan</span></div></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">02</div><div><h3>IP Address & Subnetting</h3><p>Alamat IP mengidentifikasi perangkat pada jaringan. Subnetting membagi jaringan menjadi beberapa jaringan yang lebih kecil.</p><div class="pills"><span class="pill">IPv4</span><span class="pill">Prefix</span><span class="pill">Subnet mask</span></div><button class="btn" data-v="ip" style="margin-top:14px">Buka simulasi subnet →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">03</div><div><h3>VLAN & Switching</h3><p>VLAN membagi satu jaringan switch menjadi beberapa broadcast domain secara logis. Komunikasi lintas VLAN membutuhkan routing Layer 3.</p><div class="pills"><span class="pill">VLAN 10</span><span class="pill">VLAN 20</span><span class="pill">VLAN 30</span></div><button class="btn" data-v="vlan" style="margin-top:14px">Coba simulasi VLAN →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">04</div><div><h3>Troubleshooting</h3><p>Periksa gejala, kumpulkan bukti, uji dugaan, lakukan perbaikan, lalu verifikasi hasilnya.</p><div class="pills"><span class="pill">Kabel</span><span class="pill">IP</span><span class="pill">Ping</span><span class="pill">DNS</span></div><button class="btn" data-v="fix" style="margin-top:14px">Latihan diagnosis →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">05</div><div><h3>Port & Layanan Jaringan</h3><p>Port membantu sistem mengarahkan komunikasi ke layanan yang sesuai. Contoh: HTTP 80, HTTPS 443, SSH 22, dan DNS 53.</p><button class="btn" data-v="game" style="margin-top:14px">Latihan kartu port →</button></div></div></article>
+    <article class="glass card"><div class="lesson-row"><div class="lesson-num">06</div><div><h3>Evaluasi Pemahaman</h3><p>Uji pemahaman dasar jaringan melalui 35 soal pilihan ganda dan dapatkan XP.</p><button class="btn p" data-v="quiz" style="margin-top:14px">Mulai kuis →</button></div></div></article>
+  </div>
+</section>
+
+<section class="view" id="contact">
+  <div class="eyebrow" data-i18n-en="Project information">Informasi proyek</div><h2 data-i18n-en="Contact & Information">Kontak & Informasi</h2><p data-i18n-en="Meet the creators and share feedback about this learning app.">Halaman informasi untuk mengenal pembuat dan menyampaikan masukan terkait media pembelajaran.</p>
+  <div class="glass card app-share-card"><div><h3 data-i18n-en="Share Neko">Bagikan Neko</h3><p data-i18n-en="Share the app link with your classmates. Sharing an APK requires an APK file already available on this device.">Bagikan tautan aplikasi kepada teman. Berbagi file APK memerlukan file APK yang sudah tersedia di perangkat.</p></div><div><button class="btn p" id="shareApp" type="button" data-i18n-en="Share app">Bagikan aplikasi</button><p id="shareAppStatus" class="tiny" role="status" aria-live="polite"></p></div></div>
+  <div id="teacherContactCard"></div>
+  <div class="grid g2">
+    <div class="glass card"><div class="feature-icon">✉</div><h3>Masukan untuk proyek</h3><p>Jika menemukan materi yang perlu diperbaiki, catat topik dan bagian yang dimaksud lalu sampaikan kepada kelompok atau guru pembimbing secara langsung.</p></div>
+    <div class="glass card"><div class="feature-icon">⌂</div><h3>Identitas Proyek</h3><p><b>Nama:</b> Neko</p><p><b>Developer:</b> Ivander</p><p><b>Kelas:</b> XI TJKT 2</p><p><b>Kelompok:</b> Kelompok 1</p></div>
+  </div>
+  <div class="glass card" style="margin-top:18px"><h3>Anggota Kelompok 1</h3><div class="members"><div class="mb"><b>I</b><span>Ivander</span></div><div class="mb"><b>M</b><span>Muh. Hadit RafaNizam</span></div><div class="mb"><b>F</b><span>Muh. Fikron Ainun Najib</span></div><div class="mb"><b>A</b><span>Akhsan Jauhar Santoso</span></div></div></div>
+</section>
+
+<section class="view" id="login">
+  <div class="login-wrap glass card">
+    <div class="login-brand">Neko</div><h2 style="margin-top:8px">Masuk atau daftar</h2>
+    <form id="loginForm" data-auth-form>
+      <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" name="username" autocomplete="username" placeholder="Username" maxlength="24" required></div>
+      <div class="field"><label for="loginDisplayName">Nama tampilan</label><input id="loginDisplayName" name="displayName" autocomplete="name" placeholder="Nama yang ditampilkan" maxlength="50"></div>
+      <div class="field"><label for="loginPin">PIN (6–12 angka)</label><input id="loginPin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" minlength="6" maxlength="12" pattern="[0-9]{6,12}" required></div>
+      <div class="row"><button class="btn p" type="submit" data-auth-action="login">Masuk</button><button class="btn auth-register" type="button" data-auth-action="register">Buat akun</button><button class="btn" type="button" data-v="home">Kembali</button></div>
+      <div id="loginError" class="form-error" role="status"></div>
+    </form>
+    <div class="login-note">Username harus unik. PIN berupa 6–12 angka.</div>
+  </div>
+</section>
+
+<section class="view" id="game">
+  <h2 data-i18n-en="Game Arena">Arena Game</h2><p data-i18n-en="Interactive challenges for network technicians. Play, earn XP, and test your skills!">Tantangan interaktif untuk teknisi jaringan. Mainkan, kumpulkan XP, dan buktikan kemampuanmu!</p>
+  <div class="gtabs"><button class="btn p" data-g="g-cable"><svg class="i"><use href="#i-plug"/></svg> Susun Kabel</button><button class="btn" data-g="g-mem"><svg class="i"><use href="#i-drive"/></svg> Kartu Port</button><button class="btn" data-g="g-sp"><svg class="i"><use href="#i-calc"/></svg> Subnet Sprint</button><button class="btn" data-g="g-osi"><svg class="i"><use href="#i-branch"/></svg> OSI Challenge</button><button class="btn" data-g="g-detect"><svg class="i"><use href="#i-wrench"/></svg> Detektif Jaringan</button><button class="btn" data-g="g-route"><svg class="i"><use href="#i-server"/></svg> Rute Paket</button><button class="btn" data-g="g-spy">Who Is the Spy?</button></div>
+  <div class="gp on" id="g-cable"><div class="glass card"><div class="gh"><h3>Susun kabel UTP T568B</h3><span class="chip" id="ctime">0.0 s</span></div><p>Ketuk kabel sesuai urutan pin 1 sampai 8. Waktu mulai berjalan saat ketukan pertama.</p><div class="slots" id="cslots"></div><div class="pool" id="cpool"></div><div class="msg" id="cmsg"></div><div class="row"><button class="btn" id="cre">Acak ulang</button></div></div></div>
+  <div class="gp" id="g-mem"><div class="glass card"><div class="gh"><h3>Kartu pasangan port</h3><span class="chip" id="mmv">0 langkah</span></div><p>Balik dua kartu untuk mencocokkan nomor port dengan nama layanannya.</p><div class="mgrid" id="mgrid"></div><div class="msg" id="mmsg"></div><div class="row"><button class="btn" id="mre">Kocok ulang</button></div></div></div>
+  <div class="gp" id="g-sp"><div class="glass card"><div class="gh"><h3>Subnet Sprint</h3><span class="chip">Skor <b id="ssc">0</b></span></div><p>Jawab sebanyak mungkin dalam 30 detik. Capai 5 jawaban benar untuk mendapat XP.</p><div class="bar" style="margin-top:14px"><span id="sbar" style="width:100%"></span></div><div id="sq"><div class="msg">Tekan Mulai untuk memulai ronde.</div></div><div class="row"><button class="btn p" id="sgo">Mulai</button></div></div></div>
+  <div class="gp" id="g-osi"><div class="glass card"><div class="gh"><h3>OSI Challenge</h3><span class="chip">Soal <b id="osinum">1</b>/10</span></div><p>Pilih layer OSI yang paling tepat untuk setiap situasi. Jawaban benar menambah skor.</p><div class="bar"><span id="osibar" style="width:0%"></span></div><div id="osibox"></div><div class="row"><button class="btn" id="osirestart">Ulangi tantangan</button></div></div></div>
+  <div class="gp" id="g-detect"><div class="glass card"><div class="gh"><h3>Detektif Jaringan</h3><span class="chip">Kasus <b id="detnum">1</b>/9</span></div><p>Baca gejala, lalu pilih pemeriksaan atau solusi yang paling masuk akal.</p><div id="detbox"></div><div class="row"><button class="btn" id="detrestart">Kasus baru dari awal</button></div></div></div>
+  <div class="gp" id="g-route"><div class="glass card"><div class="gh"><h3>Rute Paket</h3><span class="chip">Langkah <b id="rstep">0</b>/3</span></div><p>Bantu paket dari PC menuju server. Pilih perangkat jaringan secara berurutan.</p><div class="grid g3" style="margin:18px 0"><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-monitor"/></svg></div><b>PC Siswa</b></div><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-branch"/></svg></div><b>Switch</b></div><div class="glass card" style="text-align:center"><div class="feature-icon"><svg class="i"><use href="#i-server"/></svg></div><b>Server</b></div></div><div id="routebox"></div><div class="row"><button class="btn" id="routerestart">Reset rute</button></div></div></div>
+  <div class="gp" id="g-spy"><div class="glass card spy-game"><div class="gh"><h3><svg class="i spy-heading-icon" aria-hidden="true"><use href="#i-spy"/></svg> Who Is the Spy?</h3><span class="chip" data-i18n-en="3–30 players • 1 device">3–30 pemain • 1 perangkat</span></div><p data-i18n-en="Use one device to privately share each secret role. Once everyone has seen their role, put the device away while giving clues and discussing.">Satu perangkat untuk membagikan peran rahasia secara bergantian. Setelah semua melihat peran, simpan perangkat saat memberi clue dan berdiskusi.</p><div id="spyHost" aria-live="polite"></div></div></div>
+</section>
+
+<section class="view" id="vlan">
+  <div class="section-kicker">LAB INTERAKTIF • SIMULASI LOKAL</div><h2>Misi 1: Atur VLAN</h2><p>Pilih dua perangkat, atur VLAN, lalu amati apakah paket dapat melewati switch atau perlu routing Layer 3.</p>
+  <div class="grid g2 vlan-grid">
+    <div class="glass card vlan-simulation">
+      <div class="vlan-card-head"><div><span class="section-kicker">TOPOLOGI</span><h3>Uji koneksi perangkat</h3></div><span class="chip">4 perangkat</span></div>
+      <div class="stage" id="stage"><div class="hosts" id="hosts"></div><div class="sw" id="sw"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pkt" id="pkt"></div></div>
+      <div class="vlan-hint"><b>Urutan</b><span>1. Pilih sumber · 2. Pilih tujuan · 3. Kirim paket</span></div>
+      <div class="row vlan-router" style="align-items:center"><span><b>Router Layer 3</b><small>Routing antar-VLAN</small></span><button class="sw2" id="l3" aria-label="Router Layer 3"></button></div>
+      <div class="row"><button class="btn p vlan-send" id="send">Kirim paket</button></div>
+      <div id="vmsg" class="msg">Pilih perangkat sumber, lalu perangkat tujuan.</div>
+    </div>
+    <div class="glass card vlan-guide"><span class="section-kicker">PANDUAN CEPAT</span><h3>Kenali jaringan logis</h3><p>VLAN memisahkan satu switch menjadi beberapa broadcast domain. Perangkat dalam VLAN berbeda perlu router Layer 3 agar dapat bertukar paket.</p><div class="pills"><span class="tag v10">VLAN 10 · Guru</span><span class="tag v20">VLAN 20 · Siswa</span><span class="tag v30">VLAN 30 · Server</span></div><div class="vlan-challenge"><b>Tantangan</b><span>Hubungkan PC Siswa ke Server. Coba dulu tanpa router, lalu aktifkan Layer 3 dan kirim kembali.</span></div></div>
+  </div>
+</section>
+
+<section class="view" id="ip">
+  <h2>Misi 2: Bagi subnet</h2><p>Geser prefix dan lihat bit jaringan (terang) dan bit host (redup) berubah.</p>
+  <div class="grid g2">
+    <div class="glass card">
+      <div class="field"><label for="ipin">Alamat IPv4</label><input id="ipin" value="192.168.10.25"></div>
+      <div class="field"><label for="pre">Prefix: <b id="prel">/24</b></label><input type="range" id="pre" min="8" max="30" value="24"></div>
+      <div class="bits" id="bits"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="glass card"><h3>Tantangan kapasitas</h3><p>Lab TJKT butuh 50 host dalam satu subnet. Prefix terbesar (subnet terkecil) yang masih cukup adalah?</p>
+      <div class="field"><label for="ans">Jawabanmu (angka prefix)</label><input id="ans" type="number" placeholder="contoh: 24"></div>
+      <div class="row"><button class="btn p" id="chk">Periksa</button></div><div id="imsg"></div>
+      <p style="margin-top:14px;font-size:13px">Rumus: host usable = 2<sup>(32 − prefix)</sup> − 2. Dua alamat dipakai untuk network dan broadcast.</p></div>
+  </div>
+</section>
+
+<section class="view" id="fix">
+  <h2>Misi 3: Diagnosa gangguan</h2><p>Jalankan pemeriksaan untuk mengumpulkan bukti, lalu pilih akar masalah.</p>
+  <div class="grid g2">
+    <div class="glass card"><div class="field"><label for="tk">Tiket gangguan</label><select id="tk"></select></div><div class="msg" id="brief"></div><h3 style="margin-top:16px">Pilih akar masalah</h3><div class="opts" id="dx"></div><div id="dmsg"></div></div>
+    <div class="glass card"><h3>Alat uji</h3><div class="pills"><button class="btn" data-p="0">Cek kabel</button><button class="btn" data-p="1">Cek IP</button><button class="btn" data-p="2">Ping</button><button class="btn" data-p="3">Cek DNS</button></div><div class="term big cur" id="out">$ pilih alat uji...</div></div>
+  </div>
+</section>
+
+<section class="view" id="quiz">
+  <h2>Misi 4: Kuis kilat</h2><p>Satu soal per layar. Jawaban benar berturut-turut memberi bonus.</p>
+  <div class="glass card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;font-size:13px"><span id="qn">Soal 1 dari 35</span><span id="qs">Streak 0</span></div><div class="bar"><span id="qb" style="width:0"></span></div><div id="qbox"></div></div>
+</section>
+
+<section class="view" id="story">
+  <div class="section-kicker">Career simulation • Kelompok 1</div><h2>Story Mode: Teknisi Jaringan</h2><p>Empat insiden jaringan di lingkungan sekolah. Baca gejala, pilih langkah terbaik, dan pelajari alasan teknis di balik keputusanmu.</p>
+  <div class="story-layout">
+    <div class="mission-map" id="missionMap">
+      <button class="mission-node active" data-mission="0"><span class="node-num">01</span><span><b>Lab kehilangan koneksi</b><small>Physical layer • Kabel & link</small></span></button>
+      <button class="mission-node" data-mission="1"><span class="node-num">02</span><span><b>IP bertabrakan</b><small>Addressing • DHCP</small></span></button>
+      <button class="mission-node" data-mission="2"><span class="node-num">03</span><span><b>Internet tanpa nama</b><small>DNS • Name resolution</small></span></button>
+      <button class="mission-node" data-mission="3"><span class="node-num">04</span><span><b>Jaringan beda subnet</b><small>Gateway • Routing</small></span></button>
+    </div>
+    <div class="glass card mission-play" id="missionPanel" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="view" id="lab">
+  <div class="section-kicker">Interactive topology • Simulation only</div><h2>Virtual Network Lab</h2><p>Pilih perangkat sumber dan tujuan, lalu jalankan uji paket. Ini simulasi pembelajaran, bukan akses ke jaringan sekolah yang sebenarnya.</p>
+  <div class="grid g2" style="align-items:start">
+    <div class="glass card"><div class="gh"><h3>Topologi jaringan</h3><span class="chip"><span class="live-dot"></span> SIMULATOR</span></div>
+      <div class="lab-topology" id="labTopology">
+            <svg class="lab-lines" viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true"><path d="M95 75 L300 150 L95 225 M300 150 L505 75 M300 150 L505 225" stroke="var(--c1)" stroke-width="2" stroke-dasharray="7 7" fill="none" opacity=".6"/><circle cx="300" cy="150" r="45" fill="var(--c1)" opacity=".08"/></svg>
+        <button class="lab-node" data-node="pc1"><span class="lab-icon">▣</span><b>PC Siswa</b><small>192.168.10.10</small></button>
+        <button class="lab-node" data-node="pc2"><span class="lab-icon">▣</span><b>PC Guru</b><small>192.168.10.20</small></button>
+        <button class="lab-node active" data-node="switch"><span class="lab-icon">⌘</span><b>Switch</b><small>Layer 2</small></button>
+        <button class="lab-node" data-node="router"><span class="lab-icon">◇</span><b>Router</b><small>Gateway .1</small></button>
+        <button class="lab-node" data-node="server"><span class="lab-icon">▤</span><b>Server</b><small>192.168.20.10</small></button>
+      </div>
+      <div class="row"><button class="btn" id="labSource">Pilih sumber</button><button class="btn" id="labTarget">Pilih tujuan</button><button class="btn p" id="labSend">Jalankan ping →</button></div>
+      <div class="lab-status" id="labStatus" role="status"><span class="live-dot"></span><span>Pilih perangkat sumber dan tujuan untuk memulai uji koneksi.</span></div>
+    </div>
+    <div class="glass card"><div class="section-kicker">Packet inspector</div><h3>Hasil pemeriksaan</h3><div class="term big" id="labTerminal">NEKO NETWORK CONSOLE
+Status: idle
+Menunggu perintah ping...</div><div class="stats"><div class="stat"><small>Sumber</small><b id="labSourceValue">Belum dipilih</b></div><div class="stat"><small>Tujuan</small><b id="labTargetValue">Belum dipilih</b></div><div class="stat"><small>Hop simulasi</small><b id="labHops">—</b></div><div class="stat"><small>Latensi simulasi</small><b id="labLatency">—</b></div></div><div class="msg" style="margin-top:14px"><b>Catatan:</b> Hasil dibuat oleh aturan simulasi lokal untuk tujuan belajar. Tidak mengirim paket sungguhan.</div></div>
+  </div>
+</section>
+
+<section class="view" id="guide">
+  <div class="eyebrow">Pusat bantuan Neko</div>
+  <h2>Panduan Game & Aplikasi</h2>
+  <p>Petunjuk penggunaan untuk siswa, guru, dan angkatan berikutnya.</p>
+  <div class="grid g2">
+    <article class="glass card">
+      <div class="feature-icon"><svg class="i"><use href="#i-pad"/></svg></div>
+      <h3>Panduan Arena Game</h3>
+      <ol class="guide-list">
+        <li>Buka menu <b>Arena Game</b>, lalu pilih salah satu permainan.</li>
+        <li><b>Susun Kabel:</b> pilih warna kabel sesuai urutan standar T568B dari pin 1 sampai 8.</li>
+        <li><b>Kartu Port:</b> buka dua kartu dan cocokkan nomor port dengan layanan jaringan.</li>
+        <li><b>Subnet Sprint:</b> tekan Mulai, lalu pilih jumlah host yang benar sebelum waktu habis.</li>
+        <li><b>OSI Challenge:</b> tentukan layer OSI yang sesuai dengan situasi yang ditampilkan.</li>
+        <li><b>Detektif Jaringan:</b> baca gejala dan pilih langkah diagnosis yang paling masuk akal.</li>
+        <li><b>Rute Paket:</b> jawab pertanyaan untuk membantu paket melewati perangkat jaringan.</li>
+      </ol>
+      <p class="guide-tip">Tips: baca penjelasan setelah menjawab agar memahami alasan teknisnya, bukan hanya mengejar XP.</p>
+    </article>
+    <article class="glass card">
+      <div class="feature-icon"><svg class="i"><use href="#i-book"/></svg></div>
+      <h3>Panduan Penggunaan APK / Web App</h3>
+      <ol class="guide-list">
+        <li>Buka Neko melalui browser, lalu masukkan nama pengguna pada halaman awal.</li>
+        <li>Gunakan navigasi atas atau dock bawah untuk berpindah halaman.</li>
+        <li>Pilih <b>Materi TJKT</b> untuk membaca topik, atau gunakan pencarian materi.</li>
+        <li>Atur tema, mode gelap/terang, dan gradient dari menu <b>Tampilan</b>.</li>
+        <li>Progres dan XP pada versi satu-file ini disimpan di browser/perangkat yang digunakan.</li>
+        <li>Untuk memasang sebagai aplikasi, buka menu browser dan pilih “Tambahkan ke layar utama” jika browser mendukungnya.</li>
+      </ol>
+      <p class="guide-tip">Catatan: file HTML offline tidak otomatis menjadi APK Android. Untuk APK native diperlukan proses pembungkusan/build terpisah.</p>
+    </article>
+  </div>
+  <div class="glass card" style="margin-top:18px">
+    <h3>Tips belajar TJKT</h3>
+    <p>Mulai dari konsep dasar perangkat dan media transmisi, lanjut ke IP addressing, switching, routing, layanan jaringan, sistem operasi, keamanan, lalu praktik troubleshooting. Selalu lakukan praktik hanya pada perangkat atau lab yang memang diizinkan.</p>
+  </div>
+</section>
+
+
+<section class="view" id="missions">
+  <div class="eyebrow">TJKT Skill Mastery • learning path</div>
+  <h2>10 Misi Neko Academy</h2>
+  <p>Selesaikan materi, tantangan teori, dan aktivitas praktik. Progres tersimpan pada browser/perangkat ini.</p>
+  <div class="glass card nq-progress-card"><div class="nq-progress-head"><b>Perjalanan belajarmu</b><strong id="nqMissionCount">0/10</strong></div><div class="bar"><span id="nqMissionBar" style="width:0%"></span></div><p class="tiny" id="nqMissionHint">Mulai dari misi pertama.</p></div>
+  <div class="nq-mission-grid" id="nqMissionList"></div>
+</section>
+
+<section class="view" id="missionDetail">
+  <div class="mission-detail-top"><button class="btn" data-v="missions">← Semua misi</button><span class="pill" id="missionBreadcrumb">NEKO ACADEMY</span></div>
+  <article class="glass card nq-mission-work" id="nqMissionWork"><div class="feature-icon"><svg class="i"><use href="#i-book"/></svg></div><h3>Pilih misi untuk memulai</h3><p>Setiap misi berisi ringkasan, aktivitas, dan kuis yang perlu diselesaikan.</p></article>
+</section>
+
+<section class="view" id="classroom">
+  <div class="eyebrow">Belajar bersama • room sementara tanpa database</div>
+  <h2>Kelas Live</h2>
+  <p>Guru membuat room dan membagikan ID kepada siswa. Jawaban, skor, dan reaksi disinkronkan melalui server selama sesi berlangsung.</p>
+  <div class="glass card nq-live-settings">
+    <label for="nqLiveServer">Alamat server live</label>
+    <input id="nqLiveServer" type="url" autocomplete="url" placeholder="Otomatis dari alamat situs atau isi URL server">
+    <p class="tiny">Room memerlukan server Neko yang sedang aktif dan dapat dijangkau semua peserta. Room hanya tersimpan di memori server; restart server akan menghapus sesi.</p>
+    <div id="nqLiveStatus" class="tiny" role="status" aria-live="polite">Belum tersambung.</div>
+  </div>
+  <div class="nq-class-grid">
+    <article class="glass card">
+      <span class="nq-host-icon" aria-hidden="true">🎓</span>
+      <h3>Buat room sebagai guru</h3>
+      <label for="nqLiveRoomTitle">Nama kelas / room</label>
+      <input id="nqLiveRoomTitle" maxlength="60" placeholder="Contoh: TJKT XI — Kuis jaringan">
+      <button class="btn p" id="nqLiveCreate" type="button">Buat room</button>
+    </article>
+    <article class="glass card">
+      <span class="nq-host-icon" aria-hidden="true">🐾</span>
+      <h3>Gabung sebagai siswa</h3>
+      <label for="nqLiveRoomId">ID room</label>
+      <input id="nqLiveRoomId" inputmode="numeric" maxlength="6" placeholder="6 digit ID room">
+      <label for="nqLiveName">Nama tampilan</label>
+      <input id="nqLiveName" maxlength="24" placeholder="Nama panggilan">
+      <div class="nq-avatar-fields">
+        <div class="nq-avatar-preview-wrap"><div id="nqAvatarPreview" class="nq-avatar-preview" role="img" aria-label="Pratinjau karakter yang dipilih" aria-live="polite"></div></div>
+        <div id="nqAvatarCustomizer" class="nq-avatar-customizer" aria-label="Sesuaikan avatar sebelum masuk room"></div>
+      </div>
+      <button class="btn p" id="nqLiveJoin" type="button">Gabung ke room</button>
+    </article>
+  </div>
+  <article class="glass card nq-live-room" id="nqLiveRoom" hidden>
+    <div class="nq-live-room-head">
+      <div><span class="section-kicker" id="nqLiveRole">ROOM</span><h3 id="nqLiveTitle">Kelas Live</h3><p>ID room <strong id="nqLiveCode"></strong></p></div>
+      <button class="btn" id="nqLiveLeave" type="button">Keluar</button>
+    </div>
+    <div class="nq-live-columns" id="nqLiveColumns">
+      <section class="nq-live-roster"><h4>Peringkat kelas <span class="nq-live-dot" id="nqLivePlayerCount">0 online</span></h4><div class="nq-live-players" id="nqLivePlayers"></div></section>
+      <section class="nq-live-stage" id="nqLiveStage" aria-live="polite"><div class="nq-stage-empty"><h3>Menunggu sesi</h3><p>Guru dapat memulai kuis setelah peserta bergabung.</p></div></section>
+    </div>
+    <div class="nq-live-actions">
+      <div class="nq-live-reactions" id="nqLiveReactions" aria-live="polite"></div>
+      <div class="nq-emoji-row" aria-label="Kirim reaksi"><button type="button" data-live-emoji="👏" aria-label="Tepuk tangan">👏</button><button type="button" data-live-emoji="🎉" aria-label="Merayakan">🎉</button><button type="button" data-live-emoji="🤔" aria-label="Berpikir">🤔</button><button type="button" data-live-emoji="❤️" aria-label="Suka">❤️</button><button type="button" data-live-emoji="⚡" aria-label="Semangat">⚡</button></div>
+      <button class="btn p" id="nqLiveStart" type="button" hidden>Mulai kuis</button>
+      <button class="btn p" id="nqLiveNext" type="button" hidden>Soal berikutnya</button>
+    </div>
+  </article>
+</section>
+
+<section class="view" id="certificates">
+  <div class="eyebrow">Neko Academy • TJKT Skill Mastery</div><h2>Pusat Sertifikat</h2>
+  <p>Masukkan nama yang ingin dicetak pada sertifikat. Gunakan nama asli untuk kebutuhan sekolah, atau nama pilihan jika hanya untuk koleksi pribadi.</p>
+  <div class="glass card nq-certificate-form">
+    <label for="nqCertName">Nama peserta pada sertifikat</label><input id="nqCertName" maxlength="70" placeholder="Tulis nama lengkap / nama pilihan">
+    <div class="nq-cert-status" id="nqCertStatus">Selesaikan 10 misi untuk membuka sertifikat penyelesaian.</div>
+  </div>
+  <div class="nq-cert-grid">
+    <article class="glass card nq-cert-card"><span class="pill">JALUR 1</span><h3>Certificate of Completion</h3><p>Sertifikat penyelesaian 10 misi pembelajaran Neko TJKT.</p><div class="nq-cert-preview" id="nqCompletionPreview"><div class="nq-cert-brand">NEKO ACADEMY</div><div class="nq-cert-sub">TJKT SKILL MASTERY</div><div class="nq-cert-title">CERTIFICATE<br>OF COMPLETION</div><div class="nq-cert-line">Diberikan kepada</div><div class="nq-cert-person" data-cert-name>Nama Peserta</div><div class="nq-cert-line">Atas penyelesaian 10 misi pembelajaran TJKT</div><div class="nq-cert-seal">N</div><div class="nq-cert-foot">NEKO ACADEMY • NON-FORMAL LEARNING AWARD</div></div><div class="nq-cert-actions"><button class="btn p" id="nqDownloadCompletion" disabled>Unduh PNG</button><button class="btn" data-print="completion" disabled>Cetak / Simpan PDF</button></div><small id="nqCompletionLock">Belum terbuka — selesaikan 10 misi.</small></article>
+    <article class="glass card nq-cert-card"><span class="pill">JALUR 2</span><h3>Certificate of Skill Achievement</h3><p>Penghargaan hasil evaluasi teori dan proyek praktik dengan standar lebih tinggi.</p><div class="nq-cert-preview nq-cert-skill" id="nqSkillPreview"><div class="nq-cert-brand">NEKO ACADEMY</div><div class="nq-cert-sub">TJKT SKILL MASTERY</div><div class="nq-cert-title">CERTIFICATE OF<br>SKILL ACHIEVEMENT</div><div class="nq-cert-line">Diberikan kepada</div><div class="nq-cert-person" data-cert-name>Nama Peserta</div><div class="nq-cert-line">Atas pencapaian evaluasi teori dan proyek keterampilan TJKT</div><div class="nq-cert-seal">★</div><div class="nq-cert-foot">NEKO ACADEMY • NON-FORMAL LEARNING AWARD</div></div><div class="nq-cert-actions"><button class="btn p" id="nqDownloadSkill" disabled>Unduh PNG</button><button class="btn" data-print="skill" disabled>Cetak / Simpan PDF</button></div><small id="nqSkillLock">Selesaikan misi, ujian, dan rubrik proyek.</small></article>
+  </div>
+  <div class="glass card nq-skill-eval" style="margin-top:18px"><h3>Evaluasi proyek akhir untuk jalur keterampilan</h3><p>Rancang jaringan kecil untuk laboratorium sekolah. Isi ringkasan dan centang bukti yang sudah kamu siapkan. Penilaian ini tersimpan lokal; mintalah guru memeriksa hasil praktik. Konfirmasi guru dicatat secara lokal dan bukan autentikasi aman karena aplikasi ini tidak memakai server.</p><label for="nqProjectText">Ringkasan proyek (perangkat, topologi, IP, pengujian)</label><textarea id="nqProjectText" rows="4" maxlength="1600" placeholder="Jelaskan rancangan jaringanmu..."></textarea><div class="nq-rubric" id="nqRubric"><label><input type="checkbox" value="diagram"> Diagram topologi dibuat dan diberi label.</label><label><input type="checkbox" value="ip"> IP address, subnet mask, dan gateway dicatat.</label><label><input type="checkbox" value="devices"> Perangkat dan alasan pemilihannya dijelaskan.</label><label><input type="checkbox" value="test"> Pengujian konektivitas dan hasilnya dicatat.</label><label><input type="checkbox" value="safety"> Aspek keamanan dan keselamatan kerja dijelaskan.</label></div><button class="btn p" id="nqSaveProject">Simpan bukti proyek</button> <button class="btn" id="nqTeacherApprove" disabled>Konfirmasi verifikasi guru</button><div id="nqProjectStatus" class="tiny" role="status"></div></div>
+  <div class="nq-note">Sertifikat Neko adalah penghargaan pembelajaran non-formal yang diterbitkan oleh proyek Neko Academy. Sertifikat ini bukan sertifikasi kompetensi resmi BNSP, Kemendikbud, atau lembaga sertifikasi profesi.</div>
+</section>
+
+</main>
+
+<nav class="dock glass" id="dock">
+  <button class="on" data-v="home"><span><svg class="i"><use href="#i-home"/></svg></span>Beranda</button><button data-v="vlan"><span><svg class="i"><use href="#i-branch"/></svg></span>VLAN</button><button data-v="ip"><span><svg class="i"><use href="#i-calc"/></svg></span>Subnet</button><button data-v="fix"><span><svg class="i"><use href="#i-wrench"/></svg></span>Diagnosa</button><button data-v="quiz"><span><svg class="i"><use href="#i-trophy"/></svg></span>Kuis</button><button data-v="story"><span>◈</span>Misi</button><button data-v="lab"><span>⌘</span>Lab</button><button data-v="game"><span><svg class="i"><use href="#i-pad"/></svg></span>Game</button><button data-v="missions"><span><svg class="i"><use href="#i-book"/></svg></span>Misi</button><button data-v="certificates"><span><svg class="i"><use href="#i-trophy"/></svg></span>Badge</button>
+</nav>
+<footer>Neko TJKT • Media Pembelajaran Interaktif XI TJKT 2<br>Guru Pembimbing: Pak Andy Musly • Kelompok 1 • Developer: Ivander • Learn • Simulate • Troubleshoot</footer>
+
+
+
+<!-- Neko enhancement panel -->
+<div id="designPanel" class="design-panel glass" aria-label="Pengaturan tampilan" aria-hidden="true">
+  <div class="design-head"><div><div class="eyebrow">Personalize workspace</div><h3>Pengaturan Tampilan</h3></div><button class="th" id="closeDesign" aria-label="Tutup pengaturan">×</button></div>
+  <label>Tema warna</label>
+  <select id="palettePick" hidden>
+    <option value="default">Default — Network</option>
+    <option value="pink">Pink Cute — Candy</option>
+    <option value="ocean">Biru Putih — Ocean & Sky</option>
+    <option value="red">Merah — Computer Lab</option>
+    <option value="forest">Hijau Sejuk — Hutan</option>
+  </select>
+  <div class="theme-picker" id="themePicker" role="group" aria-label="Pilih tema warna">
+    <button class="theme-card" type="button" data-theme-choice="default" aria-pressed="false"><span class="theme-preview theme-preview-default"><i></i><i></i><i></i></span><span>Network</span></button>
+    <button class="theme-card" type="button" data-theme-choice="pink" aria-pressed="false"><span class="theme-preview theme-preview-pink"><i></i><i></i><i></i></span><span>Pink</span></button>
+    <button class="theme-card" type="button" data-theme-choice="ocean" aria-pressed="false"><span class="theme-preview theme-preview-ocean"><i></i><i></i><i></i></span><span>Ocean</span></button>
+    <button class="theme-card" type="button" data-theme-choice="red" aria-pressed="false"><span class="theme-preview theme-preview-red"><i></i><i></i><i></i></span><span>Merah</span></button>
+    <button class="theme-card" type="button" data-theme-choice="forest" aria-pressed="false"><span class="theme-preview theme-preview-forest"><i></i><i></i><i></i></span><span>Hutan</span></button>
+  </div>
+  <label>Mode tampilan</label>
+  <select id="modePick" hidden><option value="dark">Gelap</option><option value="light">Terang</option></select>
+  <div class="mode-picker" id="modePicker" role="group" aria-label="Pilih mode tampilan">
+    <button class="mode-card" type="button" data-mode-choice="dark" aria-pressed="false"><span class="mode-preview mode-preview-dark"><i></i><i></i></span><span>Gelap</span></button>
+    <button class="mode-card" type="button" data-mode-choice="light" aria-pressed="false"><span class="mode-preview mode-preview-light"><i></i><i></i></span><span>Terang</span></button>
+  </div>
+    <div class="design-toggle"><span>Gradient</span><button id="gradientToggle" class="sw2 on" type="button" aria-pressed="true"></button><small id="gradientState">On</small></div>
+    <div class="settings-section"><h4 data-i18n-en="Cat companion">Teman kucing</h4>
+      <div class="setting-row"><span><svg class="i"><use href="#i-tjkt"/></svg> Maskot kucing</span><button class="sw2 on" id="capyEnabledToggle" type="button" aria-pressed="true" aria-label="Matikan maskot kucing"></button></div>
+      <label data-i18n-en="Miki / Miko style">Gaya Miki / Miko</label>
+      <div class="miko-style-picker" id="catGenderPick" role="group" aria-label="Pilih gaya Miko">
+        <button class="miko-style-card" type="button" data-miko-style="girl" aria-pressed="false">
+          <svg viewBox="0 0 120 108" aria-hidden="true"><ellipse cx="60" cy="99" rx="39" ry="6" fill="#192b3a" opacity=".14"/><path d="M27 92q3-27 33-27t33 27v9H27z" fill="#56afc3"/><path d="M35 44 31 12q-1-6 6-2l18 18q11-5 22 0l18-18q7-4 6 2l-4 32q8 11 4 24-5 16-41 16T33 68q-4-13 2-24" fill="#f3b77f" stroke="#ba8055" stroke-width="2"/><path d="m43 52 11 2m12 0 11-2" stroke="#76513e" stroke-width="3" stroke-linecap="round"/><ellipse cx="60" cy="67" rx="15" ry="9" fill="#fff2df"/><path d="m57 66 3-3 3 3-3 3z" fill="#c86c78"/><path d="M56 70q4 4 8 0" fill="none" stroke="#795047" stroke-width="1.5"/><path d="M59 20Q42 2 38 14q-1 9 19 11-16 5-11 13 5 5 15-6 13 12 18 5 4-8-11-12 18-3 14-12-5-10-19 7z" fill="#f08caf" stroke="#cb668b" stroke-width="1.5"/><circle cx="60" cy="24" r="4" fill="#ffe5aa"/></svg>
+          <span>Miki • cewek</span>
+        </button>
+        <button class="miko-style-card" type="button" data-miko-style="boy" aria-pressed="false">
+          <svg viewBox="0 0 120 108" aria-hidden="true"><ellipse cx="60" cy="99" rx="39" ry="6" fill="#192b3a" opacity=".14"/><path d="M27 92q3-27 33-27t33 27v9H27z" fill="#419bb5"/><path d="M27 44 23 14q-1-7 7-2l21 17q9-4 18 0l21-17q8-5 7 2l-4 30q8 11 4 24-5 16-37 16T25 68q-4-13 2-24" fill="#e9a86d" stroke="#aa704b" stroke-width="2"/><path d="M33 31q2-18 25-18 22 0 28 16-15-6-27-6-12 0-26 8" fill="#894e32"/><path d="m43 52 11 2m12 0 11-2" stroke="#76513e" stroke-width="3" stroke-linecap="round"/><ellipse cx="60" cy="67" rx="15" ry="9" fill="#fff2df"/><path d="m57 66 3-3 3 3-3 3z" fill="#c86c78"/><path d="M56 70q4 4 8 0" fill="none" stroke="#795047" stroke-width="1.5"/><path d="m55 77 5 5 5-5" fill="#ffdf91" stroke="#bd7853" stroke-width="1.5"/></svg>
+          <span>Miko • cowok</span>
+        </button>
+      </div>
+      <label for="capySize" data-i18n-en="Cat size">Ukuran kucing</label><div class="music-volume-control"><input id="capySize" type="range" min="65" max="145" step="5" value="100" aria-label="Ukuran kucing"><output id="capySizeValue" for="capySize">100%</output></div>
+      <label for="capyOpacity" data-i18n-en="Mascot opacity">Transparansi maskot</label><div class="music-volume-control"><input id="capyOpacity" type="range" min="15" max="100" step="5" value="100" aria-label="Transparansi maskot"><output id="capyOpacityValue" for="capyOpacity">100%</output></div>
+      <button class="btn" id="replayMikoTour" type="button">Jelaskan ulang cara memakai aplikasi</button>
+    </div>
+    <div class="settings-section"><h4 data-i18n-en="Experience">Pengalaman</h4>
+      <label for="languagePick" data-i18n-en="Interface language">Bahasa antarmuka</label>
+      <select id="languagePick" aria-label="Bahasa antarmuka">
+        <option value="id">Bahasa Indonesia</option>
+        <option value="en">English</option>
+      </select>
+      <div class="setting-row"><span><svg class="i"><use href="#i-network"/></svg> Animasi</span><button class="sw2 on" id="motionToggle" type="button" aria-pressed="true" aria-label="Matikan animasi"></button></div>
+      <div class="setting-row"><span><svg class="i"><use href="#i-bell"/></svg> Notifikasi browser</span><button class="sw2" id="notificationToggle" type="button" aria-pressed="false" aria-label="Aktifkan notifikasi"></button></div>
+      <p class="tiny" id="notificationStatus" role="status">Notifikasi mati. Izin browser hanya diminta setelah kamu menekan tombol ini.</p>
+    </div>
+    <div class="settings-section"><h4>Musik belajar</h4>
+      <label for="musicVolume">Volume musik lembut</label><div class="music-volume-control"><input id="musicVolume" type="range" min="0" max="40" step="1" value="18" aria-label="Volume musik"><output id="musicVolumeValue" for="musicVolume">18%</output></div>
+    </div>
+    <div class="settings-section app-version"><span>Versi aplikasi</span><strong id="appVersion">v1.2.0</strong><small>Versi bertambah saat pembaruan dirilis.</small></div>
+    <button class="btn p" id="installApp" type="button" hidden>Pasang aplikasi</button>
+    <p class="guide-tip">Pilihan ini tersimpan di browser perangkat ini. Notifikasi perlu izin browser dan hanya tersedia pada situs HTTPS atau localhost.</p>
+  </div>
+
+<div id="capyBuddy" class="capy-buddy" data-mood="idle" data-side="right" role="group" aria-label="Miki, kucing teman belajar">
+  <button class="capy-speech" id="capySpeech" type="button" aria-label="Tutup pesan Miki"><span id="capyMessage"></span><i aria-hidden="true"></i></button>
+  <button class="capy-head-close" id="capyHeadClose" type="button" aria-label="Sembunyikan Miki" title="Sembunyikan maskot">×</button>
+  <button class="capy-mascot" id="capyMascot" type="button" aria-label="Ngobrol dengan Miki, kucing teman belajar">
+    <span class="capy-sparkle sparkle-one">✦</span><span class="capy-sparkle sparkle-two">✧</span>
+    <svg viewBox="0 0 180 170" role="img" aria-label="Miki, kucing jingga memakai hoodie teknisi jaringan">
+      <defs>
+        <linearGradient id="mikoFur" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd59f"/><stop offset="1" stop-color="#e99a61"/></linearGradient>
+        <linearGradient id="mikoHoodie" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#46d4cf"/><stop offset="1" stop-color="#2497ac"/></linearGradient>
+        <radialGradient id="mikoMuzzle"><stop stop-color="#fff5e9"/><stop offset="1" stop-color="#f6d8bc"/></radialGradient>
+      </defs>
+      <ellipse class="capy-shadow" cx="92" cy="153" rx="53" ry="9"/>
+      <path class="cat-tail" d="M48 139c-21 9-28-3-21-17 5-9 16-8 19 1 2 6-2 10-7 9"/>
+      <path class="capy-body" d="M39 145c3-29 22-46 53-47 34-1 55 18 58 47l-3 15H41z"/>
+      <path class="capy-coat" d="M55 111l22-10 14 14 14-14 22 10 14 49H43z"/>
+      <path class="capy-coat-line" d="M77 102l14 14 14-14M91 116v42"/>
+      <path class="capy-shirt" d="M84 107h15l-3 15-5 5-5-5z"/>
+      <path class="cat-tie" d="M88 118h6l-1 6 3 12-5 5-5-5 3-12z"/>
+      <path class="cat-hood" d="M72 105q19-16 38 0l-5 12H77z"/>
+      <path class="capy-tool-pocket" d="M108 122h20v17h-20z"/>
+      <path class="capy-badge-mark" d="M112 128h12m-12 4h9m-9 4h7"/>
+      <path class="cat-cuff" d="M46 151h17v9H44zm62 0h19v9h-18z"/>
+      <path class="capy-ear" d="M47 48 43 14q1-7 8-2l27 27m23 0 28-27q7-5 8 2l-5 34"/>
+      <path class="cat-ear-inner" d="m53 36-3-15 15 14m42 0 15-15-3 17"/>
+      <path class="capy-head" d="M43 57 47 28l23 20q20-10 41 0l23-20 4 30c8 11 11 22 8 34-4 20-23 31-55 31S39 111 35 91c-2-12 1-24 8-34Z"/>
+      <ellipse class="capy-muzzle" cx="91" cy="88" rx="31" ry="19"/>
+      <path class="cat-whiskers" d="M62 88 39 83m23 9-24 1m80-5 24-5m-24 9 24 1"/>
+      <path class="capy-brow capy-brow-left" d="M65 68q7-5 14 0"/><path class="capy-brow capy-brow-right" d="M104 68q7-5 14 0"/>
+      <g class="capy-eyes"><ellipse class="capy-eye-left" cx="71" cy="75" rx="4.3" ry="5.7"/><ellipse class="capy-eye-right" cx="111" cy="75" rx="4.3" ry="5.7"/><circle class="cat-eye-glint" cx="72.5" cy="73" r="1.5"/><circle class="cat-eye-glint" cx="112.5" cy="73" r="1.5"/></g>
+      <path class="capy-nose" d="M86 86q5-5 10 0l-5 5z"/>
+      <path class="capy-mouth" d="M86 91q5 5 10 0"/>
+      <ellipse class="capy-blush" cx="57" cy="89" rx="9" ry="5"/><ellipse class="capy-blush" cx="125" cy="89" rx="9" ry="5"/>
+      <path class="cat-bow" d="M85 31q-17-15-20-4 0 9 19 10-18 5-15 13 4 8 21-7 17 15 21 7 3-8-15-13 19-1 19-10-3-11-20 4z"/>
+      <circle class="cat-bow-center" cx="91" cy="38" r="4"/>
+      <path class="cat-collar" d="m84 112 7 9 7-9"/>
+    </svg>
+  </button>
+</div>
+<section id="capySearch" class="capy-search glass" role="dialog" aria-modal="false" aria-labelledby="capySearchTitle" hidden>
+  <div class="capy-search-head"><div><span class="section-kicker">Teman belajar • tanpa database</span><h3 id="capySearchTitle">Ngobrol dengan Miki</h3><span class="mascot-beta-badge">BETA</span></div><span class="mascot-chat-avatar" aria-hidden="true"><span id="capyChatAvatar" data-mood="idle"></span></span><button class="th" id="closeCapySearch" type="button" aria-label="Tutup percakapan">×</button></div>
+  <label class="sr-only" for="capySearchInput">Cari materi, halaman, atau tampilan</label>
+  <input id="capySearchInput" type="search" placeholder="Cari materi, misalnya VLAN atau subnet" autocomplete="off">
+  <div id="capySearchResults" class="capy-search-results" aria-live="polite"><p class="capy-search-hint">Cari materi, permainan, halaman, atau tema warna.</p></div>
+  <section class="mascot-chat" aria-label="Percakapan dengan Miki">
+    <div id="mascotChatLog" class="mascot-chat-log" role="log" aria-live="polite" aria-relevant="additions"></div>
+    <form id="mascotChatForm" class="mascot-chat-form">
+      <label class="sr-only" for="mascotChatInput">Pesan untuk Miki</label>
+      <input id="mascotChatInput" type="text" maxlength="400" placeholder="Tanya Miki tentang pelajaran..." autocomplete="off" required>
+      <button class="btn p mascot-send" type="submit" aria-label="Kirim pesan">Kirim <span aria-hidden="true">↗</span></button>
+    </form>
+    <p class="mascot-chat-note" data-i18n-en="Answers use built-in learning materials. Chat is not saved.">Jawaban belajar memakai materi lokal; chat tidak disimpan.</p>
+  </section>
+</section>
+
+<section class="miko-tour" id="mikoTour" role="dialog" aria-modal="true" aria-labelledby="mikoTourTitle" hidden>
+  <div class="miko-tour-card glass">
+    <div class="miko-tour-head"><span class="section-kicker" id="mikoTourProgress">LANGKAH 1/4</span><button class="th" id="mikoTourStop" type="button" aria-label="Hentikan panduan">×</button></div>
+    <div class="miko-tour-hero"><span id="mikoTourAvatar" aria-hidden="true"></span><div><h2 id="mikoTourTitle">Hai, aku Miki!</h2><p id="mikoTourText"></p></div></div>
+    <div class="miko-tour-actions"><button class="btn" id="mikoTourBack" type="button">Kembali</button><button class="btn" id="mikoTourSkip" type="button">Lewati</button><button class="btn p" id="mikoTourNext" type="button">Selanjutnya</button></div>
+  </div>
+</section>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Manrope:wght@400;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+
+
+
+
+
+<div id="nqPrintSheet" aria-hidden="true"></div>
+
+
+
+
+<script src="./miko/memory.js?v=1.3.3"></script>
+<script src="./miko/catalog.js?v=1.3.3"></script>
+<script src="./miko/catalog-extra.js?v=1.4.11"></script>
+<script src="./miko/assistant.js?v=1.3.3"></script>
+<script src="./classroom/room.js?v=1.4.4"></script>
+<script src="./assets/app.js?v=1.4.13"></script>
+</body>
+</html>
+ 

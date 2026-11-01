@@ -1,0 +1,122 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="main" x1="70" y1="55" x2="440" y2="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#61D5FF"/>
+      <stop offset=".32" stop-color="#398BFF"/>
+      <stop offset=".68" stop-color="#6655F5"/>
+      <stop offset="1" stop-color="#A34BFF"/>
+    </linearGradient>
+
+    <linearGradient id="shine" x1="150" y1="80" x2="340" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/>
+      <stop offset=".45" stop-color="#FFFFFF" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="ambient">
+      <stop offset="0" stop-color="#8B83FF" stop-opacity=".13"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+      <feOffset dy="10"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope=".18"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- White background -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+
+  <!-- Ambient light -->
+  <ellipse cx="256" cy="255" rx="220" ry="220" fill="url(#ambient)"/>
+
+  <!-- Decorative orbit -->
+  <circle cx="256" cy="256" r="190"
+          fill="none" stroke="#8A9BFF"
+          stroke-opacity=".09" stroke-width="1.5"/>
+
+  <circle cx="256" cy="256" r="170"
+          fill="none" stroke="#6C8CFF"
+          stroke-opacity=".07" stroke-width="1"/>
+
+  <!-- Floating accents -->
+  <circle cx="390" cy="126" r="5" fill="#66BFFF" opacity=".65"/>
+  <circle cx="116" cy="340" r="4" fill="#9572FF" opacity=".55"/>
+  <circle cx="367" cy="390" r="3" fill="#6D9CFF" opacity=".55"/>
+
+  <!-- Logo glow -->
+  <path
+    d="M256 92 C231 92 218 111 202 137 L115 281
+       C97 311 110 344 139 353
+       C163 361 184 348 198 325
+       L256 225 L314 325
+       C328 348 349 361 373 353
+       C402 344 415 311 397 281
+       L310 137 C294 111 281 92 256 92Z"
+    fill="#7774FF"
+    opacity=".25"
+    filter="url(#glow)"
+  />
+
+  <!-- Main symbol -->
+  <g filter="url(#shadow)">
+    <path
+      d="M256 76
+         C239 76 224 86 214 102
+         L103 286
+         C88 311 97 342 122 357
+         C147 372 178 364 193 339
+         L256 232
+         L319 339
+         C334 364 365 372 390 357
+         C415 342 424 311 409 286
+         L298 102
+         C288 86 273 76 256 76Z"
+      fill="url(#main)"
+    />
+
+    <!-- Glass reflection -->
+    <path
+      d="M256 91
+         C240 91 230 103 221 119
+         L150 238
+         C166 242 184 235 193 220
+         L255 116
+         C268 99 281 96 296 104
+         C285 95 271 91 256 91Z"
+      fill="url(#shine)"
+      opacity=".8"
+    />
+
+    <!-- Highlight -->
+    <path
+      d="M128 310 C138 291 148 274 160 256"
+      fill="none"
+      stroke="#FFFFFF"
+      stroke-width="5"
+      stroke-linecap="round"
+      opacity=".55"
+    />
+  </g>
+
+  <!-- Sparkle -->
+  <path
+    d="M390 186 L395 199 L408 204 L395 209 L390 222 L385 209 L372 204 L385 199Z"
+    fill="#A6DFFF"
+    opacity=".8"
+  />
+
+  <circle cx="111" cy="174" r="3" fill="#8B7AFF" opacity=".65"/>
+</svg>
