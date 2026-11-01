@@ -72,8 +72,14 @@ $('#shareApp')?.addEventListener('click',async()=>{
  }catch(error){if(error?.name==='AbortError')return;console.warn('Tautan aplikasi tidak dapat dibagikan.',error);if(status)status.textContent=english?'Could not share the app link.':'Tautan aplikasi tidak dapat dibagikan.'}
 });
 const AUTHORIZED_ACCOUNTS=[
- {username:'ivander',displayName:'Ivander',pin:'141210',role:'admin'}
- // Add school-managed accounts here with role: 'teacher'.
+  {username:'ivander',displayName:'Ivander',pin:'141210',role:'Developer'},
+  {username:'Muhaditrafanizam',displayName:'Arafa',pin:'220810',role:'President'},
+  {username:'Akhsanjauharantoso',displayName:'Akhsyan',pin:'140411',role:'admin'},
+  {username:'Pakandy',displayName:'Pak Andy',pin:'123321',role:'Guru'},
+  {username:'Pakharry',displayName:'Pak Harry',pin:'456654',role:'Guru'},
+  {username:'Buksri',displayName:'Bu Sri',pin:'789987',role:'Guru'},
+  {username:'Pakfirman',displayName:'Pak Firman',pin:'100110',role:'Wali kelas'}
+  // Add school-managed accounts here with role: 'teacher'.
 ];
 const ACCOUNT_STORAGE_KEY='neko_accounts_v1',ACCOUNT_SESSION_KEY='neko_account_session';
 let activeAccount=null;
@@ -1127,10 +1133,10 @@ if(capy){const saved=(()=>{try{return JSON.parse(localStorage.getItem('nq_capy_p
 window.addEventListener('resize',()=>{if(!capy)return;placeCapyOnSide(capy.getBoundingClientRect().top,false,capy.dataset.side);if(!searchPanel.hidden)positionCapySearch()});
 if(capy){const capyVisibilityObserver=new MutationObserver(()=>{if(!document.body.classList.contains('unlocked'))return;requestAnimationFrame(()=>{if(capy.offsetWidth)placeCapyOnSide(capy.getBoundingClientRect().top,false,capy.dataset.side)})});capyVisibilityObserver.observe(document.body,{attributes:true,attributeFilter:['class']})}
 const contactPeople=[
- {name:'Ivander',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','@vndee_r','https://www.instagram.com/vndee_r'],['TikTok','@user02_1413','https://www.tiktok.com/@user02_1413'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]},
- {name:'Muh. Hadit Rafanizam',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','Tambahkan akun Instagram'],['TikTok','Tambahkan akun TikTok'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]},
- {name:'Muh. Fikron Ainun Najib',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','Tambahkan akun Instagram'],['TikTok','Tambahkan akun TikTok'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]},
- {name:'Akhsan Jauhar Santoso',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','Tambahkan akun Instagram'],['TikTok','Tambahkan akun TikTok'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]}
+ {name:'Ivander',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','@vndee_r','https://www.instagram.com/vndee_r'],['TikTok','@user02_1413','https://www.tiktok.com/@user02_1413'],['ivander1420','https://github.com/ivander1420'],['ivander1412','Tambahkan akun Red Hat']]},
+ {name:'Muh. Hadit Rafanizam',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['mhdrafanzm','@mhdrafanzm','https://www.instagram.com/mhdrafanzm'],['rfaanzmm','https://www.tiktok.com/@rfaanzmm'],['rafanizam2010','https://github.com/rafanizam2010'],['Rafa Nizam','Tambahkan akun Red Hat']]},
+ {name:'Muh. Fikron Ainun Najib',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','@fikronainun','https://www.instagram.com/fikronainun'],['TikTok','@fikronainun','https://www.tiktok.com/@fikronainun'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]},
+ {name:'Akhsan Jauhar Santoso',accounts:[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','@akhsanzzj','https://www.instagram.com/akhsanzzj'],['TikTok','@akhsanjs','https://www.tiktok.com/@akhsanjs'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']]}
 ];
 const teacherAccounts=[['Google / Gmail','Tambahkan akun Google / Gmail'],['Instagram','Tambahkan akun Instagram'],['TikTok','Tambahkan akun TikTok'],['GitHub','Tambahkan akun GitHub'],['Red Hat','Tambahkan akun Red Hat']];
 function renderSocialRows(accounts){
