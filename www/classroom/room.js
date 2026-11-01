@@ -301,6 +301,8 @@
 
   function renderStage() {
     const stage = $('#nqLiveStage');
+    stage.dataset.phase = roomState.phase;
+    stage.dataset.role = role;
     stage.replaceChildren();
     if (roomState.phase === 'lobby') {
       const heading = document.createElement('h3');
@@ -374,7 +376,9 @@
       question.options.forEach((option, index) => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'nq-live-answer';
+        button.className = `nq-live-answer nq-live-answer-${['red', 'blue', 'yellow', 'green'][index % 4]}`;
+        button.dataset.answerIndex = String(index);
+        button.setAttribute('aria-label', `Pilihan ${String.fromCharCode(65 + index)}: ${option}`);
         button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
         button.disabled = roomState.submitted;
         button.addEventListener('click', () => send({ type: 'answer', choice: index }));
@@ -396,7 +400,9 @@
   function render() {
     document.body.classList.add('nq-room-immersive');
     panel.hidden = false;
-    $('#nqLiveRole').textContent = role === 'host' ? 'PANEL GURU' : 'PESERTA';
+    panel.dataset.role = role;
+    panel.dataset.phase = roomState.phase;
+    $('#nqLiveRole').textContent = role === 'host' ? 'HOST • PANEL GURU' : 'PLAYER • PESERTA';
     $('#nqLiveTitle').textContent = roomState.title;
     $('#nqLiveCode').textContent = roomId;
     $('#nqLiveRoomId').value = roomId;

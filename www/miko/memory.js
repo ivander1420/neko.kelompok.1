@@ -1,7 +1,6 @@
-
 /* ==========================================
    NETQUEST MIKO - LOCAL MEMORY SYSTEM
-   Tidak membutuhkan database online
+   IndexedDB - tidak membutuhkan database online
 ========================================== */
 
 (() => {
@@ -93,7 +92,7 @@
       const tx = db.transaction('facts', 'readwrite');
 
       tx.objectStore('facts').put({
-        key,
+        key: String(key),
         value: String(value),
         updatedAt: Date.now()
       });
@@ -116,6 +115,21 @@
     });
   }
 
+  // Menghapus pesan saja, tanpa menghapus fakta yang tersimpan.
+  async function clearMessages() {
+    const db = await openDB();
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readwrite');
+
+      tx.objectStore('messages').clear();
+
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  // Menghapus seluruh memory: pesan dan fakta.
   async function clearMemory() {
     const db = await openDB();
 
@@ -148,6 +162,7 @@
     getRecentMessages,
     saveFact,
     getFacts,
+    clearMessages,
     clearMemory,
     getStats
   };
