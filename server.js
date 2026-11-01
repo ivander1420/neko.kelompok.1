@@ -6,7 +6,9 @@ const http = require('node:http');
 const path = require('node:path');
 const { WebSocketServer, WebSocket } = require('ws');
 
-const webRoot = path.resolve(__dirname, 'www');
+const webRoot = __dirname;
+const publicDirectories = new Set(['assets', 'classroom', 'miko']);
+const publicFiles = new Set(['index.html', 'favicon.svg', 'loading-logo.svg', 'site.webmanifest', 'sw.js']);
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
 const rooms = new Map();
@@ -288,6 +290,14 @@ const server = http.createServer(async (request, response) => {
   if (target !== webRoot && !target.startsWith(`${webRoot}${path.sep}`)) {
     response.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
     return response.end('Forbidden');
+  }
+  const relativePath = path.relative(webRoot, target);
+  const pathSegments = relativePath.split(path.sep);
+  const isPublicFile = pathSegments.length === 1 && publicFiles.has(pathSegments[0]);
+  const isPublicDirectory = publicDirectories.has(pathSegments[0]);
+  if ((!isPublicFile && !isPublicDirectory) || pathSegments.some(segment => segment.startsWith('.'))) {
+    response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return response.end('Not found');
   }
   const type = mimeTypes.get(path.extname(target).toLowerCase());
   if (!type) {
