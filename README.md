@@ -1,43 +1,479 @@
-# Neko TJKT
+# NEKO — Belajar TJKT Sambil Bermain
 
-Versi aplikasi: **1.4.13**. Katalog memuat 500 materi TJKT untuk pencarian dan Miko dari `miko/catalog.js` serta `miko/catalog-extra.js`; penyimpanan percakapan lokal IndexedDB berada terpisah di `miko/memory.js`. Aplikasi web menggunakan `assets/app.css` dan `assets/app.js`, bukan kode inline di `index.html`.
+Aplikasi belajar **TJKT (Teknik dan Komputer Jaringan)** berbasis web yang bisa dijalankan
+di laptop, di HP lewat jaringan sekolah, dan dibungkus menjadi **APK Android**.
+Dibuat oleh **Kelompok 1 · XI TJKT 2** — pembimbing: **Pak Andy Musly**.
 
-## Membuka di web dan memasang di HP
+Stack: HTML + CSS + JavaScript murni (tanpa framework, tanpa bundler) dan satu server
+Node.js **tanpa dependency** (`node:http` + WebSocket tulis tangan). Penyimpanan memakai
+**file `server/db.json`**, bukan database.
 
-1. Unggah file proyek ini ke repository GitHub.
-2. Di Render, pilih **New > Blueprint** lalu pilih repository tersebut. `render.yaml` menjalankan `npm start`, yang memulai `server.js` di root. Server yang sama menyajikan situs dan room WebSocket.
-3. Deploy. Buka URL HTTPS dari Render di Chrome Android, lalu pilih **Pasang aplikasi** atau **Tambahkan ke layar utama**.
+---
 
-Setiap deploy baru diperiksa service worker dan diterapkan saat browser memuat ulang aplikasi. PC tetap membuka situs web biasa. XP, check-in harian tujuh hari, misi, dan tema tersimpan lokal di browser/perangkat masing-masing.
+## Daftar isi
 
-Musik belajar mulai setelah login dan dapat dimatikan lewat tombol **Musik**; tingkat volumenya bisa diatur pada **Tampilan**. Miko/Miki memakai ilustrasi SVG yang digambar di aplikasi, dengan beragam ekspresi dan efek CSS. Pengaturan mencakup transparansi maskot dan bahasa antarmuka Indonesia/Inggris. Percakapan Miki/Miko hanya menggunakan teks; tidak ada keluaran suara atau input mikrofon untuk maskot. Maskot disembunyikan saat Arena Game aktif. Tombol X kecil di atas kepala menyembunyikan maskot.
+1. [Yang perlu diketahui soal "bisa / tidak bisa"](#1-yang-perlu-diketahui-soal-bisa--tidak-bisa)
+2. [Persiapan](#2-persiapan)
+3. [Tiga cara menjalankan](#3-tiga-cara-menjalankan)
+4. [Cara pakai setiap halaman](#4-cara-pakai-setiap-halaman)
+5. [Kelas Langsung (mode Kahoot + PIN)](#5-kelas-langsung-mode-kahoot--pin)
+6. [Membuat file APK debug](#6-membuat-file-apk-debug)
+7. [Publish ke GitHub: website + APK](#7-publish-ke-github-website--apk)
+8. [Pemecahan masalah](#8-pemecahan-masalah)
+9. [Struktur folder](#9-struktur-folder)
+10. [Kredit](#10-kredit)
 
-Chat Miko memiliki area percakapan yang dapat digulir. Arena Game menyertakan **Who Is the Spy?** untuk 3–30 pemain di satu perangkat. Peran ditampilkan satu per satu dengan kategori dan clue; layar peran Spy memakai tampilan merah. Timer diskusi dapat dipilih sebelum ronde, disusul voting privat dan pengungkapan hasil. Nama dan peran hanya tersimpan sementara di memori halaman; jangan membuka kembali layar peran setelah ronde dimulai.
+---
 
-## Kelas Live
+## 1. Yang perlu diketahui soal "bisa / tidak bisa"
 
-Guru dapat membuat room, membagikan ID enam digit, memantau peserta, avatar bergambar, dan peringkat, lalu memulai kuis. Siswa memilih nama dan avatar bergaya ilustrasi 3D sebelum masuk; layar room mereka berfokus pada kuis dan reaksi serta hanya menerima skor pribadi. Room mencoba membuka fullscreen setelah aksi Buat/Gabung dan tetap memakai tata letak fokus bila browser tidak mendukung fullscreen. Avatar hanya disimpan sementara di sesi browser/server. Soal, jawaban, skor, dan reaksi dikirim melalui WebSocket. Room berada di memori server (tanpa database) dan akan hilang saat server dimulai ulang atau setelah sesi kedaluwarsa. Server harus tetap aktif dan dapat dijangkau semua peserta; gunakan HTTPS/WSS untuk situs publik.
+NEKO punya dua lapisan. **Antarmuka** (buku, game, tema, maskot, profil) murni jalan di
+browser. **Fitur bersama** (akun lintas perangkat, papan peringkat, Kelas Langsung, teman &
+chat) butuh **server Node** hidup.
 
-Room ini adalah fitur kuis kelas orisinal Neko dan tidak menggunakan kode atau aset Kahoot.
+| Fitur | Laptop sendiri | Lintas perangkat (1 WiFi) | GitHub Pages / hosting statis | APK Mode B (offline) |
+|---|:--:|:--:|:--:|:--:|
+| Beranda, maskot Miki/Miko/Neksya | ✅ | ✅ | ✅ | ✅ |
+| Perpustakaan (6 bab TJKT) & kuis bacaan | ✅ | ✅ | ✅ | ✅ |
+| 8 game Arena + XP + season | ✅ | ✅ | ✅ | ✅ |
+| Tema (8 dunia), audio, animasi | ✅ | ✅ | ✅ | ✅ |
+| Halaman Kontak + lapor bug | ✅ | ✅ | ✅ | ✅ |
+| Akun yang mengikuti data ke HP lain | ✅ lokal | ✅ server | ❌ lokal per perangkat | ❌ lokal per perangkat |
+| Kelas Langsung (PIN, banyak HP) | ❌ | ✅ server | ❌ | ❌ |
+| Teman, chat, pengumuman admin | ❌ | ✅ server | ❌ | ❌ |
 
-## Batasan aplikasi klien
+**Kesimpulan penting:** GitHub Pages hanya meng-host file statis, tidak menjalankan Node.js.
+Website yang di-publish ke Pages **tetap bisa dipakai dan tetap bisa dibuat akun**, tetapi
+berada di *mode lokal* — datanya tersimpan di browser perangkat itu saja, dan Kelas Langsung
+akan menampilkan pesan bahwa server tidak terhubung. Mode lengkap butuh laptop/PC yang
+menjalankan `Mulai-NEKO.bat`.
 
-Pemisahan JavaScript, CSS, dan katalog ke beberapa file membuat pengelolaan lebih rapi, tetapi tidak menyembunyikan kode yang dikirim ke browser. Akun anggota dan sesi disimpan lokal; PIN anggota disimpan sebagai hash, dan akun admin Ivander dikonfigurasi di `assets/app.js`. Tambahkan akun guru yang dikelola sekolah ke daftar `AUTHORIZED_ACCOUNTS` dengan `role: 'teacher'`. Tanpa server, pemeriksaan admin tidak dapat dianggap aman karena kode dan penyimpanan browser dapat diperiksa atau diubah. Jangan memakai login lokal ini untuk melindungi data rahasia atau sistem produksi. Tidak ada Firebase; login dan katalog dapat digunakan offline pada perangkat yang sama.
+---
 
-Di **Pengaturan**, pilih tema melalui kartu visual (termasuk tema hutan hijau sejuk), pilih gaya Miki/Miko dari ilustrasi, dan atur ukuran, transparansi, animasi, musik, bahasa, serta notifikasi. Pilihan bahasa menerjemahkan antarmuka; sejumlah isi materi dan pertanyaan pembelajaran tetap menggunakan bahasa sumbernya. Katalog mencakup 500 materi TJKT dan mendukung pencarian teks serta suara. Browser hanya meminta izin notifikasi setelah tombolnya ditekan; notifikasi saat aplikasi dibuka hanya berfungsi setelah izin diberikan dan aplikasi tersedia lewat HTTPS/localhost.
+## 2. Persiapan
 
-## Menjalankan lokal
+| Kebutuhan | Untuk apa | Cek |
+|---|---|---|
+| **Node.js 18+** | menjalankan server NEKO | `node -v` |
+| Browser Chrome/Edge terbaru | membuka aplikasi | — |
+| *(opsional)* JDK 17/21 | membangun APK | `java -version` |
+| *(opsional)* Android SDK (platform + build-tools) | membangun APK | folder `Sdk` |
+| *(opsional)* Gradle 8.13+ | membangun APK | ada di `C:\Users\<kamu>\.gradle\wrapper\dists` |
+| *(opsional)* Android Studio | cara paling gampang bikin APK | — |
 
-Gunakan Node.js 18 atau lebih baru, lalu jalankan:
+Tanpa alat Android sama sekali, aplikasi ini tetap 100 % bisa dipakai sebagai web app.
 
-```powershell
-node server.js
+---
+
+## 3. Tiga cara menjalankan
+
+### Cara A — Hanya di laptop (paling gampang)
+
+1. Dobel-klik **`Mulai-NEKO.bat`**.
+2. Tunggu sampai browser terbuka sendiri di `http://localhost:3000`.
+3. **Jangan tutup jendela hitam servernya** selama dipakai; tutup jendela = aplikasi mati.
+4. Selesai dipakai: tekan `Ctrl+C` di jendela itu, atau tutup jendela.
+
+### Cara B — Lintas perangkat, satu WiFi (dipakai di kelas)
+
+1. Jalankan Cara A di laptop.
+2. Di jendela server ada baris seperti:
+   `Jaringan:  http://192.168.1.7:3000   ← bagikan ke teman/kelas`. Angka itu alamat laptop.
+3. Windows Firewall: saat muncul popup pertama kali, centang **Private networks → Allow**.
+   Kalau perlu menambahkan manual lewat cmd (Administrator):
+   ```
+   netsh advfirewall firewall add rule name="NEKO" dir=in action=allow program="C:\Program Files\nodejs\node.exe" enable=yes
+   ```
+4. HP/tablet teman **harus terhubung ke WiFi yang sama**, lalu buka alamat tadi di Chrome
+   (atau lewat APK Mode A, lihat bagian 6).
+5. Kalau WiFi sekolah menolak antar-perangkat (*client isolation*), nyalakan **hotspot** di
+   salah satu HP/laptop dan sambungkan semua perangkat ke hotspot itu; alamatnya tetap alamat
+   laptop tempat server berjalan.
+
+### Cara C — Tanpa server (mode lokal)
+
+- Buka langsung `index.html` (protocol `file:`), **atau**
+- Host foldernya di situs statis seperti **GitHub Pages** (protocol `https:` tanpa backend).
+
+Aplikasi mendeteksi tidak adanya server, lalu memakai **akun lokal di perangkat itu**
+(layar awal → tab *Buat akun*). Semua buku, game, XP, tema tetap jalan. Kelas Langsung dan chat
+antar-perangkat dinonaktifkan dengan pesan yang jelas — bukan error.
+
+---
+
+## 4. Cara pakai setiap halaman
+
+Menu bawah (HP) / sidebar (laptop): **Beranda · Perpustakaan · Arena · Pesan · Kontak · Profil**
+(+ **Admin** khusus akun role Developer/President/Admin).
+
+### Beranda
+- Halo personal, ringkasan XP/season, progres bacaan, dan papan informasi admin.
+- Bulatan maskot di pojok: **tekan sekali → jendela chat langsung terbuka**.
+- Maskot berganti otomatis; di dalam chat ada tab **Miki / Miko / Neksya** untuk berpindah.
+  Setiap maskot **hanya menjawab bagiannya**:
+  | Maskot | Bagian |
+  |---|---|
+  | **Miki** — Pemandu NEKO | cara pakai aplikasi, tema, check-in, akun |
+  | **Miko** — Partner Arena | game, Kelas Langsung, XP & season, semangat |
+  | **Neksya** — Penjaga Perpustakaan | materi TJKT: subnet, OSI, kabel, VLAN, troubleshooting, keamanan, rekomendasi bacaan |
+  Kalau bertanya ke maskot yang salah, ia menjawab "itu bukan tugasanku" dan memberi tombol
+  **Tanya …** yang berpindah tab sekaligus mengulang pertanyaanmu ke maskot yang benar.
+
+### Perpustakaan
+- 6 buku materi: Dasar Jaringan, IP Address & Subnetting, VLAN & Switching, Hardware & Kabel,
+  Troubleshooting, Keamanan Jaringan.
+- Dibuka sebagai lembar dua halaman: geser dengan tombol, panah keyboard, atau usap di layar
+  sentuh. Tiap halaman punya gambar/tabel dan **cek pemahaman**.
+- Setiap halaman baru memberi XP; menamatkan buku membuka badge di koleksi.
+
+### Arena
+- 8 game: **Kuis Kilat, Kata Penyusup, Lab Kabel, Kartu Memori, Subnet Master, Menara OSI,
+  Detektif Jaringan, Refleks Neko**.
+- Pilih kartu game → atur tingkat/opsi → Main. Skor masuk XP dan papan peringkat.
+- **Kata Penyusup** mendukung 3–8 pemain dengan **nama pemain sendiri** (atur di editor roster).
+
+### Pesan
+- Cari teman lewat username, kirim permintaan berteman, lalu chat realtime.
+- Tab masuk: percakapan, permintaan teman, dan pengumuman.
+- Butuh server (Cara B). Di mode lokal halaman ini menampilkan penjelasan, tidak error.
+
+### Kontak
+- Kartu **guru pembimbing**, **4 anggota kelompok** lengkap (Gmail, Instagram, TikTok, GitHub,
+  Red Hat), dan kartu **Laporkan Bug / Masalah** yang menyiapkan email otomatis
+  (judul + keterangan + nama sesi + versi browser) ke `ivander1420@gmail.com`.
+
+### Profil
+Empat tab: **Profil · Koleksi · Panduan · Atur**.
+- **Profil**: identitas, avatar (40 karakter), level, **5 season XP**
+  (Langkah Pertama → Penjelajah → Arsitek → Penjaga → Legenda), riwayat check-in harian.
+- **Koleksi**: badge dari buku yang sudah ditamatkan dan rekor tiap game.
+- **Panduan**: cara pakai aplikasi + penjelasan tugas tiga maskot.
+- **Atur**: mode terang/gelap, suara, sidebar, dan **Keluar dari akun**.
+  Catatan: PIN tidak bisa diganti dari dalam aplikasi — masuk lewat username + PIN yang dibuat
+  saat daftar. Check-in harian otomatis memberi XP.
+
+### Admin (role khusus)
+- Membuat/mengedit pengumuman, papan informasi, leaderboard, dan pengelolaan akun.
+
+---
+
+## 5. Kelas Langsung (mode Kahoot + PIN)
+
+**Syarat: server berjalan (Cara B) dan semua perangkat satu jaringan.**
+
+1. **Guru/host** — buka **Arena → Kelas Langsung → Buat Kelas** di laptop (layar besar/proyektor).
+   Pilih tingkat, topik, jumlah soal, dan waktu per soal. Layar menampilkan **PIN 6 angka**.
+2. **Siswa** — buka NEKO di HP → **Kelas Langsung → Gabung**, masukkan PIN, ketik nama,
+   pilih satu karakter dari **40 avatar** (karakter yang sudah dipakai pemain lain tidak bisa
+   dipilih lagi; kalau dua orang memilih bersamaan, server menolak yang kedua).
+3. Host menekan **Mulai**. Setiap soal: soal tampil di layar host, siswa menjawab di HP.
+   Semakin cepat dan benar → semakin banyak poin.
+4. Setelah tiap soal host menekan **Lihat Pembahasan** (jawaban benar + penjelasan singkat),
+   lalu **Lanjut** ke soal berikutnya.
+5. Selesai → **Podium** 3 besar, XP semua peserta langsung tersimpan ke akun masing-masing.
+6. Tombol **Keluar** di bar atas menutup sesi; host bisa **restart** dengan opsi yang sama.
+
+Kalau tombol Mulai tidak bisa ditekan: minimal satu siswa harus sudah bergabung
+(label tombol menunjukkan jumlah pemain).
+
+---
+
+## 6. Membuat file APK debug
+
+APK-nya hanya **cangkang WebView**; isinya website NEKO. Pilih salah satu:
+
+| Mode | Isi APK | Fungsi |
+|---|---|---|
+| **A — Server** | WebView yang membuka `http://IP-laptop:3000` | fitur penuh: akun sinkron, Kelas Langsung, chat |
+| **B — Offline** | semua file NEKO ikut terpasang di dalam APK | jalan tanpa laptop; data hanya di HP itu |
+
+### 6.1 Struktur project
+
+Folder bebas, contoh `C:\Users\HP\Documents\NEKO-APK`:
+
+```
+NEKO-APK/
+  settings.gradle
+  build.gradle
+  gradle.properties
+  local.properties
+  app/build.gradle
+  app/src/main/AndroidManifest.xml
+  app/src/main/java/com/neko/tjkt/MainActivity.java
+  app/src/main/assets/neko/         <- hanya Mode B
 ```
 
-Buka `http://127.0.0.1:8080`.
+**settings.gradle**
+```groovy
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+rootProject.name = "NEKO"
+include ':app'
+```
 
-Navigasi bawah meratakan semua item pada layar lebar dan dapat digeser mendatar pada ponsel agar label tetap terbaca. Saat halaman dipilih, item aktif digulir otomatis ke tengah. Tata letak menyesuaikan layar kecil, tablet, orientasi pendek, serta area aman perangkat.
+**build.gradle** (root)
+```groovy
+plugins { id 'com.android.application' version '8.13.0' apply false }
+```
 
-## Ikon dan pemasangan
+**gradle.properties**
+```properties
+android.useAndroidX=true
+org.gradle.jvmargs=-Xmx2g
+```
 
-`favicon.svg` digunakan sebagai ikon web dan PWA. PWA memberi ikon aplikasi di Android, tetapi bukan file APK bertanda tangan.
+**local.properties** (ganti path SDK jika letaknya berbeda)
+```properties
+sdk.dir=C\:\\Users\\HP\\AppData\\Local\\Android\\Sdk
+```
+
+**app/build.gradle**
+```groovy
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.neko.tjkt'
+    compileSdk 36
+    defaultConfig {
+        applicationId "com.neko.tjkt"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "3.0.13"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+```
+
+**app/src/main/AndroidManifest.xml**
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application android:label="NEKO TJKT" android:usesCleartextTraffic="true">
+        <activity android:name=".MainActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+```
+`usesCleartextTraffic="true"` **wajib**: server NEKO memakai HTTP biasa, dan Android menolak
+HTTP tanpa flag ini (WebView jadi putih/kosong).
+
+**app/src/main/java/com/neko/tjkt/MainActivity.java**
+```java
+package com.neko.tjkt;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+public class MainActivity extends Activity {
+    // Mode A: isi alamat laptop, contoh "http://192.168.1.7:3000"
+    // Mode B: kosongkan "" -> memakai file yang dibundel di assets/neko
+    static final String SERVER_URL = "http://192.168.1.7:3000";
+
+    private WebView web;
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override protected void onCreate(Bundle b) {
+        super.onCreate(b);
+        web = new WebView(this);
+        WebSettings s = web.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);   // tanpa ini login & XP tidak tersimpan
+        s.setDatabaseEnabled(true);
+        s.setAllowFileAccess(true);
+        s.setMediaPlaybackRequiresUserGesture(false);
+        web.setWebViewClient(new WebViewClient());
+        setContentView(web, new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        web.loadUrl(SERVER_URL.isEmpty() ? "file:///android_asset/neko/index.html" : SERVER_URL);
+    }
+
+    @Override public void onBackPressed() {
+        if (web.canGoBack()) web.goBack(); else super.onBackPressed();
+    }
+}
+```
+
+**Khusus Mode B**, salin dulu isi website ke assets (cmd):
+```
+robocopy "C:\Users\HP\Downloads\Neko Fix" "C:\Users\HP\Documents\NEKO-APK\app\src\main\assets\neko" /E /XD server node_modules
+```
+lalu set `SERVER_URL = ""`.
+
+### 6.2 Build
+
+Opsi 1 — **Android Studio** (paling sedikit masalah): *Open* folder `NEKO-APK`, tunggu sync,
+lalu **Build → Build APK(s)**.
+
+Opsi 2 — **command line**, tanpa Gradle yang terinstal global (pakai Gradle yang sudah ada
+di cache laptop):
+```
+cd /d C:\Users\HP\Documents\NEKO-APK
+"C:\Users\HP\.gradle\wrapper\dists\gradle-8.14.3-all\10utluxaxniiv4wxiphsi49nj\gradle-8.14.3\bin\gradle.bat" --offline assembleDebug
+```
+Bila `--offline` gagal karena ada dependensi belum tercache, hilangkan `--offline`
+(perlu internet sekali).
+
+Hasil (ini file APK debug yang dimaksud):
+```
+app\build\outputs\apk\debug\app-debug.apk
+```
+APK debug otomatis ditandatangani *debug keystore* (`C:\Users\<kamu>\.android\debug.keystore`),
+jadi **tidak perlu** membuat key sendiri.
+
+### 6.3 Pasang ke HP
+
+- Lewat kabel: aktifkan **Pengaturan → Pengembang → USB debugging**, lalu
+  ```
+  C:\Users\HP\AppData\Local\Android\Sdk\platform-tools\adb.exe install -r "C:\Users\HP\Documents\NEKO-APK\app\build\outputs\apk\debug\app-debug.apk"
+  ```
+- Tanpa kabel: pindahkan `app-debug.apk` ke HP (kabel data, flashdisk, atau Google Drive),
+  buka lewat File Manager → izinkan **instal dari sumber tidak dikenal**.
+  Catatan: WhatsApp biasanya menolak mengirim `.apk` — pakai Drive/kabel.
+
+### 6.4 Alternatif tanpa APK sama sekali
+
+Karena ada `manifest.webmanifest`, situs NEKO yang sudah online bisa **di-install seperti
+aplikasi**: Chrome di HP → buka alamatnya → menu ⋮ → **Tambahkan ke layar utama**.
+Ikon muncul di homescreen dan berjalan layar penuh (standalone). Ini bukan APK, tapi untuk
+demonstrasi biasanya cukup.
+
+---
+
+## 7. Publish ke GitHub: website + APK
+
+### 7.1 Website → GitHub Pages
+
+1. Buat repository (mis. `neko-tjkt`), lalu dari folder project:
+   ```
+   cd "C:\Users\HP\Downloads\Neko Fix"
+   git init
+   git add .
+   git commit -m "NEKO belajar TJKT"
+   git branch -M main
+   git remote add origin https://github.com/<username>/neko-tjkt.git
+   git push -u origin main
+   ```
+   Tambahkan `server/db.json` ke `.gitignore` kalau tidak ingin data akun ikut ter-upload:
+   ```
+   echo server/db.json>> .gitignore
+   ```
+2. Tambahkan file kosong `.nojekyll` di root supaya Pages tidak menyaring apa pun.
+3. **Settings → Pages → Source: Deploy from a branch → `main` / root → Save.**
+4. Alamat jadinya `https://<username>.github.io/neko-tjkt/`.
+5. Yang bekerja di URL itu: seluruh aplikasi dalam **mode lokal** (lihat tabel bagian 1).
+   Yang **tidak** bekerja: Kelas Langsung, teman/chat lintas perangkat, sinkron akun,
+   leaderboard bersama, pengumuman admin.
+6. Normal kalau Console browser menampilkan `404 /api/...` — itu tanda backend memang tidak
+   ada; aplikasi sudah menanganinya dan berpindah ke mode lokal.
+
+> Ingin website yang fiturnya penuh? Pages tidak bisa. Perlu hosting yang menjalankan Node.js
+> (mis. Render/Fly/Koyeb) **plus** disk persisten supaya `server/db.json` tidak hilang saat
+> restart. Itu di luar GitHub dan butuh akun pihak ketiga.
+
+### 7.2 APK → GitHub Releases (orang lain bisa unduh dan pasang)
+
+1. Web: **repository → Releases → Draft a new release** → tag `v1.0` → *Choose file* →
+   unggah `app-debug.apk` → *Publish release*.
+2. Lewat git CLI (kalau `gh` terinstal):
+   ```
+   gh release create v1.0 "C:\Users\HP\Documents\NEKO-APK\app\build\outputs\apk\debug\app-debug.apk" --title "NEKO 3.0.13 (APK debug)" --notes "Mode A: hubungkan ke server NEKO. Mode B: offline, data per HP."
+   ```
+3. Link unduhan langsung berbentuk
+   `https://github.com/<username>/<repo>/releases/download/v1.0/app-debug.apk`
+   — taruh di bio/Grup kelas; teman tinggal ketuk dan pasang.
+4. Beri tahu cara pakainya: APK Mode A harus diisi alamat laptop (ubah `SERVER_URL` lalu build
+   ulang), Mode B langsung buka dan pakai tanpa laptop.
+
+### 7.3 (Opsional) Build APK otomatis oleh GitHub
+
+Kalau project Android diletakkan di repo (mis. folder `android-apk/`), GitHub Actions bisa
+membuat APK-nya tanpa laptop kamu — file `.github/workflows/android.yml`:
+```yaml
+name: Android Debug APK
+on:
+  push:
+    paths: ['android-apk/**']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: android-actions/setup-android@v3
+      - run: cd android-apk && ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NEKO-debug-apk
+          path: android-apk/app/build/outputs/apk/debug/app-debug.apk
+```
+Artifact-nya bisa diunduh siapa pun dari halaman Actions run.
+
+---
+
+## 8. Pemecahan masalah
+
+| Gejala | Penyebab | Solusi |
+|---|---|---|
+| Halaman putih kosong di browser/HP | server belum jalan / salah alamat | jalankan `Mulai-NEKO.bat`, cek IP dan port `3000` |
+| HP tidak bisa connect padahal 1 WiFi | Windows Firewall atau IP berubah | Allow "Private networks"; nyalakan ulang bat dan catat IP baru |
+| APK hanya menampilkan halaman error | `usesCleartextTraffic` kurang / alamat salah | tambahkan flag, cek `SERVER_URL` pakai `http://` bukan `https://` |
+| Login "hilang" setiap buka APK | `setDomStorageEnabled(true)` belum aktif | aktifkan DOM storage (lihat `MainActivity`) |
+| `Terjadi kesalahan server (404)` saat daftar akun di Pages | situs statis tanpa backend | normal — aplikasi seharusnya pindah ke mode lokal; kalau muncul, hard refresh (Ctrl+F5) |
+| Tombol **Mulai** Kelas Langsung tidak bisa ditekan | belum ada siswa bergabung | minta minimal 1 siswa join dengan PIN |
+| Karakter sudah dipakai / tidak bisa dipilih | karakter unik per ruangan | pilih karakter lain, atau tunggu pemain keluar |
+| Data kelas hilang | `server/db.json` terhapus | pulihkan dari cadangan; jangan hapus file itu |
+| Perubahan JS tidak terlihat | aset di-cache (`?v=`) | naikkan versi di `index.html` dan **Ctrl+F5** |
+| `Invalid package config ... package.json` | Node gagal baca folder | jalankan ulang `Mulai-NEKO.bat`; jangan taruh `package.json` rusak di root |
+
+---
+
+## 9. Struktur folder
+
+```
+Neko Fix/
+  Mulai-NEKO.bat          peluncur server (Windows)
+  index.html              satu halaman aplikasi + daftar aset (?v= versi cache)
+  manifest.webmanifest    supaya bisa "Tambahkan ke layar utama"
+  favicon.svg             ikon aplikasi
+  css/                    styles tema & komponen
+  js/                     app.js, api.js, auth.js, live.js, mascot.js, contact.js, ...
+    games/                8 game arena
+  data/                   materials.js (6 bab) + kuis + kata untuk Kata Penyusup
+  assets/                 gambar/ilustrasi
+  server/
+    server.js             Node tanpa dependency: REST + WebSocket + long-poll
+    db.json               penyimpanan (file JSON, BUKAN database)
+```
+
+Perintah cepat server:
+```
+node server/server.js              # port 3000
+set NEKO_PORT=8080 && node server/server.js   # port lain (Windows cmd)
+```
+
+---
+
+## 10. Kredit
+
+- **Kelompok 1 · XI TJKT 2** — Ivander, Muh. Hadit Rafanizam, Muh. Fikron Ainun Najib,
+  Akhsan Jauhar Santoso.
+- **Guru pembimbing:** Pak Andy Musly.
+- Teknologi: HTML, CSS, JavaScript, Node.js (modul bawaan), WebSocket RFC 6455, WebAudio,
+  SVG (maskot & pack avatar buatan sendiri).
+- Tidak memakai library eksternal, tidak memakai layanan Google, dan tidak memakai database.
