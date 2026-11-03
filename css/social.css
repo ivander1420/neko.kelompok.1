@@ -21,8 +21,7 @@
 .notif-group-label .ic {
   width: 14px;
   height: 14px;
-  color: var(--accent);
-}
+  color: var(--accent); --sw: 2.45;}
 
 .notif-group-label:not(:first-child) {
   margin-top: 18px;
@@ -102,8 +101,7 @@
 
 .rank-num .ic {
   width: 18px;
-  height: 18px;
-}
+  height: 18px; --sw: 2.15;}
 
 .rank-row.top-1 .rank-num {
   color: var(--accent-ink);
@@ -239,8 +237,7 @@
 .community-info .kicker .ic {
   width: 14px;
   height: 14px;
-  color: var(--accent);
-}
+  color: var(--accent); --sw: 2.45;}
 
 .community-info h3 {
   margin-top: 8px;
@@ -308,8 +305,7 @@
   height: 16px;
   flex: none;
   margin-top: 2px;
-  color: var(--accent);
-}
+  color: var(--accent); --sw: 2.3;}
 
 .community-note b {
   display: block;
@@ -342,10 +338,9 @@
 }
 
 .community-empty .ic {
-  width: 22px;
-  height: 22px;
-  color: color-mix(in srgb, var(--accent) 70%, var(--muted));
-}
+  width: 20px;
+  height: 20px;
+  color: color-mix(in srgb, var(--accent) 70%, var(--muted)); --sw: 2.05;}
 
 .community-feed-more {
   margin-top: auto;
@@ -423,8 +418,7 @@
 .admin-card .card-title .ic {
   width: 18px;
   height: 18px;
-  color: var(--accent);
-}
+  color: var(--accent); --sw: 2.15;}
 
 .admin-card .card-sub {
   margin: 3px 0 12px;

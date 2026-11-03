@@ -12,10 +12,11 @@
 
   const themes = [
     {
-      id: 'default', name: 'Neon Lab', short: 'Lab', desc: 'Komputer & jaringan',
-      icon: 'monitor', icons: ['monitor', 'network', 'server', 'ip'],
-      preview: { bg: '#071426', a: '#22e1ff', b: '#7c74ff', c: '#3dffb0' },
-      meta: '#07101f', modes: ['dark', 'light'], world: 'Dunia sirkuit neon'
+      id: 'paper', name: 'Paper Quest', short: 'Kertas', desc: 'Peta, gulungan & kayu',
+      icon: 'scroll', icons: ['scroll', 'map', 'swords', 'feather'],
+      preview: { bg: '#241812', a: '#e0ab4b', b: '#b84a3e', c: '#4ba094' },
+      meta: '#2a1c16', modes: ['dark', 'light'], world: 'Dunia petualangan kertas',
+      defaultMode: 'dark'
     },
     {
       id: 'forest', name: 'Hutan Rimba', short: 'Hutan', desc: 'Gunung, pohon & burung',
@@ -54,11 +55,10 @@
       meta: '#080516', modes: ['dark', 'light'], world: 'Dunia luar angkasa'
     },
     {
-      id: 'paper', name: 'Paper Quest', short: 'Kertas', desc: 'Peta, gulungan & kayu',
-      icon: 'scroll', icons: ['scroll', 'map', 'swords', 'feather'],
-      preview: { bg: '#241812', a: '#e0ab4b', b: '#b84a3e', c: '#4ba094' },
-      meta: '#2a1c16', modes: ['dark', 'light'], world: 'Dunia petualangan kertas',
-      defaultMode: 'light'
+      id: 'default', name: 'Neon Circuit', short: 'Neon', desc: 'Komputer & jaringan',
+      icon: 'monitor', icons: ['monitor', 'network', 'server', 'ip'],
+      preview: { bg: '#071426', a: '#22e1ff', b: '#7c74ff', c: '#3dffb0' },
+      meta: '#07101f', modes: ['dark', 'light'], world: 'Dunia sirkuit neon'
     }
   ];
 
@@ -76,7 +76,7 @@
 
   function current() {
     return {
-      theme: document.documentElement.dataset.theme || 'default',
+      theme: document.documentElement.dataset.theme || 'paper',
       mode: document.documentElement.dataset.mode || 'dark',
       car: document.documentElement.dataset.car || 'red'
     };
@@ -84,7 +84,7 @@
 
   function applyDom(prefs) {
     const root = document.documentElement;
-    const target = prefs.theme || 'default';
+    const target = prefs.theme || 'paper';
     const info = meta(target);
     const mode = target === 'car' ? 'dark' : (info.modes.includes(prefs.mode) ? prefs.mode : 'dark');
     root.dataset.theme = target;

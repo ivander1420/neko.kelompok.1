@@ -169,7 +169,7 @@
     game: {
       keywords: ['main', 'game', 'arena', 'kuis', 'quiz', 'tantangan', 'skor', 'rekor', 'bermain'],
       book: '', game: 'quiz',
-      answer: 'Arena NEKO punya delapan game solo — Kuis Kilat, Kata Penyusup, Lab Kabel, Kartu Memori, Subnet Master, Menara OSI, Detektif Jaringan, Refleks Neko — plus satu mode online bernama Kelas Langsung. Pilih kartu game, atur kesulitan, lalu tekan Mulai.'
+      answer: 'Arena NEKO punya delapan game solo — Kuis Kilat, Who Is The Spy, Lab Kabel, Kartu Memori, Subnet Master, Menara OSI, Detektif Jaringan, Refleks Neko — plus satu mode online bernama Kelas Langsung. Pilih kartu game, atur kesulitan, lalu tekan Mulai.'
     },
     live: {
       keywords: ['live class', 'kelas langsung', 'kahoot', 'pin kelas', 'main bareng', 'multiplayer', 'lawan teman'],
@@ -197,9 +197,9 @@
       answer: 'Check-in harian ada di beranda. Semakin panjang streak, hadiah XP makin besar: 20 sampai 80 XP. Check-in juga membuka badge Api Semangat saat mencapai tujuh hari.'
     },
     theme: {
-      keywords: ['tema', 'tampilan', 'warna', 'mode', 'gelap', 'terang', 'mobil', 'balap', 'astronot', 'hutan', 'laut', 'pink'],
+      keywords: ['tema', 'tampilan', 'warna', 'mode', 'gelap', 'terang', 'mobil', 'balap', 'astronot', 'hutan', 'laut', 'pink', 'paper', 'kertas', 'neon'],
       book: '', game: '',
-      answer: 'Ada delapan dunia: Neon Lab, Hutan Rimba, Samudra, Permen Manis, Crimson Core, Velocity, Orbit NEKO, dan Paper Quest. Velocity khusus balap dan selalu gelap; dunia lain punya mode terang dan gelap. Semua tema mengubah latar, ikon, font, dan suara.'
+      answer: 'Ada delapan dunia: Paper Quest (tema utama NEKO), Hutan Rimba, Samudra, Permen Manis, Crimson Core, Velocity, Orbit NEKO, dan Neon Circuit. Velocity khusus balap dan selalu gelap; dunia lain punya mode terang dan gelap. Semua tema mengubah latar, ikon, font, dan suara.'
     },
     identity: {
       keywords: ['siapa kamu', 'kamu siapa', 'namamu', 'nama kamu', 'miki', 'miko', 'neksya', 'sasha', 'mochi'],
@@ -421,6 +421,7 @@
   function pushMessage(who, text, actions = []) {
     history[who].push({ role: 'bot', text, actions, time: Date.now() });
     if (history[who].length > 60) history[who].shift();
+    if (Neko.voice) Neko.voice.say(text, who);
   }
 
   function ensureGreeting(who) {
@@ -510,6 +511,7 @@
   function closeSheet() {
     window.clearTimeout(typingTimer);
     typingTimer = null;
+    if (Neko.voice) Neko.voice.cancel();
     if (sheetEntry) {
       try { sheetEntry.close(); } catch (error) { /* abaikan */ }
       sheetEntry = null;
@@ -549,6 +551,7 @@
   function openChat(characterId) {
     const who = cast[characterId] ? characterId : activeId;
     activeId = who;
+    hideBubble();
     ensureGreeting(who);
     if (sheetEntry) {
       const current = sheetEntry.layer;
@@ -629,6 +632,7 @@
 
   const pet = {
     root: null,
+    dock: null,
     node: null,
     body: null,
     bubble: null,
@@ -639,13 +643,20 @@
     swapTimer: null,
     bubbleTimer: null,
     reactTimer: null,
-    comfortTimer: null
+    comfortTimer: null,
+    x: 0,
+    y: 0,
+    side: 'right',
+    dragId: null,
+    dragMoved: false,
+    grabX: 0,
+    grabY: 0
   };
 
   const WIN_LINES = [
     'Yeay, menang! Kerja bagus, lanjutkan!',
     'Keren! Jawabanmu cepat dan tepat.',
-    'Mantap! Miko sampai ikut bangga.'
+    'Mantap! Aku sampai ikut bangga.'
   ];
   const LOSE_LINES = [
     'Yah, belum menang. Tidak apa-apa, semangat!',
@@ -669,6 +680,7 @@
     const label = pet.node.querySelector('.mascot-pet-label');
     if (label) label.innerHTML = icon('chat') + 'Tanya ' + name;
     pet.node.setAttribute('aria-label', 'Ngobrol dengan ' + name);
+    if (pet.bubble) pet.bubble.setAttribute('aria-label', 'Buka chat dengan ' + name);
   }
 
   function hideBubble() {
@@ -676,10 +688,24 @@
     pet.bubble.classList.remove('on');
   }
 
+  function openChatFromPet() {
+    if (pet.dragMoved) return;
+    Neko.audio.play('select');
+    hideBubble();
+    if (pet.node) {
+      pet.node.classList.add('is-chatting');
+      window.setTimeout(() => { if (pet.node) pet.node.classList.remove('is-chatting'); }, 600);
+    }
+    openChat(pet.id);
+  }
+
   function showBubble(text, ms = 4200) {
     if (!pet.bubble || !text) return;
-    pet.bubble.innerHTML = esc(text);
+    if (sheetEntry) return;
+    pet.bubble.innerHTML = '<span class="mascot-bubble-text" role="status" aria-live="polite">' + esc(text) + '</span>' +
+      '<span class="mascot-bubble-hint">' + icon('chat') + 'ketuk</span>';
     pet.bubble.classList.add('on');
+    if (Neko.voice) Neko.voice.say(text, pet.id);
     window.clearTimeout(pet.bubbleTimer);
     pet.bubbleTimer = window.setTimeout(hideBubble, ms);
   }
@@ -727,6 +753,7 @@
 
   function wander() {
     if (!pet.mounted || !pet.node) return;
+    if (pet.dragId !== null) { scheduleWander(); return; }
     const spread = window.innerWidth < 760 ? 10 : 34;
     const dx = Math.round((Math.random() * 2 - 1) * spread);
     const dy = Math.round((Math.random() * 2 - 1) * 12);
@@ -742,6 +769,167 @@
   function scheduleWander() {
     window.clearTimeout(pet.wanderTimer);
     pet.wanderTimer = window.setTimeout(wander, 5200 + Math.random() * 5200);
+  }
+
+  /* ---------------- Seret maskot: snap ke tepi kiri/kanan ---------------- */
+
+  const POS_KEY = 'neko_pet_pos_v1';
+  const LAND_LINES = [
+    'Sip, aku diam di sini ya.',
+    'Enak juga di tepi ini.',
+    'Kalau mau ngobrol, ketuk aku saja.'
+  ];
+
+  function limit(value, min, max) {
+    if (max < min) return min;
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function cssNum(name, fallback) {
+    try {
+      const n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+      return Number.isFinite(n) ? n : fallback;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  /** Batas area maskot: mulai dari bawah bar atas, berhenti di atas bar bawah. */
+  function petArea() {
+    const topbar = document.getElementById('topbar');
+    const dockEl = document.getElementById('dock');
+    const sidebar = document.getElementById('sidebar');
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const topRect = topbar ? topbar.getBoundingClientRect() : null;
+    const dockRect = dockEl ? dockEl.getBoundingClientRect() : null;
+    const sideRect = sidebar ? sidebar.getBoundingClientRect() : null;
+    const barFloor = cssNum('--topbar-h', 56) + 10;
+    const onScreenBar = topRect && topRect.height > 0 && topRect.top >= 0 ? topRect.bottom + 10 : null;
+    const minY = Math.round(Math.max(8, Math.min(onScreenBar === null ? barFloor : onScreenBar, vh - 90)));
+    const barCeil = dockRect && dockRect.height > 0 ? vh - cssNum('--dock-h', 64) - 10 : vh - 14;
+    const dockVisible = dockRect && dockRect.height > 0 && dockRect.top > 0 && dockRect.top < vh;
+    const maxY = Math.round(Math.max(minY + 60, dockVisible ? Math.min(dockRect.top - 10, barCeil) : barCeil));
+    const edge = sideRect && sideRect.width > 0 && sideRect.right > 0 && sideRect.right < vw * .55 ? Math.round(sideRect.right) + 12 : 12;
+    return { minX: edge, inset: 12, minY, maxY };
+  }
+
+  function petSize() {
+    if (!pet.dock) return { w: 92, h: 70 };
+    return { w: pet.dock.offsetWidth || 92, h: pet.dock.offsetHeight || 70 };
+  }
+
+  function applyDock(instant) {
+    if (!pet.dock) return;
+    const x = Number.isFinite(pet.x) ? Math.round(pet.x) : 0;
+    const y = Number.isFinite(pet.y) ? Math.round(pet.y) : 0;
+    if (instant) pet.dock.classList.add('is-instant');
+    pet.dock.style.setProperty('--dock-x', x + 'px');
+    pet.dock.style.setProperty('--dock-y', y + 'px');
+    pet.dock.dataset.side = pet.side;
+    if (instant) {
+      void pet.dock.offsetWidth;
+      pet.dock.classList.remove('is-instant');
+    }
+  }
+
+  /** Kembalikan ke tepi paling dekat — maskot tidak boleh berhenti di tengah. */
+  function snapToEdge(instant) {
+    const area = petArea();
+    const size = petSize();
+    const middle = pet.x + size.w / 2 < window.innerWidth / 2;
+    pet.side = middle ? 'left' : 'right';
+    pet.x = middle ? area.minX : Math.max(area.minX, window.innerWidth - area.inset - size.w);
+    pet.y = limit(pet.y, area.minY, area.maxY - size.h);
+    applyDock(instant);
+  }
+
+  function savePos() {
+    const area = petArea();
+    const size = petSize();
+    const span = area.maxY - size.h - area.minY;
+    try {
+      localStorage.setItem(POS_KEY, JSON.stringify({
+        side: pet.side,
+        ratio: span > 0 ? (pet.y - area.minY) / span : 1
+      }));
+    } catch (error) { /* penyimpanan privat */ }
+  }
+
+  function restorePos() {
+    const area = petArea();
+    const size = petSize();
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null'); } catch (error) { saved = null; }
+    if (saved && (saved.side === 'left' || saved.side === 'right')) {
+      pet.side = saved.side;
+      const ratio = limit(Number(saved.ratio), 0, 1);
+      pet.x = pet.side === 'left' ? area.minX : Math.max(area.minX, window.innerWidth - area.inset - size.w);
+      pet.y = limit(area.minY + ratio * (area.maxY - size.h - area.minY), area.minY, area.maxY - size.h);
+      applyDock(true);
+      return true;
+    }
+    pet.side = 'right';
+    pet.x = Math.max(area.minX, window.innerWidth - area.inset - size.w);
+    pet.y = area.maxY - size.h;
+    applyDock(true);
+    return false;
+  }
+
+  function onPetDown(event) {
+    if (!pet.node || pet.dragId !== null) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    pet.dragId = event.pointerId;
+    pet.dragMoved = false;
+    pet.grabX = event.clientX - pet.x;
+    pet.grabY = event.clientY - pet.y;
+    pet.node.style.setProperty('--wx', '0px');
+    pet.node.style.setProperty('--wy', '0px');
+    window.clearTimeout(pet.wanderTimer);
+    try { pet.node.setPointerCapture(event.pointerId); } catch (error) { /* tetap jalan tanpa capture */ }
+    if (pet.dock) pet.dock.classList.add('is-dragging');
+  }
+
+  function onPetMove(event) {
+    if (pet.dragId === null || event.pointerId !== pet.dragId || !pet.dock) return;
+    const area = petArea();
+    const size = petSize();
+    const x = event.clientX - pet.grabX;
+    const y = event.clientY - pet.grabY;
+    if (!pet.dragMoved && Math.abs(x - pet.x) + Math.abs(y - pet.y) > 7) {
+      pet.dragMoved = true;
+      hideBubble();
+    }
+    if (!pet.dragMoved) return;
+    event.preventDefault();
+    pet.x = limit(x, area.minX, Math.max(area.minX, window.innerWidth - 8 - size.w));
+    pet.y = limit(y, area.minY, Math.max(area.minY, area.maxY - size.h));
+    applyDock(true);
+  }
+
+  function onPetUp(event) {
+    if (pet.dragId === null || (event && event.pointerId !== pet.dragId)) return;
+    pet.dragId = null;
+    if (pet.dock) pet.dock.classList.remove('is-dragging');
+    if (pet.dragMoved) {
+      snapToEdge();
+      if (pet.dock) {
+        pet.dock.classList.add('is-landing');
+        window.setTimeout(() => { if (pet.dock) pet.dock.classList.remove('is-landing'); }, 640);
+      }
+      window.setTimeout(() => { pet.dragMoved = false; }, 180);
+      savePos();
+      Neko.audio.play('select');
+      window.setTimeout(() => showBubble(randomOf(LAND_LINES), 2600), 420);
+    }
+    scheduleWander();
+  }
+
+  function onPetResize() {
+    if (!pet.mounted || !pet.dock) return;
+    if (pet.dragId !== null) return;
+    snapToEdge(true);
+    savePos();
   }
 
   function swapCharacter() {
@@ -764,12 +952,20 @@
     pet.id = 'miki';
     pet.mood = 'happy';
     pet.mounted = true;
+    pet.dragId = null;
+    pet.dragMoved = false;
+    pet.side = 'right';
 
-    const bubble = document.createElement('div');
+    const dock = document.createElement('div');
+    dock.className = 'mascot-dock';
+    dock.dataset.side = 'right';
+    pet.dock = dock;
+
+    const bubble = document.createElement('button');
+    bubble.type = 'button';
     bubble.className = 'mascot-bubble';
-    bubble.setAttribute('role', 'status');
-    bubble.setAttribute('aria-live', 'polite');
-    root.appendChild(bubble);
+    bubble.addEventListener('click', openChatFromPet);
+    dock.appendChild(bubble);
     pet.bubble = bubble;
 
     const button = document.createElement('button');
@@ -778,17 +974,29 @@
     button.style.setProperty('--wx', '0px');
     button.style.setProperty('--wy', '0px');
     button.innerHTML = '<span class="mascot-pet-body" style="' + palette('miki') + '">' + svg('miki', 'happy') + '</span><span class="mascot-pet-label">' + icon('chat') + 'Tanya Miki</span>';
-    button.addEventListener('click', () => {
-      Neko.audio.play('select');
-      hideBubble();
-      button.classList.add('is-chatting');
-      window.setTimeout(() => button.classList.remove('is-chatting'), 600);
-      openChat(pet.id);
-    });
+    button.addEventListener('click', openChatFromPet);
+    button.addEventListener('pointerdown', onPetDown);
+    button.addEventListener('pointermove', onPetMove);
+    button.addEventListener('pointerup', onPetUp);
+    button.addEventListener('pointercancel', onPetUp);
+    button.addEventListener('lostpointercapture', onPetUp);
+    button.addEventListener('dragstart', (event) => event.preventDefault());
+    button.setAttribute('title', 'Seret ke tepi, atau ketuk untuk ngobrol');
     pet.node = button;
     pet.body = button.querySelector('.mascot-pet-body');
-    root.appendChild(button);
+    dock.appendChild(button);
+    root.appendChild(dock);
 
+    paintPet();
+    const known = restorePos();
+    window.setTimeout(() => { if (pet.mounted && pet.dock && pet.dragId === null) restorePos(); }, 150);
+    if (!known) {
+      dock.classList.add('is-hint');
+      window.setTimeout(() => { if (pet.dock) pet.dock.classList.remove('is-hint'); }, 2200);
+      window.setTimeout(() => showBubble('Aku bisa digeser ke tepi, lho. Ketuk untuk ngobrol.', 5200), 1900);
+    }
+    window.addEventListener('resize', onPetResize);
+    window.addEventListener('orientationchange', onPetResize);
     window.setTimeout(() => { if (pet.mounted) showBubble(randomOf(IDLE_LINES), 5000); }, 1400);
     scheduleWander();
     window.clearInterval(pet.swapTimer);
@@ -803,8 +1011,12 @@
     window.clearTimeout(pet.reactTimer);
     window.clearTimeout(pet.comfortTimer);
     window.clearInterval(pet.swapTimer);
+    window.removeEventListener('resize', onPetResize);
+    window.removeEventListener('orientationchange', onPetResize);
     pet.wanderTimer = pet.bubbleTimer = pet.reactTimer = pet.comfortTimer = pet.swapTimer = null;
-    pet.root = pet.node = pet.body = pet.bubble = null;
+    pet.dragId = null;
+    pet.dragMoved = false;
+    pet.root = pet.node = pet.body = pet.bubble = pet.dock = null;
     const root = document.getElementById('mascotRoot');
     if (root) root.innerHTML = '';
   }

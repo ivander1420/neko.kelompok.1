@@ -1,5 +1,5 @@
 /* ============================================================
-   NEKO · games/spy.js — Kata Penyusup
+   NEKO · games/spy.js — Who Is The Spy 
    ============================================================ */
 (function () {
   'use strict';
@@ -12,7 +12,7 @@
     const total = Math.max(3, ctx.config.players || 3);
     const base = ctx.store.session?.displayName || 'Kamu';
     const names = [base];
-    const extras = ['Nadia', 'Rafi', 'Faris', 'Bima', 'Kirana', 'Dewa'];
+    const extras = ['pemain', 'pemain', 'pemain', 'pemain', 'pemain', 'pemain'];
     for (let i = 1; i < total; i += 1) names.push(extras[(i - 1) % extras.length]);
     return names;
   }
@@ -30,7 +30,7 @@
 
       async function playRound() {
         if (!categories.length) {
-          ctx.finish({ title: 'Data kata belum ada', message: 'Komponen kata penyusup tidak termuat.', score: 0, won: false, xp: 0, stats: [] });
+          ctx.finish({ title: 'Data kata belum ada', message: 'Komponen Who Is The Spy tidak termuat.', score: 0, won: false, xp: 0, stats: [] });
           return;
         }
         const category = pick(categories);
@@ -77,7 +77,7 @@
             '<button type="button" class="spy-card" data-spy-card aria-label="Buka kartu rahasia">' +
             '<span class="spy-card-inner">' +
             '<span class="spy-face"><span class="spy-icon">' + icon('spy') + '</span><small>Kartu rahasia</small><strong>Ketuk untuk buka</strong><span>Pastikan pemain lain tidak melihat</span></span>' +
-            '<span class="spy-face back"><span class="spy-icon">' + icon(isSpy ? 'alien' : 'cat') + '</span><small>' + esc(categoryName) + '</small><strong>' + esc(word) + '</strong><span class="spy-role-badge">' + (isSpy ? 'Kata penyusup' : 'Kru jaringan') + '</span></span>' +
+            '<span class="spy-face back"><span class="spy-icon">' + icon(isSpy ? 'alien' : 'cat') + '</span><small>' + esc(categoryName) + '</small><strong>' + esc(word) + '</strong><span class="spy-role-badge">' + (isSpy ? 'Who Is The Spy' : 'Kru Jaringan') + '</span></span>' +
             '</span></button>' +
             '<p class="spy-hint">Ingat katamu. Jangan ucapkan langsung.</p>' +
             '<div class="g-actions" data-spy-actions></div>' +
@@ -124,7 +124,7 @@
                   '<h2>' + (found ? 'Penyusup tertangkap!' : 'Penyusup lolos!') + '</h2>' +
                   '<p>' + (found ? esc(names[accused]) + ' memang penyusup. Kru jaringan menang.' : esc(names[accused]) + ' bukan penyusup. Penyusup sebenarnya adalah ' + esc(names[spyIndex]) + '.') + '</p>' +
                   '<div class="spy-reveal"><span class="spy-word">' + esc(mainWord) + '</span><small>Kata kru · kategori ' + esc(categoryName) + '</small></div>' +
-                  '<div class="spy-reveal"><span class="spy-word">' + esc(decoyWord) + '</span><small>Kata penyusup</small></div>' +
+                  '<div class="spy-reveal"><span class="spy-word">' + esc(decoyWord) + '</span><small>Who Is The Spy</small></div>' +
                   '<div class="g-actions"><button type="button" class="btn btn-primary" data-round-next>' + (round >= rounds ? 'Lihat hasil' : 'Putaran berikutnya') + icon('arrow-right') + '</button></div>' +
                   '</div>'
                 );
@@ -145,7 +145,7 @@
         const xp = 18 + Math.round(score / 5);
         ctx.finish({
           title: won ? 'Kru jaringan menang' : 'Penyusup berjaya',
-          message: 'Kata penyusup menguji seberapa tepat kamu memberi petunjuk tanpa membocorkan rahasia.',
+          message: 'Who Is The Spy menguji seberapa tepat kamu memberi petunjuk tanpa membocorkan rahasia.',
           won, score, xp,
           stats: [
             { label: 'Putaran', value: String(rounds) },
@@ -184,7 +184,7 @@
             const add = frame.querySelector('[data-roster-add]');
             if (add) add.addEventListener('click', () => { roster.push('Pemain ' + (roster.length + 1)); Neko.audio.play('tap'); paint(); });
             frame.querySelectorAll('[data-del]').forEach(button => button.addEventListener('click', () => {
-              if (roster.length <= 3) { Neko.ui.toast('Minimal tiga pemain', 'Kata Penyusup seru dimainkan tiga pemain atau lebih.', 'error', 'warning'); return; }
+              if (roster.length <= 3) { Neko.ui.toast('Minimal tiga pemain', 'Who Is The Spy seru dimainkan tiga pemain atau lebih.', 'error', 'warning'); return; }
               roster.splice(Number(button.dataset.del), 1);
               Neko.audio.play('tap');
               paint();

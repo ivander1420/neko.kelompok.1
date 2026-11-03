@@ -65,9 +65,10 @@
 
 .msg-search .icon,
 .msg-search svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   flex: none;
+  --sw: 2.3;
 }
 
 .msg-search input {
@@ -137,6 +138,7 @@
 .msg-tab svg {
   width: 16px;
   height: 16px;
+  --sw: 2.3;
 }
 
 .msg-tab-n {
@@ -179,6 +181,7 @@
 .msg-loading svg {
   width: 18px;
   height: 18px;
+  --sw: 2.15;
   animation: msg-spin 1.1s linear infinite;
 }
 
@@ -213,6 +216,7 @@
 .msg-empty-ic svg {
   width: 28px;
   height: 28px;
+  --sw: 1.75;
 }
 
 .msg-empty h3 {
@@ -562,6 +566,7 @@
 .msg-friend-xp svg {
   width: 14px;
   height: 14px;
+  --sw: 2.45;
 }
 
 .msg-friend-actions {
@@ -598,8 +603,9 @@
 
 .msg-state-chip .icon,
 .msg-state-chip svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
+  --sw: 2.3;
 }
 
 .msg-outgoing {
@@ -660,8 +666,9 @@
 
 .msg-offline-ic .icon,
 .msg-offline-ic svg {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  --sw: 1.6;
 }
 
 .msg-offline h2 {
@@ -696,6 +703,7 @@
 .msg-offline-tip svg {
   width: 16px;
   height: 16px;
+  --sw: 2.3;
   flex: none;
   margin-top: 1px;
   color: var(--accent);

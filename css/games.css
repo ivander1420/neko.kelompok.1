@@ -49,7 +49,7 @@
   box-shadow: 0 20px 44px -12px color-mix(in srgb, var(--accent) 65%, transparent);
   animation: float-y 5s ease-in-out infinite;
 }
-.arena-core .ic { width: 46px; height: 46px; }
+.arena-core .ic { width: 44px; height: 44px; --sw: 1.45;}
 .arena-orbit-dot {
   position: absolute;
   width: 38px;
@@ -61,6 +61,11 @@
   border: 1px solid var(--line);
   color: var(--accent);
   box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .4);
+}
+.arena-orbit-dot .ic {
+  width: 18px;
+  height: 18px;
+  --sw: 2.15;
 }
 .arena-orbit-dot.d1 { top: 6%; left: 12%; animation: float-y 4.6s ease-in-out infinite; }
 .arena-orbit-dot.d2 { top: 18%; right: 8%; animation: float-y 5.4s ease-in-out infinite reverse; }
@@ -131,7 +136,7 @@
   box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--gc, var(--accent)) 70%, transparent);
   flex: none;
 }
-.game-icon .ic { width: 27px; height: 27px; }
+.game-icon .ic { width: 28px; height: 28px; --sw: 1.75;}
 .game-card h3 { font-size: 17px; margin: 2px 0 0; }
 .game-card p { font-size: 12.6px; line-height: 1.55; }
 .game-card-foot {
@@ -151,7 +156,7 @@
   font-size: 13px;
   color: var(--gc, var(--accent));
 }
-.game-card-foot .game-play .ic { width: 15px; height: 15px; }
+.game-card-foot .game-play .ic { width: 14px; height: 14px; --sw: 2.45;}
 .game-best { font-size: 10.5px; color: var(--muted); font-family: var(--font-mono); }
 .game-tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .game-tags span {
@@ -240,7 +245,7 @@
   font-size: 11.5px;
   color: var(--muted);
 }
-.setup-note .ic { color: var(--accent); flex: none; margin-top: 2px; }
+.setup-note .ic { width: 14px; height: 14px; color: var(--accent); flex: none; margin-top: 2px; --sw: 2.45; }
 
 /* ---------- Fullscreen game ---------- */
 
@@ -284,10 +289,10 @@
   transition: .25s var(--ease);
 }
 .game-exit:hover { border-color: var(--danger); color: var(--danger); }
-.game-exit .ic { width: 15px; height: 15px; }
+.game-exit .ic { width: 14px; height: 14px; --sw: 2.45;}
 .game-title-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .game-title-wrap .game-icon { width: 34px; height: 34px; border-radius: 11px; }
-.game-title-wrap .game-icon .ic { width: 18px; height: 18px; }
+.game-title-wrap .game-icon .ic { width: 18px; height: 18px; --sw: 2.15;}
 .game-title-wrap b { font-family: var(--font-display); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .game-title-wrap small { display: block; color: var(--muted); font-size: 10.5px; }
 .game-bar .spacer { flex: 1; }
@@ -311,7 +316,7 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.game-hud-pill .ic { width: 13px; height: 13px; color: var(--gc, var(--accent)); }
+.game-hud-pill .ic { width: 12px; height: 12px; color: var(--gc, var(--accent)); --sw: 2.6;}
 .game-hud-pill.hot { border-color: color-mix(in srgb, var(--danger) 50%, var(--line)); color: var(--danger); }
 
 .game-stage {
@@ -540,7 +545,7 @@
   box-shadow: 0 24px 46px -16px color-mix(in srgb, var(--gc, var(--accent)) 70%, transparent);
   animation: float-y 4.4s ease-in-out infinite;
 }
-.g-center-icon .ic { width: 44px; height: 44px; }
+.g-center-icon .ic { width: 44px; height: 44px; --sw: 1.45;}
 .g-center h2 { margin: 0; font-size: clamp(20px, 3vw, 30px); }
 .g-center p { max-width: 46ch; font-size: 13px; }
 .g-center .btn { min-width: 180px; }
@@ -609,7 +614,7 @@
   box-shadow: 0 22px 44px -16px color-mix(in oklab, var(--warn) 55%, transparent);
   animation: pop-in .5s var(--ease-bounce) both;
 }
-.g-result-medal .ic { width: 48px; height: 48px; }
+.g-result-medal .ic { width: 48px; height: 48px; --sw: 1.4;}
 .g-result h2 { margin: 0; font-size: clamp(22px, 3.4vw, 34px); }
 .g-result > p { font-size: 13px; margin: 0 auto; max-width: 48ch; }
 .g-result-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 6px 0; }
@@ -646,6 +651,7 @@
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
+  --sw: 2.6;
 }
 
 /* ---------- Spy ---------- */
@@ -964,7 +970,7 @@
   background: color-mix(in srgb, var(--danger) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
 }
-.exit-pop-icon .ic { width: 34px; height: 34px; }
+.exit-pop-icon .ic { width: 34px; height: 34px; --sw: 1.6;}
 .exit-pop h3 { margin: 0 0 6px; }
 .exit-pop p { font-size: 13px; }
 .exit-pop-warning {
@@ -1186,7 +1192,7 @@ html[data-motion="off"] .g-timer-bar span::after { animation: none; }
   .arena-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .game-card { padding: 14px; gap: 8px; }
   .game-icon { width: 42px; height: 42px; border-radius: 14px; }
-  .game-icon .ic { width: 22px; height: 22px; }
+  .game-icon .ic { width: 20px; height: 20px; --sw: 2.05;}
   .game-card h3 { font-size: 14px; }
   .game-card p { font-size: 11.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .game-card-foot .game-play { font-size: 11.5px; }
@@ -1263,7 +1269,7 @@ html[data-motion="off"] .reaction-pad.go { animation: none; }
   }
 }
 
-/* ---------------- Kata Penyusup: roster nama pemain ---------------- */
+/* ---------------- Who Is The Spy: roster nama pemain ---------------- */
 
 .spy-roster { display: grid; gap: 8px; margin-top: 14px; }
 

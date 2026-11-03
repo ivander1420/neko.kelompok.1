@@ -238,10 +238,105 @@
     paper: { home: 't-paper-home', books: 't-paper-books', book: 't-paper-books', arena: 't-paper-arena', gamepad: 't-paper-arena', profile: 't-paper-profile', user: 't-paper-profile', settings: 't-paper-settings', volume: 't-paper-volume', 'volume-up': 't-paper-volume', music: 't-paper-music', xp: 't-paper-xp', star: 't-paper-star', sparkle: 't-paper-sparkle', sparkles: 't-paper-sparkle' }
   };
 
+    /* Koreksi optik hasil pengukuran getBBox: tiap glyph digeser atau
+     diperkecil secukupnya agar tintanya tepat di tengah grid 24. */
+  const nudge = {
+    'alien': 'translate(0 0.5)',
+    'banner': 'translate(0 2)',
+    'bell': 'translate(0 0.75)',
+    'bolt': 'translate(0.5 0)',
+    'car': 'translate(0 -1.75)',
+    'cat': 'translate(0 0.5)',
+    'chevron-down': 'translate(0 -0.5)',
+    'chevron-left': 'translate(1 0)',
+    'chevron-right': 'translate(-1 0)',
+    'chevron-up': 'translate(0 0.5)',
+    'crown': 'translate(0 -0.5)',
+    'cursor': 'translate(0 0.5)',
+    'detective': 'translate(-0.5 -0.5)',
+    'download': 'translate(0 0.5)',
+    'edit': 'translate(0.5 -0.5)',
+    'feather': 'translate(-0.5 0)',
+    'fish': 'translate(0.5 0)',
+    'flag': 'translate(1.5 -0.5)',
+    'flame': 'translate(-0.75 -0.25)',
+    'heart': 'translate(0 -0.85)',
+    'key': 'translate(0 1)',
+    'layers': 'translate(0 -0.75)',
+    'list-check': 'translate(-0.5 -0.25)',
+    'live': 'translate(0.33 0.33) scale(0.972)',
+    'megaphone': 'translate(-0.5 0)',
+    'music': 'translate(0.5 0)',
+    'note': 'translate(-0.5 0)',
+    'paw': 'translate(0 0.45)',
+    'phone-call': 'translate(1.01 0.99)',
+    'pin': 'translate(1 -1)',
+    'planet': 'translate(0.91 0.91) scale(0.924)',
+    'puzzle': 'translate(0.5 0)',
+    'ranking': 'translate(0 1)',
+    'refresh': 'translate(0 0.62)',
+    'restart': 'translate(0 0.62)',
+    'rotate-ccw': 'translate(0 0.62)',
+    'school': 'translate(0 0.5)',
+    'scroll': 'translate(-1.5 0)',
+    'search': 'translate(-0.75 -0.75)',
+    'settings': 'translate(0 0.6)',
+    'sparkle': 'translate(-1.25 0.25)',
+    'sparkles': 'translate(-1.25 0.25)',
+    'swords': 'translate(0 0.75)',
+    't-astronaut-home': 'translate(0 0.5)',
+    't-astronaut-music': 'translate(0 1.05)',
+    't-astronaut-profile': 'translate(0 1)',
+    't-astronaut-star': 'translate(-0.85 0.5)',
+    't-astronaut-xp': 'translate(0 1)',
+    't-candy-books': 'translate(0 -0.85)',
+    't-candy-home': 'translate(0 -0.5)',
+    't-candy-music': 'translate(1 -0.5)',
+    't-candy-settings': 'translate(0 -0.5)',
+    't-candy-sparkle': 'translate(0.2 1)',
+    't-candy-star': 'translate(0 -0.85)',
+    't-candy-volume': 'translate(0 -0.85)',
+    't-candy-xp': 'translate(0 -0.85)',
+    't-car-home': 'translate(0 -1)',
+    't-car-music': 'translate(0 0.75)',
+    't-car-profile': 'translate(0 -1.25)',
+    't-car-settings': 'translate(0 0.6)',
+    't-car-star': 'translate(0 -0.5)',
+    't-car-xp': 'translate(0 1)',
+    't-forest-home': 'translate(0 0.5)',
+    't-forest-music': 'translate(1 -1)',
+    't-forest-profile': 'translate(0 0.45)',
+    't-forest-settings': 'translate(0 0.6)',
+    't-forest-star': 'translate(0 2)',
+    't-forest-volume': 'translate(-1 -1.15)',
+    't-ocean-arena': 'translate(0.5 0)',
+    't-ocean-books': 'translate(0 -0.95)',
+    't-ocean-profile': 'translate(0 -1)',
+    't-ocean-sparkle': 'translate(0.6 0.55)',
+    't-ocean-star': 'translate(0 1.15)',
+    't-ocean-volume': 'translate(0.4 -2.2)',
+    't-paper-books': 'translate(0 0.5)',
+    't-paper-home': 'translate(0 0.5)',
+    't-paper-music': 'translate(0.5 0.25)',
+    't-paper-profile': 'translate(0 0.5)',
+    't-paper-star': 'translate(0 0.6)',
+    't-paper-volume': 'translate(-0.85 0)',
+    't-paper-xp': 'translate(0 0.95)',
+    't-red-music': 'translate(0 0.5)',
+    't-red-profile': 'translate(0 -1.25)',
+    't-red-xp': 'translate(0.5 0)',
+    'trophy': 'translate(0 -0.5)',
+    'warning': 'translate(0 0.5)',
+    'wrench': 'translate(-0.54 0.54)',
+    'zap': 'translate(0.5 0)',
+  };
+
   const all = Object.assign({}, base, extra);
 
   function symbol(id, inner) {
-    return '<symbol id="i-' + id + '" viewBox="0 0 24 24">' + inner + '</symbol>';
+    const fix = nudge[id];
+    const body = fix ? '<g transform="' + fix + '">' + inner + '</g>' : inner;
+    return '<symbol id="i-' + id + '" viewBox="0 0 24 24">' + body + '</symbol>';
   }
 
   function mountSprite() {
@@ -258,7 +353,7 @@
   }
 
   function resolve(name) {
-    const theme = document.documentElement.dataset.theme || 'default';
+    const theme = document.documentElement.dataset.theme || 'paper';
     const map = themeMap[theme];
     return (map && map[name]) || name;
   }

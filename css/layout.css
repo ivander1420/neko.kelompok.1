@@ -485,7 +485,8 @@
   place-items: center;
   border-radius: 9px;
   color: var(--muted);
-  font-size: 17px;
+  font-size: 18px;
+  --sw: 2.15;
   transition: color .2s, background .2s;
 }
 
@@ -521,6 +522,9 @@
 }
 
 .auth-note .ic {
+  width: 12px;
+  height: 12px;
+  --sw: 2.6;
   margin-top: 2px;
   color: var(--accent);
 }
@@ -705,8 +709,7 @@
 }
 
 .side-link .ic {
-  font-size: 19px;
-}
+  font-size: 18px; --sw: 2.15;}
 
 .side-link:hover {
   color: var(--ink);
@@ -884,7 +887,8 @@
   display: grid;
   place-items: center;
   color: var(--ink-2);
-  font-size: 16px;
+  font-size: 18px;
+  --sw: 2.15;
   transition: background .2s, color .2s, transform .2s var(--ease-spring);
 }
 
@@ -1039,7 +1043,8 @@
 }
 
 .dock-btn .dock-ic {
-  font-size: 21px;
+  font-size: 20px;
+  --sw: 2.05;
   transition: transform .25s var(--ease-spring);
 }
 
@@ -1083,6 +1088,52 @@
   height: 2px;
   border-radius: 99px;
   background: var(--accent);
+}
+
+/* Versi label dock ditentukan lewat pengukuran lebar nyata di js/app.js:
+   tulisan penuh -> singkatan -> ikon saja bila benar-benar tidak muat. */
+
+html[data-dock-fit="short"] .dock-btn .dock-label:not(.is-short) {
+  display: none;
+}
+
+html[data-dock-fit="short"] .dock-btn .dock-label.is-short {
+  display: block;
+}
+
+html[data-dock-fit="icon"] {
+  --dock-h: 58px;
+}
+
+html[data-dock-fit="icon"] .dock-btn .dock-label {
+  display: none;
+}
+
+html[data-dock-fit="icon"] .dock-btn .dock-ic {
+  font-size: 22px;
+  --sw: 1.95;
+}
+
+html[data-dock-fit="icon"] .dock-btn.on::after {
+  bottom: 7px;
+}
+
+/* Mode ukur: kedua label dibuat terlihat bayangan agar scrollWidth akurat */
+
+html.dock-measure .dock-btn .dock-label {
+  display: block !important;
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  max-width: none;
+  transform: none;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html.dock-measure .dock-btn .dock-ic {
+  font-size: 20px;
+  --sw: 2.05;
 }
 
 /* ---------------- Responsif shell ---------------- */
@@ -1235,19 +1286,6 @@
     gap: 3px;
     padding: 5px;
   }
-
-  .dock-btn .dock-label {
-    display: none;
-  }
-
-  .dock-btn .dock-label.is-short {
-    display: block;
-    font-size: 9.5px;
-  }
-
-  .dock-btn .dock-ic {
-    font-size: 19px;
-  }
 }
 
 /* Perangkat pendek (lanskap HP / tablet kecil): kurangi tinggi bar agar konten tidak tertutup */
@@ -1255,6 +1293,10 @@
   :root {
     --dock-h: 52px;
     --topbar-h: 50px;
+  }
+
+  html[data-dock-fit="icon"] {
+    --dock-h: 52px;
   }
 
   .dock-btn {

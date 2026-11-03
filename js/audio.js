@@ -17,7 +17,7 @@
     sfxBus: null,
     timer: null,
     step: 0,
-    theme: document.documentElement.dataset.theme || 'default',
+    theme: document.documentElement.dataset.theme || 'paper',
     sound: true,
     music: true,
     volume: 78,

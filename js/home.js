@@ -248,7 +248,7 @@
         window.setTimeout(() => { if (Neko.app.currentView === 'home') Neko.app.render(); }, 1050);
         return;
       }
-      if (event.target.closest('[data-open-chat]')) { Neko.mascot.openChat(); return; }
+      if (event.target.closest('[data-open-chat]')) { Neko.mascot.openChat('miki'); return; }
       if (event.target.closest('[data-open-theme]')) { Neko.ui.themeSheet(); return; }
       if (event.target.closest('[data-open-notifications]')) { Neko.ui.notificationsSheet(); return; }
     });

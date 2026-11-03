@@ -1,5 +1,6 @@
 /* ============================================================
-   NEKO · js/auth.js
+
+NEKO · js/auth.js
    Layar masuk & daftar. Akun utama berada di server NEKO agar
    data mengikuti akun ke perangkat lain. Saat server tidak
    terjangkau, aplikasi jatuh ke mode lokal (PBKDF2 + salt).

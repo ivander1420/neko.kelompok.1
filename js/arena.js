@@ -18,7 +18,7 @@
       tags: ['TJKT', 'Pilihan ganda'], players: 1, roundLabel: 'Jumlah soal', rounds: [5, 8, 12], defaults: 8
     },
     {
-      id: 'spy', name: 'Kata Penyusup', icon: 'spy', color: tone(1),
+      id: 'spy', name: 'Who Is The Spy', icon: 'spy', color: tone(1),
       desc: 'Satu pemain mendapat kata berbeda. Beri petunjuk, diskusikan, lalu temukan penyusupnya.',
       tags: ['Sosial', '3–8 pemain'], players: 8, minPlayers: 3, roundLabel: 'Putaran', rounds: [1, 2, 3], defaults: 1
     },

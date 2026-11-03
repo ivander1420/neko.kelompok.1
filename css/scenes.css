@@ -96,6 +96,7 @@
   color: color-mix(in srgb, var(--accent) 65%, transparent);
   opacity: .3;
   font-size: clamp(28px, 4.6vw, 58px);
+  --sw: 1.35;
   animation: float-y 8s ease-in-out infinite;
   filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 28%, transparent));
 }

@@ -1208,8 +1208,9 @@ button.live-answer.locked {
 
 .live-class-ic .icon,
 .live-class-ic svg {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
+  --sw: 1.75;
 }
 
 .live-class-copy {
@@ -1266,6 +1267,7 @@ button.live-answer.locked {
 .live-class-go svg {
   width: 16px;
   height: 16px;
+  --sw: 2.3;
 }
 
 @media (max-width: 720px) {

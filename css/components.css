@@ -39,8 +39,7 @@ NEKO · components.css
 }
 
 .btn .ic {
-  font-size: 17px;
-}
+  font-size: 16px; --sw: 2.3;}
 
 .btn:hover {
   transform: translateY(var(--btn-lift)) scale(1.02);
@@ -136,6 +135,8 @@ NEKO · components.css
   min-height: 0;
   padding: 0;
   border-radius: 50%;
+  font-size: 20px;
+  --sw: 2.05;
 }
 
 .btn[disabled],
@@ -224,8 +225,7 @@ NEKO · components.css
 
 .card-title .ic {
   color: var(--accent);
-  font-size: 19px;
-}
+  font-size: 18px; --sw: 2.15;}
 
 .card-sub {
   margin-top: 6px;
@@ -246,6 +246,7 @@ NEKO · components.css
   background: var(--surface-3);
   color: var(--accent);
   font-size: 14px;
+  --sw: 2.45;
   transition: transform .3s var(--ease-spring), background .3s;
 }
 
@@ -262,7 +263,8 @@ NEKO · components.css
   place-items: center;
   background: color-mix(in srgb, var(--accent) 14%, var(--surface-3));
   color: var(--accent);
-  font-size: 23px;
+  font-size: 24px;
+  --sw: 1.9;
   flex: none;
 }
 
@@ -333,8 +335,7 @@ NEKO · components.css
 .pill .ic,
 .chip .ic {
   font-size: 12px;
-  color: var(--accent);
-}
+  color: var(--accent); --sw: 2.6;}
 
 .pill-accent {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
@@ -552,6 +553,7 @@ NEKO · components.css
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-3));
   color: var(--accent);
   font-size: 16px;
+  --sw: 2.3;
   flex: none;
 }
 
@@ -686,8 +688,7 @@ NEKO · components.css
 
 .theme-name .ic {
   color: var(--accent);
-  font-size: 14px;
-}
+  font-size: 14px; --sw: 2.45;}
 
 .theme-meta {
   font-size: 9.5px;
@@ -742,6 +743,7 @@ NEKO · components.css
   display: grid;
   place-items: center;
   font-size: 16px;
+  --sw: 2.3;
 }
 
 .mode-card small {
@@ -822,8 +824,7 @@ NEKO · components.css
 .theme-notice .ic {
   color: var(--warn);
   font-size: 14px;
-  margin-top: 1px;
-}
+  margin-top: 1px; --sw: 2.45;}
 
 /* ---------------- Sheet & modal ---------------- */
 
@@ -922,6 +923,7 @@ NEKO · components.css
   background: var(--surface-3);
   color: var(--ink-2);
   font-size: 16px;
+  --sw: 2.3;
   flex: none;
   transition: background .2s, transform .2s;
 }
@@ -1003,7 +1005,8 @@ NEKO · components.css
   border-radius: 18px;
   display: grid;
   place-items: center;
-  font-size: 27px;
+  font-size: 28px;
+  --sw: 1.75;
   background: color-mix(in srgb, var(--accent) 14%, var(--surface-3));
   color: var(--accent);
 }
@@ -1568,6 +1571,8 @@ NEKO · components.css
   border-radius: 50%;
   display: grid;
   place-items: center;
+  font-size: 20px;
+  --sw: 2.05;
   background: linear-gradient(130deg, var(--accent), var(--accent-2));
   color: var(--accent-ink);
   font-size: 18px;
@@ -1605,6 +1610,7 @@ NEKO · components.css
   color: var(--accent);
   flex: none;
   font-size: 16px;
+  --sw: 2.3;
 }
 
 .notif-item b {
@@ -1655,8 +1661,7 @@ NEKO · components.css
 .acc summary .ic {
   color: var(--accent);
   font-size: 16px;
-  transition: transform .3s var(--ease-spring);
-}
+  transition: transform .3s var(--ease-spring); --sw: 2.3;}
 
 .acc[open] summary .ic {
   transform: rotate(45deg);
@@ -1719,6 +1724,7 @@ NEKO · components.css
   background: var(--surface-3);
   color: var(--accent);
   font-size: 24px;
+  --sw: 1.9;
 }
 
 /* ---------------- Modal noise & mobile ---------------- */

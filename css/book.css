@@ -88,7 +88,7 @@
   border-radius: 999px;
   background: var(--surface);
 }
-.book-search .ic { color: var(--muted); }
+.book-search .ic { width: 16px; height: 16px; color: var(--muted); --sw: 2.3; }
 .book-search input { border: 0; background: none; outline: none; width: 100%; height: 100%; color: var(--ink); font-size: 13px; padding: 0; }
 
 .shelf {
@@ -186,7 +186,7 @@
   color: #fff;
   backdrop-filter: blur(6px);
 }
-.book-emblem .ic { width: 24px; height: 24px; }
+.book-emblem .ic { width: 24px; height: 24px; --sw: 1.9;}
 
 .book-cover-body {
   position: absolute;
@@ -478,7 +478,7 @@ html[data-mode="dark"] .book { background: #e9e1cf; }
 .book.page-cover .book-page::before { background: radial-gradient(100% 80% at 80% 0%, rgba(255, 255, 255, .22), transparent 60%); }
 .cover-page-inner { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 10px; color: #fff; }
 .cover-page-inner .cover-badge { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .3); }
-.cover-page-inner .cover-badge .ic { width: 30px; height: 30px; }
+.cover-page-inner .cover-badge .ic { width: 28px; height: 28px; --sw: 1.75;}
 .cover-page-inner h2 { color: #fff; font-size: clamp(22px, 3.4vw, 40px); line-height: 1.06; text-shadow: 0 4px 18px rgba(0, 0, 0, .3); }
 .cover-page-inner small { letter-spacing: .18em; text-transform: uppercase; font-family: var(--font-mono); font-size: 9px; opacity: .8; }
 .cover-page-inner p { color: rgba(255, 255, 255, .84); font-size: 12.5px; }
@@ -598,7 +598,7 @@ html[data-mode="dark"] .book { background: #e9e1cf; }
   .book-cover-body span { font-size: 10px; }
   .book-tag { left: 18px; top: 10px; }
   .book-emblem { width: 38px; height: 38px; border-radius: 11px; }
-  .book-emblem .ic { width: 19px; height: 19px; }
+  .book-emblem .ic { width: 18px; height: 18px; --sw: 2.15;}
   .book-spine-text { display: none; }
 
   .book { grid-template-columns: 1fr; height: calc(100dvh - 172px); max-height: none; min-height: 0; }

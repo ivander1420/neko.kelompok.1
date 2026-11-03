@@ -56,6 +56,45 @@
     return valid(hash) ? hash : null;
   }
 
+  /* Lebar dock terbatas. Versi label dipilih lewat pengukuran nyata:
+     tulisan penuh bila muat, lalu singkatan, lalu ikon saja. */
+  function fitDock() {
+    const root = document.documentElement;
+    if (!dock || !dock.getClientRects().length) return;
+    const buttons = Array.prototype.slice.call(dock.querySelectorAll('.dock-btn'));
+    if (!buttons.length) return;
+    const box = getComputedStyle(dock);
+    const pad = (parseFloat(box.paddingLeft) || 0) + (parseFloat(box.paddingRight) || 0);
+    const gap = parseFloat(box.columnGap) || parseFloat(box.gap) || 0;
+    const avail = dock.clientWidth - pad - gap * (buttons.length - 1);
+    if (avail <= 0) return;
+    const first = buttons[0];
+    const isRow = getComputedStyle(first).flexDirection === 'row';
+    const innerGap = parseFloat(getComputedStyle(first).columnGap) || parseFloat(getComputedStyle(first).gap) || 0;
+    root.classList.add('dock-measure');
+    let full = 0;
+    let short = 0;
+    let icons = 0;
+    for (const button of buttons) {
+      const ic = button.querySelector('.dock-ic');
+      const label = button.querySelector('.dock-label:not(.is-short)');
+      const shortLabel = button.querySelector('.dock-label.is-short');
+      const icWidth = Math.ceil(ic.getBoundingClientRect().width);
+      icons += icWidth;
+      full += isRow ? icWidth + innerGap + Math.ceil(label.scrollWidth) : Math.max(icWidth, Math.ceil(label.scrollWidth));
+      short += isRow ? icWidth + innerGap + Math.ceil(shortLabel.scrollWidth) : Math.max(icWidth, Math.ceil(shortLabel.scrollWidth));
+    }
+    root.classList.remove('dock-measure');
+    const fit = full <= avail ? 'full' : short <= avail ? 'short' : 'icon';
+    if (root.dataset.dockFit !== fit) root.dataset.dockFit = fit;
+  }
+
+  let dockFitTimer = null;
+  function scheduleDockFit() {
+    window.clearTimeout(dockFitTimer);
+    dockFitTimer = window.setTimeout(fitDock, 90);
+  }
+
   /* ---------------- Loader ---------------- */
 
   function bootLoader() {
@@ -159,6 +198,7 @@
         '<span class="dock-label">' + views[id].label + '</span>' +
         '<span class="dock-label is-short">' + (views[id].short || views[id].label) + '</span></button>'
       )).join('');
+      fitDock();
     }
 
     if (Neko.ui) Neko.ui.refreshAudioButtons();
@@ -222,6 +262,11 @@
         Neko.audio.play('select');
         go(nav.dataset.nav);
       });
+      window.addEventListener('resize', scheduleDockFit);
+      window.addEventListener('orientationchange', scheduleDockFit);
+      if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
+        document.fonts.ready.then(() => fitDock()).catch(() => {});
+      }
     }
 
     document.addEventListener('neko:xp', () => { if (started) shellHTML(); });
@@ -311,7 +356,8 @@
     if (Neko.api) Neko.api.startEvents();
     if (options.intro) {
       window.setTimeout(() => {
-        if (Neko.auth && Neko.auth.intro) Neko.auth.intro(profile.displayName);
+        if (Neko.intro && !Neko.intro.isSeen()) Neko.intro.play({ name: profile.displayName });
+        else if (Neko.auth && Neko.auth.intro) Neko.auth.intro(profile.displayName);
       }, 320);
     }
     document.dispatchEvent(new CustomEvent('neko:app-start'));

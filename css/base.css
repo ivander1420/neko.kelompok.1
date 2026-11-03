@@ -283,11 +283,12 @@ textarea:focus-visible,
 .ic {
   width: 1em;
   height: 1em;
+  max-width: none;
   flex: none;
   vertical-align: -.12em;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.8;
+  stroke-width: var(--sw, 1.8);
   stroke-linecap: round;
   stroke-linejoin: round;
   overflow: visible;

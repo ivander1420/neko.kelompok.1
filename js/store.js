@@ -31,7 +31,7 @@
   ];
 
   const defaultPrefs = {
-    theme: 'default',
+    theme: 'paper',
     mode: 'dark',
     car: 'red',
     motion: 'auto',
@@ -40,6 +40,7 @@
     lastView: 'home',
     haptics: true,
     cursor: 'on',
+    charVoice: true,
     sidebarCollapsed: false,
     pushNotify: true
   };
@@ -127,13 +128,14 @@
     state.prefs = { ...defaultPrefs, ...(saved && typeof saved === 'object' ? saved : {}) };
     if (state.prefs.theme === 'car') state.prefs.mode = 'dark';
     if (!['red', 'blue', 'pink'].includes(state.prefs.car)) state.prefs.car = 'red';
-    if (!['default', 'forest', 'ocean', 'candy', 'red', 'car', 'astronaut', 'paper'].includes(state.prefs.theme)) state.prefs.theme = 'default';
+    if (!['default', 'forest', 'ocean', 'candy', 'red', 'car', 'astronaut', 'paper'].includes(state.prefs.theme)) state.prefs.theme = 'paper';
     if (!['auto', 'off'].includes(state.prefs.motion)) state.prefs.motion = 'auto';
     if (typeof state.prefs.haptics !== 'boolean') state.prefs.haptics = true;
     if (!['on', 'off'].includes(state.prefs.cursor)) state.prefs.cursor = 'on';
+    if (typeof state.prefs.charVoice !== 'boolean') state.prefs.charVoice = true;
     if (typeof state.prefs.sidebarCollapsed !== 'boolean') state.prefs.sidebarCollapsed = false;
     if (typeof state.prefs.pushNotify !== 'boolean') state.prefs.pushNotify = true;
-    if (state.prefs.theme === 'paper' && !['dark', 'light'].includes(state.prefs.mode)) state.prefs.mode = 'light';
+    if (state.prefs.theme === 'paper' && !['dark', 'light'].includes(state.prefs.mode)) state.prefs.mode = 'dark';
   }
 
   function savePrefs() {

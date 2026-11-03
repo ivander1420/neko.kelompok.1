@@ -17,11 +17,10 @@
     bio: 'Pembimbing proyek NEKO TJKT — media pembelajaran interaktif untuk siswa Teknik Jaringan Komputer dan Telekomunikasi. Guru KKJ 1.',
     tags: ['Pembelajaran TJKT', 'Jaringan Komputer', 'Proyek Kelompok'],
     accounts: [
-      ['Google / Gmail', 'Belum ditambahkan'],
-      ['Instagram', 'Belum ditambahkan'],
-      ['TikTok', 'Belum ditambahkan'],
+      ['Google / Gmail', '@andy.musly@gmail.com'],
+      ['Instagram', '@aprhy9', 'https://www.instagram.com/aprhy9'],
+      ['Blog', 'aprhy.WordPress.com'],
       ['GitHub', 'Belum ditambahkan'],
-      ['Red Hat', 'Belum ditambahkan']
     ]
   };
 
@@ -32,8 +31,7 @@
         ['Google / Gmail', 'ivander1420@gmail.com', 'mailto:ivander1420@gmail.com'],
         ['Instagram', '@vndee_r', 'https://www.instagram.com/vndee_r'],
         ['TikTok', '@user02_1413', 'https://www.tiktok.com/@user02_1413'],
-        ['GitHub', 'ivander1420', 'https://github.com/ivander1420'],
-        ['Red Hat', 'ivander1412']
+        ['GitHub', 'ivander1420', 'https://github.com/ivander1420']
       ]
     },
     {
@@ -50,9 +48,9 @@
       name: 'Muh. Fikron Ainun Najib',
       accounts: [
         ['Google / Gmail', 'Belum ditambahkan'],
-        ['Instagram', '@fikronainun', 'https://www.instagram.com/fikronainun'],
-        ['TikTok', '@fikronainun', 'https://www.tiktok.com/@fikronainun'],
-        ['GitHub', 'fikronainun', 'https://github.com/fikronainun'],
+        ['Instagram', '@Belum ada', 'Belum ditambahkan'],
+        ['TikTok', '@Belum ada', 'Belum ditambahkan'],
+        ['GitHub', 'fikronainun', 'Belum ditambahkan'],
         ['Red Hat', 'Belum ditambahkan']
       ]
     },
@@ -61,7 +59,7 @@
       accounts: [
         ['Google / Gmail', 'Belum ditambahkan'],
         ['Instagram', '@akhsanzzj', 'https://www.instagram.com/akhsanzzj'],
-        ['TikTok', '@akhsanjs', 'https://www.tiktok.com/@akhsanjs'],
+        ['TikTok', '@aksnjs', 'https://www.tiktok.com/@aksnjs'],
         ['GitHub', 'akhsanjs', 'https://github.com/akhsanjs'],
         ['Red Hat', 'Belum ditambahkan']
       ]

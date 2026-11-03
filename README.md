@@ -5,8 +5,9 @@ di laptop, di HP lewat jaringan sekolah, dan dibungkus menjadi **APK Android**.
 Dibuat oleh **Kelompok 1 · XI TJKT 2** — pembimbing: **Pak Andy Musly**.
 
 Stack: HTML + CSS + JavaScript murni (tanpa framework, tanpa bundler) dan satu server
-Node.js **tanpa dependency** (`node:http` + WebSocket tulis tangan). Penyimpanan memakai
-**file `server/db.json`**, bukan database.
+Node.js **tanpa dependency** (`node:http` + WebSocket tulis tangan). Penyimpanan default berupa
+**file `server/db.json`**; kalau diisi kredensial Supabase, seluruh state juga disalin ke
+database cloud (lihat bagian 7).
 
 ---
 
@@ -18,10 +19,11 @@ Node.js **tanpa dependency** (`node:http` + WebSocket tulis tangan). Penyimpanan
 4. [Cara pakai setiap halaman](#4-cara-pakai-setiap-halaman)
 5. [Kelas Langsung (mode Kahoot + PIN)](#5-kelas-langsung-mode-kahoot--pin)
 6. [Membuat file APK debug](#6-membuat-file-apk-debug)
-7. [Publish ke GitHub: website + APK](#7-publish-ke-github-website--apk)
-8. [Pemecahan masalah](#8-pemecahan-masalah)
-9. [Struktur folder](#9-struktur-folder)
-10. [Kredit](#10-kredit)
+7. [Publish ke internet: banyak orang + Kelas Langsung hidup](#7-publish-ke-internet-banyak-orang--kelas-langsung-hidup)
+8. [Publish ke GitHub: website + APK](#8-publish-ke-github-website--apk)
+9. [Pemecahan masalah](#9-pemecahan-masalah)
+10. [Struktur folder](#10-struktur-folder)
+11. [Kredit](#11-kredit)
 
 ---
 
@@ -31,22 +33,22 @@ NEKO punya dua lapisan. **Antarmuka** (buku, game, tema, maskot, profil) murni j
 browser. **Fitur bersama** (akun lintas perangkat, papan peringkat, Kelas Langsung, teman &
 chat) butuh **server Node** hidup.
 
-| Fitur | Laptop sendiri | Lintas perangkat (1 WiFi) | GitHub Pages / hosting statis | APK Mode B (offline) |
-|---|:--:|:--:|:--:|:--:|
-| Beranda, maskot Miki/Miko/Neksya | ✅ | ✅ | ✅ | ✅ |
-| Perpustakaan (6 bab TJKT) & kuis bacaan | ✅ | ✅ | ✅ | ✅ |
-| 8 game Arena + XP + season | ✅ | ✅ | ✅ | ✅ |
-| Tema (8 dunia), audio, animasi | ✅ | ✅ | ✅ | ✅ |
-| Halaman Kontak + lapor bug | ✅ | ✅ | ✅ | ✅ |
-| Akun yang mengikuti data ke HP lain | ✅ lokal | ✅ server | ❌ lokal per perangkat | ❌ lokal per perangkat |
-| Kelas Langsung (PIN, banyak HP) | ❌ | ✅ server | ❌ | ❌ |
-| Teman, chat, pengumuman admin | ❌ | ✅ server | ❌ | ❌ |
+| Fitur | Laptop sendiri | Lintas perangkat (1 WiFi) | GitHub Pages / hosting statis | Server di internet (bagian 7) | APK Mode B (offline) |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Beranda, maskot Miki/Miko/Neksya | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Perpustakaan (6 bab TJKT) & kuis bacaan | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 8 game Arena + XP + season | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Tema (8 dunia), audio, animasi | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Halaman Kontak + lapor bug | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Akun yang mengikuti data ke HP lain | ✅ lokal | ✅ server | ❌ lokal per perangkat | ✅ lintas jaringan/sekolah | ❌ lokal per perangkat |
+| Kelas Langsung (PIN, banyak HP) | ❌ | ✅ server | ❌ | ✅ | ❌ |
+| Teman, chat, pengumuman admin | ❌ | ✅ server | ❌ | ✅ | ❌ |
 
 **Kesimpulan penting:** GitHub Pages hanya meng-host file statis, tidak menjalankan Node.js.
 Website yang di-publish ke Pages **tetap bisa dipakai dan tetap bisa dibuat akun**, tetapi
 berada di *mode lokal* — datanya tersimpan di browser perangkat itu saja, dan Kelas Langsung
-akan menampilkan pesan bahwa server tidak terhubung. Mode lengkap butuh laptop/PC yang
-menjalankan `Mulai-NEKO.bat`.
+akan menampilkan pesan bahwa server tidak terhubung. Mode lengkap butuh server Node yang
+hidup 24 jam: di laptop sendiri (`Mulai-NEKO.bat`) atau di internet lewat bagian 7.
 
 ---
 
@@ -105,11 +107,30 @@ antar-perangkat dinonaktifkan dengan pesan yang jelas — bukan error.
 
 Menu bawah (HP) / sidebar (laptop): **Beranda · Perpustakaan · Arena · Pesan · Kontak · Profil**
 (+ **Admin** khusus akun role Developer/President/Admin).
+Menu bawah mengukur lebarnya sendiri setiap kali: kalau masih muat, label penuh ikut tampil;
+kalau pas-pasan dipakai label pendek; kalau tetap sempit (HP kecil / layar landscape sempit)
+sisa **ikon saja** — jadi tiap device mendapatkan ukuran yang paling rapi.
+
+**Pertama kali dibuka** (setelah login pertama) NEKO menayangkan intro sinematik empat babak:
+logo, tur enam halaman penting, perkenalan Miki/Miko/Neksya (ketiganya bicara dengan suaranya
+sendiri), lalu tombol **Mulai belajar** yang mengajak langsung ke halaman yang ditekan.
+Semua narasi berbahasa Indonesia dengan suara cewek lembut; ada tombol lewati, ketuk layar untuk
+berlanjut, dan bisa diputar ulang dari Profil. Intro hanya tayang sekali per perangkat.
+
+**Tema utama** NEKO sekarang adalah **Paper Quest** dan aplikasi terbuka pertama kali dalam versi
+**gelap**-nya. Delapan dunia: Paper Quest (utama) · Hutan Rimba · Samudra · Permen Manis ·
+Crimson Core · Velocity (balap, selalu gelap) · Orbit NEKO · Neon Circuit.
 
 ### Beranda
 - Halo personal, ringkasan XP/season, progres bacaan, dan papan informasi admin.
-- Bulatan maskot di pojok: **tekan sekali → jendela chat langsung terbuka**.
+- Bulatan maskot di pojok **dan** gelembung teksnya sama-sama bisa ditekan: sekali ketuk,
+  jendela chat langsung terbuka untuk maskot yang sedang tampil.
 - Maskot berganti otomatis; di dalam chat ada tab **Miki / Miko / Neksya** untuk berpindah.
+- Setiap gelembung chat (dan gelembung maskot di pojok) **dibacakan dengan suara masing-masing**:
+  Miki cewek dewasa yang lembut, Miko anak-anak cowok, Neksya anak cewek kecil yang imut.
+  Bahasa yang dipakai bahasa Indonesia; kalau perangkat tidak punya suara Indonesia, aplikasi
+  memakai suara cewek/cowok yang ada lalu mengatur nada (pitch) supaya tetap berbeda.
+  Saklarnya: **Profil → Atur → Suara karakter** (sama dengan tombol mikrofon di intro).
   Setiap maskot **hanya menjawab bagiannya**:
   | Maskot | Bagian |
   |---|---|
@@ -148,7 +169,8 @@ Empat tab: **Profil · Koleksi · Panduan · Atur**.
   (Langkah Pertama → Penjelajah → Arsitek → Penjaga → Legenda), riwayat check-in harian.
 - **Koleksi**: badge dari buku yang sudah ditamatkan dan rekor tiap game.
 - **Panduan**: cara pakai aplikasi + penjelasan tugas tiga maskot.
-- **Atur**: mode terang/gelap, suara, sidebar, dan **Keluar dari akun**.
+- **Atur**: mode terang/gelap, suara, **Suara karakter** (narasi intro + bubble maskot),
+  **Putar ulang intro sinematik**, sidebar, dan **Keluar dari akun**.
   Catatan: PIN tidak bisa diganti dari dalam aplikasi — masuk lewat username + PIN yang dibuat
   saat daftar. Check-in harian otomatis memberi XP.
 
@@ -202,6 +224,11 @@ NEKO-APK/
   app/src/main/java/com/neko/tjkt/MainActivity.java
   app/src/main/assets/neko/         <- hanya Mode B
 ```
+
+> Saat menyusun ulang `assets/neko`, salin **semua** file web terbaru — termasuk yang masih baru:
+> `js/voice.js` (suara Miki/Miko/Neksya) dan `css/intro.css` (intro sinematik). Kalau keduanya
+> ketinggalan, intro tidak muncul dan bubble chat tidak bersuara.
+> Daftar aset + versi cache ada di `index.html` (`?v=3.0.29`).
 
 **settings.gradle**
 ```groovy
@@ -354,9 +381,95 @@ demonstrasi biasanya cukup.
 
 ---
 
-## 7. Publish ke GitHub: website + APK
+## 7. Publish ke internet: banyak orang + Kelas Langsung hidup
 
-### 7.1 Website → GitHub Pages
+Ini jalur yang benar kalau tujuannya **"dibuka banyak orang, Kelas Langsung berfungsi, dipakai
+beberapa sekolah"**. Dua bagian: (a) server Node yang jalan 24 jam, (b) database Supabase supaya
+data tidak hilang saat server restart.
+
+> Kenapa dua-duanya? Hosting gratis (Render/Koyeb) menyalakan ulang container dan **disk-nya
+> kosong lagi** — `server/db.json` akan hilang. Supabase adalah tempat datanya disimpan, hosting
+> hanyalah tempat kodenya jalan. Kelas Langsung sendiri tetap berjalan di memori server saat
+> sesi berlangsung; Supabase menyimpan akun, profil, chat, pengumuman, dan hasil permainan.
+
+### 7.1 Buat database Supabase (5 menit)
+
+1. Daftar di `supabase.com` → **New project** → nama `neko`, region Singapore, buat password
+   database, tunggu project siap.
+2. **SQL Editor → New query**, salin **seluruh isi** [`server/supabase/schema.sql`](server/supabase/schema.sql),
+   lalu **Run**. Semua tabel, index, kebijakan RLS, dan seed dibuat (skripnya aman dijalankan
+   berulang kali).
+3. **Project Settings → API**, catat dua hal:
+   - **Project URL** → `https://xxxxxxxx.supabase.co`
+   - **Project API keys → `service_role`** → kunci panjang diawali `eyJ…`
+     (ini **kunci rahasia server** — jangan pernah ditempel di APK, di `index.html`, atau di
+     file `.js` mana pun).
+4. Cek berhasil: **Table editor → `neko_snapshot`** ada 1 baris `key = main`, `value = {}`.
+
+### 7.2 Jalankan server NEKO di hosting (Render contoh)
+
+1. Push repo ke GitHub (lihat bagian 8.1) — pastikan `server/db.json` dan `server/.env`
+   **tidak** ikut ter-upload (sudah ada di `.gitignore`).
+2. Buka `render.com` → **New → Web Service** → pilih repo `neko-tjkt`.
+3. Isi:
+   | Field | Nilai |
+   |---|---|
+   | Runtime | Node |
+   | Build command | *(kosongkan — tidak ada dependency yang perlu di-install)* |
+   | Node version | 20 (atau versi terbaru yang tersedia) |
+   | Start command | `node server/server.js` |
+   | Instance type | Free |
+4. **Environment Variables**:
+   - `SUPABASE_URL` = Project URL dari langkah 7.1
+   - `SUPABASE_SERVICE_ROLE_KEY` = kunci service_role
+   - `NEKO_PORT` **tidak perlu diisi** — Render mengirim port-nya otomatis dan server NEKO sudah
+     membacanya.
+5. **Deploy**. Di log harus muncul:
+   ```
+   [neko] Supabase aktif → https://xxxx.supabase.co
+   [neko] memakai data lokal (11 akun), dikirim ke Supabase.
+     Cloud  :  Supabase neko_snapshot (key=main)
+   ```
+6. Alamat jadinya `https://neko-tjkt.onrender.com`. Bagikan URL itu — siapa pun (Chrome di HP,
+   laptop sekolah lain) buka, daftar, dan **Kelas Langsung berfungsi**.
+
+Kalau laptop sendiri yang dibiarkan jadi server, cukup buat file `server/.env` (salin dari
+`server/.env.example`) lalu isi dua nilai itu; datanya otomatis ikut tersimpan di Supabase.
+
+### 7.3 Menghubungkan APK ke server internet
+
+Di `android-apk/app/src/main/java/com/neko/tjkt/MainActivity.java` isi:
+```java
+static final String SERVER_URL = "https://neko-tjkt.onrender.com";
+```
+Build ulang (bagian 6.2). Aplikasi kemudian memakai akun & Kelas Langsung sungguhan dari server
+itu, bukan mode offline. Kalau `SERVER_URL` dibiarkan kosong, APK tetap Mode B (offline,
+termasuk saat HP tidak ada sinyal).
+
+### 7.4 Aturan yang tidak boleh dilanggar
+
+* **Satu instance server saja.** Snapshot disimpan sebagai satu baris; dua server yang jalan
+  bersamaan akan saling menimpa. Free tier Render = 1 instance, jadi aman selama tidak di-scale.
+* Server **freeze** di free tier setelah ±15 menit tidak ada yang buka; permintaan pertama
+  butuh ±30–60 detik untuk bangun. Saat sesi Kelas Langsung berlangsung, biarkan minimal satu
+  tab terbuka.
+* `service_role` key hanya di environment server. Kalau key pernah bocor ke repo: Supabase →
+  Settings → API → **roll key**, lalu ganti env variable.
+* Supaya mudah dipakai banyak sekolah, kolom `school` sudah tersedia di tabel
+  `neko_users`/`neko_announcements`/`neko_live_rooms` (schema normal) — belum dipakai
+  di layar, tinggal difungsikan kalau perlu pemisahan sekolah.
+
+> **Mode alternatif (belum dipakai):** schema.sql juga berisi tabel normal
+> (`neko_users`, `neko_profiles`, `neko_messages`, `neko_live_rooms`, …) dengan kebijakan RLS
+> dan Realtime. Itu siap dipakai kalau nanti aplikasi dihubungkan **langsung** ke Supabase tanpa
+> server Node. Hari ini server NEKO masih memakai jalur snapshot (1 baris) sehingga tidak ada
+> satu baris pun kode frontend yang perlu diubah.
+
+---
+
+## 8. Publish ke GitHub: website + APK
+
+### 8.1 Website → GitHub Pages
 
 1. Buat repository (mis. `neko-tjkt`), lalu dari folder project:
    ```
@@ -368,10 +481,8 @@ demonstrasi biasanya cukup.
    git remote add origin https://github.com/<username>/neko-tjkt.git
    git push -u origin main
    ```
-   Tambahkan `server/db.json` ke `.gitignore` kalau tidak ingin data akun ikut ter-upload:
-   ```
-   echo server/db.json>> .gitignore
-   ```
+   `.gitignore` di repo ini sudah mengecualikan `server/db.json` (data akun siswa) dan
+   `server/.env` (kunci Supabase) — cek dulu dengan `git status` sebelum push.
 2. Tambahkan file kosong `.nojekyll` di root supaya Pages tidak menyaring apa pun.
 3. **Settings → Pages → Source: Deploy from a branch → `main` / root → Save.**
 4. Alamat jadinya `https://<username>.github.io/neko-tjkt/`.
@@ -381,11 +492,11 @@ demonstrasi biasanya cukup.
 6. Normal kalau Console browser menampilkan `404 /api/...` — itu tanda backend memang tidak
    ada; aplikasi sudah menanganinya dan berpindah ke mode lokal.
 
-> Ingin website yang fiturnya penuh? Pages tidak bisa. Perlu hosting yang menjalankan Node.js
-> (mis. Render/Fly/Koyeb) **plus** disk persisten supaya `server/db.json` tidak hilang saat
-> restart. Itu di luar GitHub dan butuh akun pihak ketiga.
+> Ingin website yang fiturnya penuh (Kelas Langsung + akun lintas sekolah)? Pages tidak bisa.
+> Perlu hosting yang menjalankan Node.js (Render/Koyeb/Fly) — caranya sudah ditulis di
+> **bagian 7**, dan database Supabase di bagian 7.1 menutup kelemahan disk hosting gratis.
 
-### 7.2 APK → GitHub Releases (orang lain bisa unduh dan pasang)
+### 8.2 APK → GitHub Releases (orang lain bisa unduh dan pasang)
 
 1. Web: **repository → Releases → Draft a new release** → tag `v1.0` → *Choose file* →
    unggah `app-debug.apk` → *Publish release*.
@@ -399,7 +510,7 @@ demonstrasi biasanya cukup.
 4. Beri tahu cara pakainya: APK Mode A harus diisi alamat laptop (ubah `SERVER_URL` lalu build
    ulang), Mode B langsung buka dan pakai tanpa laptop.
 
-### 7.3 (Opsional) Build APK otomatis oleh GitHub
+### 8.3 (Opsional) Build APK otomatis oleh GitHub
 
 Kalau project Android diletakkan di repo (mis. folder `android-apk/`), GitHub Actions bisa
 membuat APK-nya tanpa laptop kamu — file `.github/workflows/android.yml`:
@@ -426,7 +537,7 @@ Artifact-nya bisa diunduh siapa pun dari halaman Actions run.
 
 ---
 
-## 8. Pemecahan masalah
+## 9. Pemecahan masalah
 
 | Gejala | Penyebab | Solusi |
 |---|---|---|
@@ -437,13 +548,18 @@ Artifact-nya bisa diunduh siapa pun dari halaman Actions run.
 | `Terjadi kesalahan server (404)` saat daftar akun di Pages | situs statis tanpa backend | normal — aplikasi seharusnya pindah ke mode lokal; kalau muncul, hard refresh (Ctrl+F5) |
 | Tombol **Mulai** Kelas Langsung tidak bisa ditekan | belum ada siswa bergabung | minta minimal 1 siswa join dengan PIN |
 | Karakter sudah dipakai / tidak bisa dipilih | karakter unik per ruangan | pilih karakter lain, atau tunggu pemain keluar |
-| Data kelas hilang | `server/db.json` terhapus | pulihkan dari cadangan; jangan hapus file itu |
+| Data kelas hilang | `server/db.json` terhapus | pulihkan dari cadangan; aktifkan Supabase (bagian 7) supaya ada salinan cloud |
+| `Cloud : belum terhubung` di banner server | `server/.env` belum dibuat / kosong | salin `server/.env.example` jadi `server/.env`, isi URL + service_role key |
+| Log `[neko] sinkron Supabase gagal ... HTTP 404` | tabel belum dibuat | jalankan ulang seluruh `server/supabase/schema.sql` di SQL Editor |
+| Website cloud lambat dibuka (±30–60 detik) | free tier tertidur | buka URL-nya dulu sebelum acara; biarkan satu tab tetap terbuka saat Kelas Langsung |
+| Data setelah deploy hilang padahal Supabase aktif | env variable hanya ada di laptop | isi `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` di dashboard hosting |
+| Akun dan progres saling menimpa | dua instance server jalan bersamaan | di hosting: jumlah instance = 1; jangan jalankan laptop + cloud pada saat sama |
 | Perubahan JS tidak terlihat | aset di-cache (`?v=`) | naikkan versi di `index.html` dan **Ctrl+F5** |
 | `Invalid package config ... package.json` | Node gagal baca folder | jalankan ulang `Mulai-NEKO.bat`; jangan taruh `package.json` rusak di root |
 
 ---
 
-## 9. Struktur folder
+## 10. Struktur folder
 
 ```
 Neko Fix/
@@ -458,7 +574,14 @@ Neko Fix/
   assets/                 gambar/ilustrasi
   server/
     server.js             Node tanpa dependency: REST + WebSocket + long-poll
-    db.json               penyimpanan (file JSON, BUKAN database)
+    db.json               penyimpanan lokal (file JSON) — isi akun, jangan di-upload
+    supabase-sync.js      penyalin db.json ke Supabase (diam total kalau .env kosong)
+    .env.example          contoh isi kredensial; salin jadi server/.env
+    .env                  kredensial asli (dikecualikan dari git)
+    supabase/
+      schema.sql          skrip database: tabel + index + RLS + Realtime + seed
+  android-apk/            project Android (Mode A / Mode B)
+  README.md               dokumen ini
 ```
 
 Perintah cepat server:
@@ -469,7 +592,7 @@ set NEKO_PORT=8080 && node server/server.js   # port lain (Windows cmd)
 
 ---
 
-## 10. Kredit
+## 11. Kredit
 
 - **Kelompok 1 · XI TJKT 2** — Ivander, Muh. Hadit Rafanizam, Muh. Fikron Ainun Najib,
   Akhsan Jauhar Santoso.

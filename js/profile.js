@@ -216,6 +216,7 @@
       '<section class="profile-section"><div class="profile-section-head"><div><span class="kicker">PENGATURAN DETAIL</span><h2>Sesuaikan NEKO denganmu</h2></div></div>' +
       '<div class="settings-panel">' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('volume') + '</span><div><b>Efek suara</b><small>Klik tombol, jawaban benar, dan notifikasi</small></div></div><button type="button" class="switch" data-audio-toggle aria-pressed="' + String(Neko.audio.soundOn) + '" aria-label="Efek suara"></button></div>' +
+      '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('chat') + '</span><div><b>Suara karakter</b><small>Narasi intro dan setiap bubble Miki, Miko, dan Neksya dibacakan</small></div></div><button type="button" class="switch" data-voice-toggle aria-pressed="' + String(!Neko.voice || Neko.voice.enabled()) + '" aria-label="Suara karakter"></button></div>' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('music') + '</span><div><b>Musik tema</b><small>Nada latar mengikuti dunia aktif</small></div></div><button type="button" class="switch" data-music-toggle aria-pressed="' + String(Neko.audio.musicOn) + '" aria-label="Musik tema"></button></div>' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('volume-up') + '</span><div><b>Volume</b><small>Atur kenyaringan efek dan musik</small></div></div><div class="range-row"><input type="range" min="0" max="100" step="1" value="' + Neko.audio.volume + '" data-volume aria-label="Volume"><output data-volume-out>' + Neko.audio.volume + '%</output></div></div>' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('sun') + '</span><div><b>Mode terang</b><small>' + (lightDisabled ? 'Nonaktif pada tema Velocity (mobil)' : 'Berganti suasana siang dan malam') + '</small></div></div><button type="button" class="switch ' + (lightDisabled ? 'is-disabled' : '') + '" data-mode-toggle aria-pressed="' + String(prefs.mode === 'light') + '" aria-label="Mode terang"' + (lightDisabled ? ' aria-disabled="true"' : '') + '></button></div>' +
@@ -224,6 +225,7 @@
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('vibrate') + '</span><div><b>Getaran haptic</b><small>Getaran halus saat menang, kalah, dan menekan tombol</small></div></div><button type="button" class="switch" data-haptics-toggle aria-pressed="' + String(prefs.haptics) + '" aria-label="Getaran haptic"></button></div>' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('cursor') + '</span><div><b>Kursor interaktif</b><small>Kursor bercahaya yang mengikuti tema aktif</small></div></div><button type="button" class="switch" data-cursor-toggle aria-pressed="' + String(prefs.cursor === 'on') + '" aria-label="Kursor interaktif"></button></div>' +
       '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('palette') + '</span><div><b>Dunia tema</b><small>' + esc(info.name) + ' · ' + esc(info.desc) + '</small></div></div><button type="button" class="btn btn-soft btn-sm" data-open-theme>' + icon('sparkles') + 'Ganti tema</button></div>' +
+      '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('play') + '</span><div><b>Intro sambutan</b><small>Putar lagi perkenalan NEKO, halaman penting, dan ketiga asisten</small></div></div><button type="button" class="btn btn-soft btn-sm" data-cine-replay>' + icon('rocket') + 'Putar ulang</button></div>' +
       (prefs.theme === 'car' ? '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('car') + '</span><div><b>Warna mobil</b><small>Merah, biru, atau pink</small></div></div><div class="car-colors compact">' + levelInfo.map(color => '<button type="button" class="car-color" data-car-pick="' + color.id + '" aria-pressed="' + String(prefs.car === color.id) + '" style="--car-dot:' + color.dot + '"><i></i><span>' + color.name + '</span></button>').join('') + '</div></div>' : '') +
       '</div></section>' +
       '<section class="profile-section"><div class="profile-section-head"><div><span class="kicker">NOTIFIKASI</span><h2>Kabar & pengingat</h2></div></div>' +
@@ -299,6 +301,11 @@
       if (character) { characterSheet(character.dataset.character); return; }
       if (event.target.closest('[data-notifications]')) { Neko.ui.notificationsSheet(); return; }
       if (event.target.closest('[data-open-theme]')) { Neko.ui.themeSheet(); return; }
+      if (event.target.closest('[data-cine-replay]')) {
+        Neko.audio.play('select');
+        if (Neko.intro) Neko.intro.play({ name: (Neko.store.session || {}).displayName, force: true });
+        return;
+      }
       const car = event.target.closest('[data-car-pick]');
       if (car) {
         Neko.theme.setCar(car.dataset.carPick);
@@ -309,6 +316,14 @@
       if (audio) {
         Neko.audio.setSound(!Neko.audio.soundOn);
         audio.setAttribute('aria-pressed', String(Neko.audio.soundOn));
+        return;
+      }
+      const voice = event.target.closest('[data-voice-toggle]');
+      if (voice) {
+        const next = !Neko.voice.enabled();
+        Neko.voice.setEnabled(next);
+        voice.setAttribute('aria-pressed', String(next));
+        if (next) Neko.voice.say('Suara karakter aktif. Aku Miki, siap menemani belajarmu.', 'miki');
         return;
       }
       const music = event.target.closest('[data-music-toggle]');
