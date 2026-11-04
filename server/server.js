@@ -18,6 +18,16 @@ const crypto = require('node:crypto');
 const os = require('node:os');
 const vm = require('node:vm');
 
+/* Dimuat PALING AWAL supaya server/.env terbaca sebelum konstanta
+   berbasis environment (PORT, dsb.) dipakai. Modul ini boleh mati:
+   tanpa .env server tetap berjalan penuh dengan server/db.json. */
+let sync = null;
+try {
+  sync = require('./supabase-sync.js');
+} catch (error) {
+  console.error('[neko] modul supabase-sync gagal dimuat:', error.message);
+}
+
 const ROOT = path.join(__dirname, '..');
 const DB_FILE = path.join(ROOT, 'server', 'db.json');
 const PORT = Number(process.env.NEKO_PORT || 3000);
@@ -54,29 +64,156 @@ function loadDB() {
 }
 
 let saveTimer = null;
-let saving = false;
+let saveChain = Promise.resolve();
+
 function saveDB() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushDB, 500);
 }
 
-async function flushDB() {
-  if (saving) return;
-  saving = true;
+/* Satu rantai antrean: tiap panggilan flushDB dijamin benar-benar menulis
+   (tidak dibuang karena 'masih sibuk'), dan tidak ada dua penulisan paralel. */
+function flushDB() {
+  saveChain = saveChain.then(writeDB).catch((error) => console.error('[neko] gagal menyimpan db:', error.message));
+  return saveChain;
+}
+
+async function writeDB() {
   const tmp = DB_FILE + '.tmp';
-  try {
-    await fsp.writeFile(tmp, JSON.stringify(db), 'utf8');
-    await fsp.rename(tmp, DB_FILE);
-  } catch (error) {
-    console.error('[neko] gagal menyimpan db:', error.message);
-  } finally {
-    saving = false;
-  }
+  await fsp.writeFile(tmp, JSON.stringify(db), 'utf8');
+  await fsp.rename(tmp, DB_FILE);
+  if (sync && sync.CONFIGURED && !suppressSync) sync.push(db);
 }
 
 process.on('exit', () => {
   try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch (error) { /* abaikan */ }
 });
+
+/* ---------------- Sinkronisasi Supabase ---------------- */
+
+const STARTED_AT = Date.now();
+let suppressSync = false;   // true saat merge boot, supaya tidak kirim dua kali
+let shuttingDown = false;
+
+function countData(state) {
+  if (!state || typeof state !== 'object') return 0;
+  return Object.keys(state.users || {}).length
+    + Object.keys(state.friends || {}).length
+    + Object.keys(state.chats || {}).length
+    + ((state.community || {}).announcements || []).length;
+}
+
+function countDetail(state) {
+  const s = state || {};
+  return Object.keys(s.users || {}).length + ' akun, '
+    + Object.keys(s.friends || {}).length + ' pertemanan, '
+    + Object.keys(s.chats || {}).length + ' ruang chat, '
+    + (((s.community || {}).announcements || []).length) + ' pengumuman';
+}
+
+function mergeMap(local, remote) {
+  return { ...(remote || {}), ...(local || {}) };
+}
+
+/** Gabungkan data lokal + Supabase. Lokal selalu menang saat ada tabrakan. */
+function mergeDB(local, remote) {
+  const base = { ...emptyDB(), ...(remote || {}), ...(local || {}) };
+  base.users = mergeMap(local.users, remote.users);
+  base.sessions = mergeMap(local.sessions, remote.sessions);
+  base.friends = mergeMap(local.friends, remote.friends);
+  base.seen = mergeMap(local.seen, remote.seen);
+
+  const chats = {};
+  const keys = new Set([...Object.keys(local.chats || {}), ...Object.keys(remote.chats || {})]);
+  for (const key of keys) {
+    const a = (local.chats || {})[key] || [];
+    const b = (remote.chats || {})[key] || [];
+    chats[key] = a.length >= b.length ? a : b;   // riwayat terbaru selalu yang lebih panjang
+  }
+  base.chats = chats;
+
+  const localInfo = (local.community || {}).info || {};
+  const remoteInfo = (remote.community || {}).info || {};
+  base.community = { ...emptyDB().community, ...(remote.community || {}), ...(local.community || {}) };
+  base.community.info = Number(localInfo.updatedAt || 0) >= Number(remoteInfo.updatedAt || 0)
+    ? { ...remoteInfo, ...localInfo }
+    : { ...localInfo, ...remoteInfo };
+
+  const announcements = [];
+  const byKey = new Set();
+  for (const item of [...((local.community || {}).announcements || []), ...((remote.community || {}).announcements || [])]) {
+    const mark = (item && (item.id || (item.createdAt || '') + '|' + (item.title || ''))) || JSON.stringify(item);
+    if (byKey.has(mark)) continue;
+    byKey.add(mark);
+    announcements.push(item);
+  }
+  announcements.sort((a, b) => Number((b && b.createdAt) || 0) - Number((a && a.createdAt) || 0));
+  base.community.announcements = announcements.slice(0, 60);
+
+  for (const bucket of ['users', 'sessions', 'friends', 'chats', 'seen']) base[bucket] = base[bucket] || {};
+  return base;
+}
+
+async function startSupabase() {
+  if (!sync) return;
+  sync.logStartup();
+  if (!sync.CONFIGURED) return;
+  try {
+    const snap = await sync.pull();
+    if (!snap) return;
+    suppressSync = true;
+    // Jangan pernah menunggu writeDB() dari sini: rantai saveDB menunggu
+    // flushDB() ini selesai, jadi await akan mengunci (deadlock).
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch (error) { console.error('[neko] gagal menyimpan db saat boot:', error.message); }
+    if (snap.empty) {
+      // KONDISI PALING PENTING: snapshot {} tidak boleh menimpa data lokal.
+      sync.log('Supabase masih kosong, sedangkan server/db.json berisi ' + countDetail(db) + '.');
+      if (countData(db) > 0) {
+        const ok = await sync.pushNow(db);
+        sync.log(ok
+          ? 'data lokal BERHASIL dinaikkan ke Supabase (rev ' + sync.status().revision + '). Sekarang dua arah.'
+          : 'pengiriman pertama masih gagal — server tetap jalan, dicoba terus di latar belakang.');
+      } else {
+        sync.log('data lokal juga kosong — Supabase dibiarkan apa adanya sampai ada aktivitas.');
+      }
+    } else {
+      const before = countDetail(db);
+      db = mergeDB(db, snap.value);
+      await flushDB();
+      const ok = await sync.pushNow(db);
+      sync.log('gabungan selesai: lokal ' + before + ' + Supabase ' + countDetail(snap.value) + ' → ' + countDetail(db) + '.');
+      sync.log(ok ? 'snapshot gabungan dikirim ke Supabase.' : 'snapshot gabungan belum terkirim — dicoba lagi otomatis.');
+    }
+  } catch (error) {
+    console.error('[neko] sinkron Supabase saat menyala gagal:', error.message);
+    sync.log('server TETAP BERJALAN NORMAL tanpa Supabase (http://localhost:' + PORT + ')');
+  } finally {
+    suppressSync = false;
+  }
+}
+
+function gracefulShutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  clearTimeout(saveTimer);
+  console.log('[neko] ' + signal + ' diterima — menyimpan data...');
+  const finish = async () => {
+    try { await saveChain; } catch (error) { /* sudah dicatat rantai */ }
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch (error) { /* abaikan */ }
+    if (sync && sync.CONFIGURED) {
+      console.log('[neko] mengirim snapshot terakhir ke Supabase...');
+      sync.push(db);
+      const clean = await sync.flush(5000);
+      console.log(clean ? '[neko] beres — semua data sudah di Supabase. Sampai jumpa!' : '[neko] snapshot terakhir belum masuk; data aman di server/db.json.');
+    }
+    process.exit(0);
+  };
+  finish().catch(() => process.exit(0));
+  setTimeout(() => process.exit(0), 7000).unref();
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
 /* ---------------- Akun preset (roles + PIN awal) ---------------- */
 
@@ -1170,6 +1307,43 @@ const routes = {
     };
     if ((room.rev || 0) > since) return sendJSON(res, 200, { rev: room.rev, state: roomState(room, 'player'), host: roomState(room, isHost ? 'host' : 'player') });
     liveEvents.watch('live:' + pin, req, res, sendState);
+  },
+
+  'GET /api/sync-status': (req, res) => {
+    // Khusus untuk mengetes sinkronisasi dari komputer yang sama.
+    if (sync && sync.CONFIGURED) {
+      const st = sync.status();
+      const detail = {
+        enabled: true,
+        url: st.url,
+        table: st.table,
+        authMode: st.authMode,
+        key: st.key,
+        revision: st.revision,
+        pendingKb: st.pendingKb,
+        inFlight: st.inFlight,
+        failures: st.failures,
+        lastError: st.lastError,
+        lastPushAt: st.lastPushAt,
+        lastPushMs: st.lastPushMs,
+        lastPushKb: st.lastPushKb,
+        pushCount: st.pushCount,
+        lastPullAt: st.lastPullAt,
+        lastPullInfo: st.lastPullInfo
+      };
+      return sendJSON(res, 200, {
+        ok: st.failures === 0,
+        ...detail,
+        local: { file: 'server/db.json', bytes: fs.existsSync(DB_FILE) ? fs.statSync(DB_FILE).size : 0, collections: countDetail(db) },
+        uptimeSeconds: Math.round((Date.now() - STARTED_AT) / 1000)
+      });
+    }
+    return sendJSON(res, 200, {
+      ok: false,
+      enabled: false,
+      reason: sync ? 'SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY belum terisi di server/.env.' : 'Modul supabase-sync tidak termuat.',
+      detail: sync ? sync.status().detail : 'modul tidak ada'
+    });
   }
 };
 
@@ -1270,6 +1444,12 @@ const server = http.createServer(async (req, res) => {
   const routeKey = method + ' ' + parsed.pathname;
   const handler = routes[routeKey];
   if (handler) {
+    // status sinkronisasi memuat informasi host + potongan kunci: hanya boleh dari komputer ini
+    const remote = String(req.socket.remoteAddress || '');
+    const isLoopback = remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
+    if (parsed.pathname === '/api/sync-status' && !isLoopback) {
+      return sendJSON(res, 403, { error: 'Hanya bisa dibuka dari komputer tempat server berjalan (http://localhost:' + PORT + '/api/sync-status).' });
+    }
     try {
       await handler(req, res, parsed);
     } catch (error) {
@@ -1304,6 +1484,9 @@ server.listen(PORT, () => {
   console.log('  NEKO server aktif!');
   console.log('  Lokal :  http://localhost:' + PORT);
   for (const ip of lan) console.log('  Jaringan:  http://' + ip + ':' + PORT + '  ← bagikan ke teman/kelas');
-  console.log('  Data   :  server/db.json');
+  console.log('  Data   :  server/db.json (' + countDetail(db) + ')');
+  console.log('  Sinkron:  ' + (sync && sync.CONFIGURED ? 'Supabase — sedang menghubungkan...' : 'belum aktif (pakai server/db.json saja)'));
+  if (sync && sync.CONFIGURED) console.log('  Cek     :  http://localhost:' + PORT + '/api/sync-status');
   console.log('==================================================');
+  startSupabase();
 });

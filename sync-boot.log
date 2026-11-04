@@ -1,0 +1,18 @@
+==================================================
+  NEKO server aktif!
+  Lokal :  http://localhost:3111
+  Jaringan:  http://169.254.142.201:3111  ← bagikan ke teman/kelas
+  Jaringan:  http://192.168.1.2:3111  ← bagikan ke teman/kelas
+  Data   :  server/db.json (15 akun, 6 pertemanan, 3 ruang chat, 0 pengumuman)
+  Sinkron:  Supabase — sedang menghubungkan...
+  Cek     :  http://localhost:3111/api/sync-status
+==================================================
+[06:45:34] [neko:supabase] file .env: terbaca (key: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+[06:45:34] [neko:supabase] target: https://vsrdumwrhaogmnwxnnnf.supabase.co · tabel neko_snapshot · baris key="main"
+[06:45:34] [neko:supabase] kunci: sb_secret · 41 karakter · ...nEkF · mode auth: bearer (header apikey + Authorization: Bearer)
+[06:45:34] [neko:supabase]  debounce push: 1500ms · retry: eksponensial, maksimal 60s
+[06:45:36] [neko:supabase] tarik snapshot (2086ms): dapat 6 koleksi · rev 1 · diubah 2026-11-03T21:42:31.142+00:00
+[06:45:36] [neko:supabase] kirim snapshot SUKSES · rev 2 · 19 KB · 273ms · via POST upsert
+[06:45:36] [neko:supabase] gabungan selesai: lokal 15 akun, 6 pertemanan, 3 ruang chat, 0 pengumuman + Supabase 15 akun, 6 pertemanan, 3 ruang chat, 0 pengumuman → 15 akun, 6 pertemanan, 3 ruang chat, 0 pengumuman.
+[06:45:36] [neko:supabase] snapshot gabungan dikirim ke Supabase.
+[06:50:01] [neko:supabase] kirim snapshot SUKSES · rev 3 · 19 KB · 423ms · via POST upsert
