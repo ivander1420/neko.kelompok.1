@@ -30,7 +30,7 @@ try {
 
 const ROOT = path.join(__dirname, '..');
 const DB_FILE = path.join(ROOT, 'server', 'db.json');
-const PORT = Number(process.env.NEKO_PORT || 3000);
+const PORT = Number(process.env.PORT || process.env.NEKO_PORT || 3000);
 const SCRYPT_N = 1 << 14;
 
 /* ---------------- Database JSON sederhana ---------------- */

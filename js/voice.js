@@ -1,340 +1,384 @@
 
 /* ============================================================
-   NEKO · js/voice.js
-   Indonesian Text-to-Speech Character System
-   - Tetap berbicara meskipun voice Indonesia belum terdeteksi
-   - Memprioritaskan suara Indonesia
-   - Memiliki karakter suara berbeda
-   - Mendukung Miki, Miko, Neksya, dan Narrator
+   NEKO VOICE SYSTEM
+   Indonesian TTS • Character Personas • Queue Manager
    ============================================================ */
 
-(function () {
+(() => {
   'use strict';
-
-  const Neko = window.Neko = window.Neko || {};
 
   const PERSONAS = {
     narrator: {
       gender: 'female',
-      pitch: 1.08,
-      rate: 0.91
+      pitch: 1.02,
+      rate: 0.91,
+      volume: 1
     },
 
+    // Miki: ceria, imut, energik, suara perempuan muda
     miki: {
       gender: 'female',
-      pitch: 1.20,
-      rate: 0.92
+      pitch: 1.24,
+      rate: 0.96,
+      volume: 1
     },
 
+    // Miko: ceria, ramah, suara laki-laki muda
     miko: {
       gender: 'male',
-      pitch: 1.40,
-      rate: 0.98
+      pitch: 0.98,
+      rate: 0.97,
+      volume: 1
     },
 
+    // Neksya: manis, ekspresif, bernada lebih tinggi
     neksya: {
       gender: 'female',
-      pitch: 1.90,
-      rate: 0.90
+      pitch: 1.38,
+      rate: 0.95,
+      volume: 1
     }
   };
 
-  let voiceCache = {};
-  let lastSpeech = {};
-  let voicesLoaded = false;
-  let speechQueueTimer = null;
+  const MAX_QUEUE = 6;
+  const DUPLICATE_DELAY = 2600;
 
-  function speech() {
-    return window.speechSynthesis || null;
+  let voices = [];
+  let queue = [];
+  let speaking = false;
+  let enabled = true;
+  let voicesLoaded = false;
+  let lastText = '';
+  let lastTime = 0;
+  let currentUtterance = null;
+
+  const synth = window.speechSynthesis;
+
+  if (!('speechSynthesis' in window) ||
+      typeof SpeechSynthesisUtterance === 'undefined') {
+    console.warn('[NEKO Voice] Browser tidak mendukung Speech Synthesis.');
+    return;
   }
 
-  function voiceList() {
-    const engine = speech();
+  /* ============================================================
+     VOICE LIST
+     ============================================================ */
 
-    if (!engine) return [];
+  function refreshVoices() {
+    voices = synth.getVoices() || [];
+    voicesLoaded = voices.length > 0;
 
-    try {
-      return engine.getVoices() || [];
-    } catch (error) {
-      return [];
-    }
+    return voices;
   }
 
   function isIndonesia(voice) {
-    const lang = String(voice.lang || '').toLowerCase();
-    const name = String(voice.name || '').toLowerCase();
+    const lang = String(voice?.lang || '').toLowerCase();
 
-    return (
-      lang === 'id' ||
-      lang.startsWith('id-') ||
-      name.includes('indonesia') ||
-      name.includes('indonesian')
-    );
-  }
-
-  function voiceLabel(voice) {
-    return (
-      String(voice.name || '') +
-      ' ' +
-      String(voice.lang || '')
-    ).toLowerCase();
+    return lang === 'id' || lang.startsWith('id-');
   }
 
   function isFemale(voice) {
-    return /female|woman|wanita|perempuan|zira|samantha|aria|jenny|heera|nadia|gadis/i
-      .test(voiceLabel(voice));
+    const name = String(voice?.name || '').toLowerCase();
+
+    return /female|woman|perempuan|gadis|google indonesia female/i.test(name);
   }
 
   function isMale(voice) {
-    return /male|man|pria|cowok|david|mark|guy|fred|ardi|andika/i
-      .test(voiceLabel(voice));
+    const name = String(voice?.name || '').toLowerCase();
+
+    return /male|man|laki|pria|boy/i.test(name);
   }
 
-  function chooseVoice(persona) {
-    const all = voiceList();
+  function getIndonesianVoices() {
+    return voices.filter(isIndonesia);
+  }
 
-    if (!all.length) return null;
+  /* ============================================================
+     VOICE SELECTION
+     Tidak memilih voice Inggris untuk teks Indonesia.
+     ============================================================ */
 
+  function chooseVoice(persona = 'miki') {
     const spec = PERSONAS[persona] || PERSONAS.miki;
+    const indonesian = getIndonesianVoices();
 
-    // Utamakan suara Indonesia.
-    const indonesian = all.filter(isIndonesia);
+    if (!indonesian.length) {
+      return null;
+    }
 
-    // Jika ada suara Indonesia, gunakan itu.
-    // Jika tidak ada, jangan memaksakan suara bahasa Inggris.
-    const pool = indonesian.length ? indonesian : [];
+    const matching = indonesian.filter(voice => {
+      if (spec.gender === 'female') {
+        return isFemale(voice);
+      }
 
-    if (!pool.length) return null;
+      if (spec.gender === 'male') {
+        return isMale(voice);
+      }
 
-    const matching = pool.filter(voice => {
-      if (spec.gender === 'female') return isFemale(voice);
-      return isMale(voice);
+      return false;
     });
 
-    const neutral = pool.filter(voice => {
+    const neutral = indonesian.filter(voice => {
       return !isFemale(voice) && !isMale(voice);
     });
 
-    return matching[0] || neutral[0] || pool[0] || null;
+    return matching[0] || neutral[0] || indonesian[0];
   }
 
   function getVoice(persona) {
-    if (voiceCache[persona] !== undefined) {
-      return voiceCache[persona];
-    }
-
-    const selected = chooseVoice(persona);
-
-    voiceCache[persona] = selected;
-
-    return selected;
+    return chooseVoice(persona);
   }
 
-  function refreshVoices() {
-    voicesLoaded = true;
-    voiceCache = {};
+  /* ============================================================
+     CHARACTER TONE
+     ============================================================ */
 
-    return voiceList();
-  }
-
-  function setupVoiceListener() {
-    const engine = speech();
-
-    if (!engine) return;
-
-    try {
-      engine.addEventListener('voiceschanged', refreshVoices);
-    } catch (error) {
-      // Browser tidak mendukung event ini.
-    }
-
-    refreshVoices();
-  }
-
-  function clean(raw) {
-    return String(raw || '')
-      .replace(/[\r\n]+/g, '. ')
-      .replace(/\s{2,}/g, ' ')
-      .trim()
-      .slice(0, 380);
-  }
-
-  function enabled() {
-    const prefs = (Neko.store && Neko.store.prefs) || {};
-
-    return prefs.charVoice !== false;
-  }
-
-  function setEnabled(on) {
-    const value = Boolean(on);
-
-    if (
-      Neko.store &&
-      typeof Neko.store.patchPrefs === 'function'
-    ) {
-      Neko.store.patchPrefs({
-        charVoice: value
-      });
-    }
-
-    if (!value) {
-      cancel();
-    }
-  }
-
-  function cancel() {
-    const engine = speech();
-
-    if (!engine) return;
-
-    if (speechQueueTimer) {
-      window.clearTimeout(speechQueueTimer);
-      speechQueueTimer = null;
-    }
-
-    try {
-      engine.cancel();
-    } catch (error) {
-      // Abaikan.
-    }
-  }
-
-  function getTone(persona, voice) {
+  function getTone(persona) {
     const spec = PERSONAS[persona] || PERSONAS.miki;
 
-    let pitch = spec.pitch;
-
-    // Sedikit penyesuaian berdasarkan voice perangkat.
-    if (voice) {
-      if (spec.gender === 'female' && isMale(voice)) {
-        pitch += 0.10;
-      }
-
-      if (spec.gender === 'male' && isFemale(voice)) {
-        pitch -= 0.08;
-      }
-    }
-
     return {
-      pitch: Math.max(0.5, Math.min(2, pitch)),
+      pitch: spec.pitch,
       rate: spec.rate,
-      volume: 1
+      volume: spec.volume
     };
   }
 
-  function say(raw, persona) {
-    const engine = speech();
+  /* ============================================================
+     UTTERANCE
+     ============================================================ */
 
-    if (!engine || !enabled()) return;
+  function createUtterance(item) {
+    const utterance = new SpeechSynthesisUtterance(item.text);
+    const voice = getVoice(item.persona);
+    const tone = getTone(item.persona);
 
-    const text = clean(raw);
+    // Paksa bahasa Indonesia.
+    utterance.lang = 'id-ID';
 
-    if (!text) return;
+    // Jangan pernah memasang voice non-Indonesia.
+    if (voice && isIndonesia(voice)) {
+      utterance.voice = voice;
+    }
 
-    const key = PERSONAS[persona] ? persona : 'miki';
+    utterance.pitch = tone.pitch;
+    utterance.rate = tone.rate;
+    utterance.volume = tone.volume;
+
+    utterance.onstart = () => {
+      speaking = true;
+      currentUtterance = utterance;
+    };
+
+    utterance.onend = () => {
+      speaking = false;
+      currentUtterance = null;
+      processQueue();
+    };
+
+    utterance.onerror = (event) => {
+      console.warn('[NEKO Voice] TTS error:', event.error);
+
+      speaking = false;
+      currentUtterance = null;
+      processQueue();
+    };
+
+    return utterance;
+  }
+
+  /* ============================================================
+     QUEUE MANAGER
+     ============================================================ */
+
+  function processQueue() {
+    if (!enabled || speaking || !queue.length) {
+      return;
+    }
+
+    const item = queue.shift();
+
+    if (!item || !item.text) {
+      processQueue();
+      return;
+    }
+
+    const utterance = createUtterance(item);
+
+    speaking = true;
+    currentUtterance = utterance;
+
+    try {
+      synth.speak(utterance);
+    } catch (error) {
+      console.error('[NEKO Voice] Gagal memulai suara:', error);
+
+      speaking = false;
+      currentUtterance = null;
+
+      processQueue();
+    }
+  }
+
+  /* ============================================================
+     SAY
+     ============================================================ */
+
+  function say(text, persona = 'miki', options = {}) {
+    if (!enabled || typeof text !== 'string') {
+      return false;
+    }
+
+    const cleanText = text.trim();
+
+    if (!cleanText) {
+      return false;
+    }
 
     const now = Date.now();
 
-    // Hindari kalimat identik dibacakan berulang.
+    // Hindari ucapan yang sama berulang terlalu cepat.
     if (
-      lastSpeech[key] &&
-      lastSpeech[key].text === text &&
-      now - lastSpeech[key].time < 2600
+      cleanText === lastText &&
+      now - lastTime < DUPLICATE_DELAY
     ) {
-      return;
+      return false;
     }
 
-    lastSpeech[key] = {
-      text: text,
-      time: now
+    lastText = cleanText;
+    lastTime = now;
+
+    const normalizedPersona = PERSONAS[persona]
+      ? persona
+      : 'miki';
+
+    const item = {
+      text: cleanText,
+      persona: normalizedPersona,
+      priority: options.priority || false
     };
 
-    // Cari suara Indonesia jika tersedia.
-    const voice = getVoice(key);
-
-    const tone = getTone(key, voice);
-
-    let utterance;
-
-    try {
-      utterance = new SpeechSynthesisUtterance(text);
-
-      // Tetapkan bahasa Indonesia.
-      utterance.lang = 'id-ID';
-
-      // Voice bersifat opsional.
-      // Jika belum tersedia, browser tetap mencoba membaca.
-      if (voice) {
-        utterance.voice = voice;
+    if (item.priority) {
+      queue.unshift(item);
+    } else {
+      if (queue.length >= MAX_QUEUE) {
+        queue.shift();
       }
 
-      utterance.pitch = tone.pitch;
-      utterance.rate = tone.rate;
-      utterance.volume = tone.volume;
-
-    } catch (error) {
-      console.error('[NEKO Voice] Gagal membuat ucapan:', error);
-      return;
+      queue.push(item);
     }
 
-    // Hentikan ucapan sebelumnya agar tidak bertumpuk.
+    processQueue();
+
+    return true;
+  }
+
+  /* ============================================================
+     CANCEL
+     ============================================================ */
+
+  function cancel() {
+    queue = [];
+    speaking = false;
+    currentUtterance = null;
+
     try {
-      engine.cancel();
+      synth.cancel();
     } catch (error) {
-      // Abaikan.
+      console.warn('[NEKO Voice] Cancel gagal:', error);
+    }
+  }
+
+  /* ============================================================
+     ENABLE / DISABLE
+     ============================================================ */
+
+  function setEnabled(value) {
+    enabled = Boolean(value);
+
+    if (!enabled) {
+      cancel();
     }
 
-    if (speechQueueTimer) {
-      window.clearTimeout(speechQueueTimer);
-    }
-
-    // Beri waktu Chromium menyelesaikan cancel().
-    speechQueueTimer = window.setTimeout(function () {
-      speechQueueTimer = null;
-
-      if (!enabled()) return;
-
-      try {
-        engine.speak(utterance);
-      } catch (error) {
-        console.error('[NEKO Voice] Gagal memutar suara:', error);
-      }
-    }, 120);
+    return enabled;
   }
 
-  function available() {
-    return Boolean(speech());
+  function isEnabled() {
+    return enabled;
   }
 
-  function indonesiaAvailable() {
-    return voiceList().some(isIndonesia);
-  }
+  /* ============================================================
+     CHARACTER INFORMATION
+     ============================================================ */
 
   function getCharacters() {
-    return Object.keys(PERSONAS);
+    return {
+      narrator: {
+        name: 'Narrator',
+        description: 'Tenang, jelas, dan nyaman didengar.'
+      },
+
+      miki: {
+        name: 'Miki',
+        description: 'Ceria, imut, energik, dan ekspresif.'
+      },
+
+      miko: {
+        name: 'Miko',
+        description: 'Ramah, ceria, ringan, dan bersahabat.'
+      },
+
+      neksya: {
+        name: 'Neksya',
+        description: 'Manis, ceria, ekspresif, dan bernada tinggi.'
+      }
+    };
   }
 
-  // Siapkan daftar suara.
-  setupVoiceListener();
+  function getVoiceInfo() {
+    const indonesian = getIndonesianVoices();
 
-  // Beberapa browser baru memuat daftar suara setelah halaman siap.
-  window.addEventListener('load', refreshVoices);
+    return {
+      supported: true,
+      enabled,
+      speaking,
+      queueLength: queue.length,
+      voicesLoaded,
+      totalVoices: voices.length,
+      indonesiaAvailable: indonesian.length > 0,
 
-  // API publik NEKO.
-  Neko.voice = {
-    say: say,
-    cancel: cancel,
-    enabled: enabled,
-    setEnabled: setEnabled,
+      indonesiaVoices: indonesian.map(voice => ({
+        name: voice.name,
+        lang: voice.lang,
+        default: voice.default
+      }))
+    };
+  }
+
+  /* ============================================================
+     PUBLIC API
+     ============================================================ */
+
+  window.Neko = window.Neko || {};
+
+  window.Neko.voice = {
+    say,
+    cancel,
+    enabled: isEnabled,
+    setEnabled,
     refresh: refreshVoices,
-    getCharacters: getCharacters,
+    getCharacters,
+    getVoiceInfo,
 
-    get available() {
-      return available();
+    get isSpeaking() {
+      return speaking;
+    },
+
+    get queueLength() {
+      return queue.length;
     },
 
     get indonesiaAvailable() {
-      return indonesiaAvailable();
+      return getIndonesianVoices().length > 0;
     },
 
     get voicesLoaded() {
@@ -342,4 +386,20 @@
     }
   };
 
+  /* ============================================================
+     INITIALIZATION
+     ============================================================ */
+
+  refreshVoices();
+
+  if (typeof synth.addEventListener === 'function') {
+    synth.addEventListener('voiceschanged', refreshVoices);
+  } else {
+    synth.onvoiceschanged = refreshVoices;
+  }
+
+  // Beberapa browser baru memuat daftar voice setelah halaman aktif.
+  window.addEventListener('load', refreshVoices);
+
+  console.info('[NEKO Voice] Voice system initialized.');
 })();
