@@ -16,6 +16,7 @@
     { id: 'overview', label: 'Profil', icon: 'user' },
     { id: 'collection', label: 'Koleksi', icon: 'medal' },
     { id: 'guide', label: 'Panduan', icon: 'help' },
+    { id: 'kontak', label: 'Kontak', icon: 'school' },
     { id: 'settings', label: 'Atur', icon: 'settings' }
   ];
 
@@ -26,7 +27,7 @@
       hello: 'Hai! Aku Miki. Tanyakan cara pakai NEKO, ya.'
     },
     {
-      id: 'miko', name: 'Miko', role: 'Partner Arena', icon: 'paw', color: Neko.util.tone(1),
+      id: 'miko', name: 'Miko', role: 'Partner Game', icon: 'paw', color: Neko.util.tone(1),
       desc: 'Adik kucing yang energik. Miko memegang arena: pilihan game, Kelas Langsung, XP, dan semangat sebelum bertanding.',
       hello: 'Miko siap! Pilih game dan kita kalahkan rekor kemarin.'
     },
@@ -53,7 +54,7 @@
     return seasonBadges.concat([
       { id: 'pembaca', name: 'Pembaca Tekun', desc: 'Selesaikan satu buku materi', icon: 'books', color: Neko.util.tone(3), ok: profile.stats.booksFinished >= 1 },
       { id: 'kolektor', name: 'Kolektor Buku', desc: 'Tamatkan semua buku materi', icon: 'school', color: Neko.util.tone(0), ok: profile.stats.booksFinished >= 6 },
-      { id: 'juara', name: 'Juara Arena', desc: 'Menangkan lima sesi game', icon: 'trophy', color: Neko.util.tone(6), ok: wins >= 5 },
+      { id: 'juara', name: 'Juara Game', desc: 'Menangkan lima sesi game', icon: 'trophy', color: Neko.util.tone(6), ok: wins >= 5 },
       { id: 'penjelajah', name: 'Penjelajah Game', desc: 'Mainkan kedelapan game arena', icon: 'gamepad', color: Neko.util.tone(1), ok: playedKinds >= 8 },
       { id: 'streak', name: 'Api Semangat', desc: 'Streak check-in tujuh hari', icon: 'flame', color: Neko.util.tone(7), ok: (profile.checkin.best || 0) >= 7 },
       { id: 'sniper', name: 'Sniper Kuis', desc: 'Skor kuis terbaik 500+', icon: 'target', color: Neko.util.tone(5), ok: profile.stats.quizBest >= 500 }
@@ -188,7 +189,7 @@
     const steps = [
       { icon: 'palette', title: 'Pilih duniamu', body: 'Buka Pengaturan atau tombol tema. Delapan dunia mengubah warna, ikon, latar bergerak, hingga suara. Tema Velocity khusus balap dan selalu gelap, sedangkan Paper Quest membawa suasana peta petualangan.' },
       { icon: 'books', title: 'Baca buku seperti aslinya', body: 'Di Perpustakaan, pilih buku lalu balik halaman dengan tombol, geser, atau tombol panah. Halaman baru memberi XP, menamatkan buku membuka badge.' },
-      { icon: 'gamepad', title: 'Mulai dari arena', body: 'Arena menampilkan pilihan game lebih dulu. Atur kesulitan dan jumlah ronde, lalu tekan Mulai. Saat bermain, layar penuh berisi game. Tombol Keluar memberi pilihan lanjut atau mengakhiri sesi.' },
+      { icon: 'gamepad', title: 'Mulai dari Game', body: 'Game menampilkan pilihan game lebih dulu. Atur kesulitan dan jumlah ronde, lalu tekan Mulai. Saat bermain, layar penuh berisi game. Tombol Keluar memberi pilihan lanjut atau mengakhiri sesi.' },
       { icon: 'bolt', title: 'Naik lima season', body: 'Kumpulkan XP dari check-in, membaca, dan game. Setiap season penuh memberi gelar, badge, dan bingkai profil baru. Notifikasi season muncul otomatis.' },
       { icon: 'chat', title: 'Ngobrol dengan maskot', body: 'Tekan bulatan maskot di beranda untuk langsung membuka chat, lalu pindah tab antara Miki (fitur NEKO), Miko (arena & XP), dan Neksya (materi TJKT). Tiap maskot hanya menjawab bagiannya.' },
       { icon: 'shield', title: 'Jaga akunmu', body: 'PIN disimpan ter-hash di perangkat ini. Jangan bagikan PIN. Gunakan tombol keluar di profil bila memakai perangkat bersama.' }
@@ -199,10 +200,11 @@
         '<article class="guide-card"><span class="guide-num">0' + (index + 1) + '</span><span class="guide-ic">' + icon(step.icon) + '</span><h3>' + esc(step.title) + '</h3><p>' + esc(step.body) + '</p></article>'
       )).join('') + '</div></section>' +
       '<section class="profile-section profile-two-col">' +
-      '<article class="profile-about"><span class="kicker">TENTANG NEKO</span><h3>Media belajar TJKT yang hidup</h3><p>NEKO adalah aplikasi belajar Teknik Jaringan Komputer dan Telekomunikasi untuk siswa SMK. Dibuat sebagai media interaktif oleh Kelompok 1, XI TJKT 2.</p>' +
-      '<div class="about-meta"><span>' + icon('school') + 'XI TJKT 2</span><span>' + icon('user') + 'Guru pembimbing: Pak Andy Musly</span><span>' + icon('info') + 'Versi 2.0 · penyimpanan lokal</span></div></article>' +
-      '<article class="profile-about"><span class="kicker">BANTUAN</span><h3>Butuh bantuan?</h3><p>Temui guru pembimbing atau anggota Kelompok 1 di kelas. Untuk masalah teknis, coba muat ulang halaman; progres tersimpan di perangkat ini selama data peramban tidak dihapus.</p>' +
-      '<div class="about-meta"><span>' + icon('users') + 'Kelompok 1 · NEKO</span><span>' + icon('chat') + 'Tanya Miki lewat tombol ngobrol</span><span>' + icon('lock') + 'Data tidak dikirim ke server</span></div></article>' +
+      '<article class="profile-about"><span class="kicker">TENTANG NEKO</span><h3>Media belajar TJKT yang hidup</h3><p>NEKO mengumpulkan materi, kuis, game, dan progres belajar dalam satu aplikasi. Semua data tersimpan di perangkatmu.</p>' +
+      '<div class="about-meta"><span>' + icon('bolt') + 'Delapan dunia tema</span><span>' + icon('info') + 'Penyimpanan lokal</span></div></article>' +
+      '<article class="profile-about"><span class="kicker">BANTUAN</span><h3>Butuh bantuan?</h3><p>Tanya Miki lewat tombol ngobrol, atau buka tab Kontak untuk melihat pembimbing, pembuat aplikasi, dan formulir lapor masalah.</p>' +
+      '<div class="about-meta"><span>' + icon('chat') + 'Tanya Miki</span><span>' + icon('lock') + 'Data tidak dikirim ke server</span></div>' +
+      '<button type="button" class="btn btn-soft btn-sm" data-profile-tab="kontak">' + icon('school') + 'Buka Kontak</button></article>' +
       '</section>'
     );
   }
@@ -249,6 +251,7 @@
     const body =
       tab === 'collection' ? collection(profile) :
       tab === 'guide' ? guide() :
+      tab === 'kontak' ? contactTab() :
       tab === 'settings' ? settings(profile) :
       overview(profile);
     return (
@@ -259,6 +262,13 @@
       body +
       '</div>'
     );
+  }
+
+  /* Tab Kontak: seluruh informasi proyek (pembimbing, anggota Kelompok 1,
+     dan laporan bug) hanya muncul di sini. */
+  function contactTab() {
+    const inner = Neko.contact ? Neko.contact.render() : '<div class="empty-state"><span class="empty-ic">' + icon('school') + '</span><h3>Kontak belum tersedia</h3><p>Muat ulang halaman untuk memuat data kontak.</p></div>';
+    return '<section class="profile-section kontak-in-profile">' + inner + '</section>';
   }
 
   function characterSheet(id) {
@@ -425,6 +435,9 @@
     root.addEventListener('change', event => {
       if (event.target.closest('[data-volume]')) Neko.audio.play('tick');
     });
+
+    /* Formulir laporan bug di tab Kontak memakai pengikatan milik halaman Kontak. */
+    if (tab === 'kontak' && Neko.contact && Neko.contact.bind) Neko.contact.bind(root);
   }
 
   Neko.profile = {

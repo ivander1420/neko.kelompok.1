@@ -535,6 +535,27 @@ jobs:
 ```
 Artifact-nya bisa diunduh siapa pun dari halaman Actions run.
 
+### 8.4 Website online penuh: GitHub → Vercel + server Node (rekomendasi)
+
+Cara ini dipakai supaya **semua fitur hidup** (akun lintas perangkat, Kelas Langsung, Mabar,
+teman/chat, leaderboard bersama) sekaligus otomatis ter-update setiap kali kode di-push.
+
+Ringkas: Vercel menjalankan frontend statis, Render menjalankan `server/server.js`, dan
+website menunjuk ke server lewat satu baris di `index.html`.
+
+1. Push repository `NEKO` ke GitHub (branch `main` untuk production, `development` untuk uji coba).
+2. Vercel → Import repository → Framework `Other`, Build Command `npm run build`,
+   Output Directory `.` → Deploy.
+3. Render → Web Service dari repository yang sama → Start Command `npm start` +
+   environment `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY` → Deploy.
+4. Isi alamat server Render di `index.html`:
+   `<meta name="neko-server-base" content="https://neko-server.onrender.com">` lalu push.
+   Untuk satu perangkat saja: Pengaturan cepat → **Alamat server NEKO → Atur**.
+5. Cek `https://<server>/api/health` dan daftar uji lengkap.
+
+Langkah detail, alasan teknis (kenapa backend tidak bisa dititipkan ke Vercel),
+batasan free tier, dan tabel pengujian ada di **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
+
 ---
 
 ## 9. Pemecahan masalah

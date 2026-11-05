@@ -13,12 +13,17 @@
   const views = {
     home: { label: 'Beranda', short: 'Awal', icon: 'home', render: () => Neko.home.render(), bind: (root) => Neko.home.bind(root) },
     materials: { label: 'Perpustakaan', short: 'Buku', icon: 'books', render: () => Neko.book.render(), bind: (root) => Neko.book.bind(root) },
-    arena: { label: 'Arena', short: 'Arena', icon: 'gamepad', render: () => Neko.arena.render(), bind: (root) => Neko.arena.bind(root) },
+    arena: { label: 'Game', short: 'Game', icon: 'gamepad', render: () => Neko.arena.render(), bind: (root) => Neko.arena.bind(root) },
+    mabar: { label: 'Mabar', short: 'Mabar', icon: 'swords', render: () => Neko.rooms.render(), bind: (root) => Neko.rooms.bind(root) },
     messages: { label: 'Pesan', short: 'Pesan', icon: 'chat', render: () => Neko.friends.render(), bind: (root) => Neko.friends.bind(root) },
-    kontak: { label: 'Kontak', short: 'Kontak', icon: 'school', render: () => Neko.contact.render(), bind: (root) => Neko.contact.bind(root) },
     profile: { label: 'Profil', short: 'Profil', icon: 'profile', render: () => Neko.profile.render(), bind: (root) => Neko.profile.bind(root) },
     admin: { label: 'Admin', short: 'Admin', icon: 'shield', render: () => Neko.admin.render(), bind: (root) => Neko.admin.bind(root) }
   };
+
+  /* Kontak tidak lagi menjadi tombol di sidebar/dock — isinya pindah ke tab
+     di dalam Profil. Rute lama (#kontak) tetap hidup: membuka Profil pada tab
+     Kontak sehingga tautan dan lastView lama tidak rusak. */
+  const viewAlias = { kontak: 'profile' };
 
   const ids = Object.keys(views);
   const app = document.getElementById('app');
@@ -43,7 +48,16 @@
   }
 
   function valid(view) {
-    return ids.includes(view) && (view !== 'admin' || canManage());
+    const target = viewAlias[view] || view;
+    return ids.includes(target) && (target !== 'admin' || canManage());
+  }
+
+  /* Rute lama tetap diterima; kembalikan layar tujuan sebenarnya dan
+     buka tab yang sesuai di halaman itu. */
+  function resolveView(view) {
+    const target = viewAlias[view] || view;
+    if (target !== view && Neko.profile && Neko.profile.setTab) Neko.profile.setTab(target === 'profile' ? 'kontak' : 'overview');
+    return target;
   }
 
   function applySidebar() {
@@ -53,11 +67,14 @@
 
   function viewFromLocation() {
     const hash = String(location.hash || '').replace(/^#/, '').toLowerCase();
-    return valid(hash) ? hash : null;
+    return valid(hash) ? resolveView(hash) : null;
   }
 
-  /* Lebar dock terbatas. Versi label dipilih lewat pengukuran nyata:
-     tulisan penuh bila muat, lalu singkatan, lalu ikon saja. */
+  /* Tulisan selalu berada di bawah ikon. Lebar kolom dock diketahui, jadi
+     ukuran huruf dicari lewat pengukuran nyata: mulai paling besar sampai muat,
+     lalu pakai singkatan bila label penuh tidak muat. Tidak pernah ikon saja. */
+  const DOCK_SIZES = [11.5, 11, 10.5, 10, 9.5, 9, 8.5, 8, 7.5, 7];
+
   function fitDock() {
     const root = document.documentElement;
     if (!dock || !dock.getClientRects().length) return;
@@ -68,25 +85,37 @@
     const gap = parseFloat(box.columnGap) || parseFloat(box.gap) || 0;
     const avail = dock.clientWidth - pad - gap * (buttons.length - 1);
     if (avail <= 0) return;
-    const first = buttons[0];
-    const isRow = getComputedStyle(first).flexDirection === 'row';
-    const innerGap = parseFloat(getComputedStyle(first).columnGap) || parseFloat(getComputedStyle(first).gap) || 0;
+    const column = avail / buttons.length;
+    const pairs = buttons.map(button => ({
+      full: button.querySelector('.dock-label:not(.is-short)'),
+      short: button.querySelector('.dock-label.is-short')
+    }));
+
     root.classList.add('dock-measure');
-    let full = 0;
-    let short = 0;
-    let icons = 0;
-    for (const button of buttons) {
-      const ic = button.querySelector('.dock-ic');
-      const label = button.querySelector('.dock-label:not(.is-short)');
-      const shortLabel = button.querySelector('.dock-label.is-short');
-      const icWidth = Math.ceil(ic.getBoundingClientRect().width);
-      icons += icWidth;
-      full += isRow ? icWidth + innerGap + Math.ceil(label.scrollWidth) : Math.max(icWidth, Math.ceil(label.scrollWidth));
-      short += isRow ? icWidth + innerGap + Math.ceil(shortLabel.scrollWidth) : Math.max(icWidth, Math.ceil(shortLabel.scrollWidth));
+    let choice = null;
+    for (const which of ['full', 'short']) {
+      for (const size of DOCK_SIZES) {
+        root.style.setProperty('--dock-label-size', size + 'px');
+        let needed = 0;
+        for (const item of pairs) {
+          const label = item[which];
+          if (label) needed = Math.max(needed, Math.ceil(label.scrollWidth));
+        }
+        if (needed <= column) {
+          choice = { which, size };
+          break;
+        }
+      }
+      if (choice) break;
     }
+    if (!choice) {
+      choice = { which: 'short', size: DOCK_SIZES[DOCK_SIZES.length - 1] };
+      root.style.setProperty('--dock-label-size', choice.size + 'px');
+    }
+    const iconSize = Math.round(Math.max(18, Math.min(23, choice.size * 1.9)));
+    root.style.setProperty('--dock-ic-size', iconSize + 'px');
     root.classList.remove('dock-measure');
-    const fit = full <= avail ? 'full' : short <= avail ? 'short' : 'icon';
-    if (root.dataset.dockFit !== fit) root.dataset.dockFit = fit;
+    if (root.dataset.dockFit !== choice.which) root.dataset.dockFit = choice.which;
   }
 
   let dockFitTimer = null;
@@ -164,14 +193,14 @@
         '<div class="progress thin" style="margin-top:9px"><span style="width:' + snap.progress.toFixed(1) + '%"></span></div>' +
         '<button type="button" class="btn btn-ghost btn-sm" style="margin-top:9px;width:100%" data-season="' + snap.season.id + '">' + icon('info') + 'Detail season</button>' +
         '</div>' +
-        '<div class="side-foot">NEKO · Kelompok 1</div>';
+        '<div class="side-foot">NEKO</div>';
     }
 
     if (topbar) {
       topbar.innerHTML =
         '<div class="topbar-inner">' +
         '<div class="top-brand"><span class="top-brand-mark"><span class="logo-mask"></span></span>' +
-        '<span class="top-brand-copy"><b>NEKO</b><small>TJKT · Kelompok 1</small></span></div>' +
+        '<span class="top-brand-copy"><b>NEKO</b><small>Media belajar</small></span></div>' +
         '<div class="top-xp" id="topXp">' +
         '<div class="top-xp-line"><b>' + esc(snap.season.title) + '</b><span>' + range + '</span></div>' +
         '<div class="progress"><span style="width:' + snap.progress.toFixed(1) + '%"></span></div>' +
@@ -322,9 +351,12 @@
   }
 
   function go(view, options = {}) {
+    const aliased = Boolean(viewAlias[view]);
+    view = resolveView(view);
     if (!valid(view)) return false;
     if (!Neko.store.profile) return false;
     if (view === current && !options.force) {
+      if (aliased) render();
       window.scrollTo({ top: 0, behavior: Neko.util.reducedMotion() ? 'auto' : 'smooth' });
       return true;
     }
@@ -348,7 +380,7 @@
     applySidebar();
     Neko.theme.applyDom(Neko.store.prefs);
     Neko.scenes.render(Neko.store.prefs.theme, Neko.store.prefs.mode);
-    current = viewFromLocation() || (valid(Neko.store.prefs.lastView) ? Neko.store.prefs.lastView : 'home');
+    current = viewFromLocation() || (valid(Neko.store.prefs.lastView) ? resolveView(Neko.store.prefs.lastView) : 'home');
     bindShell();
     render();
     Neko.mascot.mount();

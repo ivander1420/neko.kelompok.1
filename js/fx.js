@@ -37,7 +37,7 @@
   }
 
   function cursorEnabled() {
-    return finePointer() && !reduced() && Neko.store && Neko.store.prefs.cursor === 'on';
+    return false;
   }
 
   /* ---------------- Haptic ---------------- */

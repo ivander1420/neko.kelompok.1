@@ -471,6 +471,94 @@ html[data-mode="dark"] .book { background: #e9e1cf; }
   cursor: pointer;
 }
 
+/* --- komponen halaman untuk buku koding & desain --- */
+.page-code {
+  margin: 0;
+  border: 1px solid rgba(60, 50, 30, .35);
+  border-radius: 10px;
+  background: #2b2a24;
+  color: #f2ead6;
+  padding: 9px 11px 10px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: clamp(9.6px, 1vw, 11.4px);
+  line-height: 1.58;
+  box-shadow: inset 0 -12px 22px -18px rgba(0, 0, 0, .9);
+}
+.page-code code { font-family: inherit; white-space: pre; }
+.page-code[data-label]::before {
+  content: attr(data-label);
+  display: block;
+  margin: -2px 0 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed rgba(242, 234, 214, .28);
+  font-family: var(--font-mono);
+  font-size: 8.6px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--book-color, #6fbf8a) 75%, #f2ead6);
+}
+.page-key {
+  display: inline-block;
+  border: 1px solid rgba(90, 70, 30, .4);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: rgba(255, 255, 255, .7);
+  color: #2c2415;
+}
+.page-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.page-flow span {
+  border: 1px solid color-mix(in srgb, var(--book-color, #2c6) 45%, #7a6a4a);
+  background: rgba(255, 255, 255, .55);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #33402f;
+}
+.page-flow i { font-style: normal; color: #8a7c62; font-size: 11px; }
+.page-check { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.page-check li {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  font-size: clamp(10.8px, 1.12vw, 12.4px);
+  color: #4a4232;
+  line-height: 1.5;
+}
+.page-check li::before {
+  content: "✓";
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--book-color, #2c6) 26%, #fff);
+  color: #24401f;
+  font-size: 10px;
+  font-weight: 900;
+}
+.page-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.page-swatches span {
+  width: 46px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid rgba(90, 70, 30, .3);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: rgba(255, 255, 255, .92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+}
+.page-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 620px) { .page-cols { grid-template-columns: 1fr; } }
+
 .book.page-cover .book-page {
   background: linear-gradient(150deg, var(--cover-a), var(--cover-b));
   color: #fff;
@@ -624,4 +712,154 @@ html[data-mode="dark"] .book { background: #e9e1cf; }
   .book-card .book-cover { transform: none !important; }
   .book.is-flipping-next .book-flip,
   .book.is-flipping-prev .book-flip { animation-duration: .01s; }
+}
+
+/* ============================================================
+   HIASAN BUKU DONGENG
+   Ornamen sudut, garis emas, huruf pertama besar, dan pita
+   penanda. Semua hiasan aria-hidden dan tidak menutupi teks.
+   ============================================================ */
+
+.book-page { isolation: isolate; }
+
+/* Bingkai emas tipis di sekeliling halaman. */
+.book-page::after {
+  content: "";
+  position: absolute;
+  inset: clamp(7px, .9vw, 12px);
+  border: 1px solid rgba(163, 122, 44, .34);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 3px rgba(163, 122, 44, .09);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.book-page.left::after { border-right-color: rgba(163, 122, 44, .12); }
+.book-page.right::after { border-left-color: rgba(163, 122, 44, .12); }
+
+/* Ornamen sudut: dua garis lengkung plus satu titik emas. */
+.page-orn {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .72;
+}
+
+.page-orn::before,
+.page-orn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 0 solid rgba(150, 108, 32, .55);
+}
+
+.page-orn::before { border-width: 2px 0 0 2px; border-radius: 10px 0 0 0; }
+.page-orn::after { inset: 5px; border-width: 1px 0 0 2px; border-radius: 7px 0 0 0; opacity: .62; }
+
+.page-orn.tl { top: clamp(11px, 1.3vw, 17px); left: clamp(11px, 1.3vw, 17px); }
+.page-orn.tr { top: clamp(11px, 1.3vw, 17px); right: clamp(11px, 1.3vw, 17px); transform: scaleX(-1); }
+.page-orn.bl { bottom: clamp(11px, 1.3vw, 17px); left: clamp(11px, 1.3vw, 17px); transform: scaleY(-1); }
+.page-orn.br { bottom: clamp(11px, 1.3vw, 17px); right: clamp(11px, 1.3vw, 17px); transform: scale(-1, -1); }
+
+/* Pita penanda halaman — menggantung dari tepi atas halaman kanan. */
+.page-ribbon {
+  position: absolute;
+  top: 0;
+  right: clamp(26px, 4vw, 46px);
+  width: 13px;
+  height: 54px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, #9d3550, #c2506c 62%, #9d3550);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  box-shadow: 0 4px 10px -4px rgba(60, 20, 30, .6);
+}
+
+/* Judul bab: garis emas dengan intan kecil di tengah. */
+.page-inner h2 { position: relative; padding-bottom: 10px; }
+
+.page-inner h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 7px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(163, 122, 44, .9) 3.4px, transparent 3.6px) center / 12px 7px no-repeat,
+    linear-gradient(90deg, transparent, rgba(163, 122, 44, .58) 12%, rgba(163, 122, 44, .58) 42%, transparent 44% 56%, rgba(163, 122, 44, .58) 58% 88%, transparent);
+}
+
+/* Label kecil di atas judul diberi permata emas di ujung kanan. */
+.page-kicker { letter-spacing: .16em; }
+
+.page-kicker::after {
+  content: "◆";
+  margin-left: 7px;
+  font-size: 7px;
+  color: rgba(163, 122, 44, .8);
+  vertical-align: 1px;
+}
+
+/* Huruf pertama besar bergaya buku dongeng. */
+.page-inner > p:first-of-type { text-indent: 0; }
+
+.page-inner > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(34px, 4.6vw, 52px);
+  line-height: .82;
+  padding: 4px 9px 2px 0;
+  color: #8a5a1f;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, .7);
+}
+
+/* Paragraf pertama setelah blok besar tidak diberi drop cap. */
+.page-inner > .page-figure + p::first-letter,
+.page-inner > .page-code + p::first-letter,
+.page-inner > .page-callout + p::first-letter,
+.page-inner > .page-table + p::first-letter {
+  float: none;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  text-shadow: none;
+}
+
+/* Nomor halaman dihimpit garis pendek. */
+.page-inner .page-num { letter-spacing: .06em; }
+
+.page-inner .page-num::before {
+  content: "— ◆ —";
+  display: block;
+  margin-bottom: 3px;
+  font-size: 8px;
+  letter-spacing: .1em;
+  color: rgba(163, 122, 44, .55);
+}
+
+/* Sampul dalam: bingkai ganda. */
+.cover-art { position: relative; }
+
+.cover-art::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+
+@media (max-width: 800px) {
+  .page-orn { width: 16px; height: 16px; }
+  .page-orn::after { inset: 4px; }
+  .page-ribbon { height: 40px; width: 11px; right: 20px; }
+  .book-page::after { inset: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-ribbon { box-shadow: none; }
 }

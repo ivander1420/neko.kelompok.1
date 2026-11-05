@@ -438,12 +438,7 @@ html[data-sidebar="collapsed"] .side-link.on {
 }
 
 @media (pointer: fine) and (hover: hover) {
-  html[data-fx-cursor="on"],
-  html[data-fx-cursor="on"] body,
-  html[data-fx-cursor="on"] *:not(input):not(textarea):not(select):not([contenteditable="true"]) {
-    cursor: none !important;
   }
-}
 
 @media (pointer: coarse), (hover: none) {
   .fx-cursor-dot,

@@ -10,7 +10,34 @@
   const Neko = window.Neko = window.Neko || {};
 
   const TOKEN_KEY = 'neko_token_v1';
-  const isFile = location.protocol === 'file:';
+  const BASE_KEY = 'neko_server_base_v1';
+
+  /* Alamat server NEKO.
+     Kosong      = pakai alamat halaman ini (server dan web di tempat sama).
+     Terisi      = pakai server lain, misalnya server online sementara webnya
+                   di-hosting Vercel/GitHub Pages atau dibuka dari file/APK.
+                 Bisa lewat <meta name="neko-server-base" content="https://...">
+                 atau disimpan di localStorage (mode Pengaturan → Server). */
+  function readServerBase() {
+    let raw = '';
+    try { raw = localStorage.getItem(BASE_KEY) || ''; } catch (error) { raw = ''; }
+    if (!raw) {
+      const meta = document.querySelector('meta[name="neko-server-base"]');
+      raw = (meta && meta.content) || '';
+    }
+    raw = String(raw).trim().replace(/\/+$/, '');
+    if (!raw || raw === 'same' || raw === 'auto') return '';
+    return /^https?:\/\//i.test(raw) ? raw : '';
+  }
+
+  const serverBaseInitial = readServerBase();
+  // Mode file hanya dianggap offline kalau tidak ada alamat server yang diisi.
+  let serverBase = serverBaseInitial;
+  let isFile = location.protocol === 'file:' && !serverBase;
+
+  function apiURL(path) {
+    return serverBase ? serverBase + path : path;
+  }
 
   let token = '';
   try { token = localStorage.getItem(TOKEN_KEY) || ''; } catch (error) { token = ''; }
@@ -42,7 +69,7 @@
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (token && options.auth !== false) headers.Authorization = 'Bearer ' + token;
-      const response = await fetch(path, {
+      const response = await fetch(apiURL(path), {
         method: options.method || 'GET',
         headers,
         body: options.body ? JSON.stringify(options.body) : undefined,
@@ -184,6 +211,11 @@
   /* ---------------- WebSocket Kelas Langsung ---------------- */
 
   function wsURL() {
+    if (serverBase) {
+      const secure = /^https:/i.test(serverBase);
+      const host = serverBase.replace(/^https?:\/\//i, '');
+      return (secure ? 'wss://' : 'ws://') + host + '/ws';
+    }
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     return proto + '//' + location.host + '/ws';
   }
@@ -207,7 +239,13 @@
     socket.onmessage = event => {
       let message = null;
       try { message = JSON.parse(event.data); } catch (error) { return; }
-      if (message && message.type === 'live-state' && onLiveMessage) onLiveMessage(message);
+      if (!message) return;
+      if (message.type === 'live-state' && onLiveMessage) onLiveMessage(message);
+      if (String(message.type || '').indexOf('room-') === 0) {
+        for (const listener of Array.from(socketListeners)) {
+          try { listener(message); } catch (error) { /* listener lain tetap jalan */ }
+        }
+      }
     };
     socket.onclose = () => {
       socket = null;
@@ -276,17 +314,111 @@
     request('/api/live/answer', { method: 'POST', body: { ...payload } }).catch(() => {});
   }
 
+  /* ---------------- Kanal room mabar (realtime) ---------------- */
+
+  const socketListeners = new Set();
+  const roomChannel = { pin: '', rev: 0, polling: false, timer: null };
+
+  function subscribeRoom(pin, listener) {
+    roomChannel.pin = String(pin || '');
+    roomChannel.rev = 0;
+    if (listener) socketListeners.add(listener);
+    const ws = ensureSocket(null);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try { ws.send(JSON.stringify({ type: 'room-subscribe', pin: roomChannel.pin, token })); } catch (error) { /* fallback polls */ }
+    }
+    window.clearInterval(roomChannel.timer);
+    roomChannel.timer = window.setInterval(async () => {
+      if (!roomChannel.pin) return;
+      const wsOpen = socket && socket.readyState === WebSocket.OPEN;
+      if (wsOpen) return;
+      if (roomChannel.polling) return;
+      roomChannel.polling = true;
+      try {
+        const data = await request('/api/room/wait?pin=' + encodeURIComponent(roomChannel.pin) + '&rev=' + roomChannel.rev, { timeout: 30000 });
+        const item = data && Array.isArray(data.events) ? data.events[data.events.length - 1] : data;
+        if (item && item.state) {
+          roomChannel.rev = item.rev || roomChannel.rev;
+          for (const fn of Array.from(socketListeners)) {
+            try { fn({ type: item.type || 'room-state', rev: item.rev, state: item.state, ...item }); } catch (error) { /* abaikan */ }
+          }
+        }
+      } catch (error) {
+        roomChannel.polling = false;
+        if (error && error.status === 404) {
+          unsubscribeRoom();
+          for (const fn of Array.from(socketListeners)) {
+            try { fn({ type: 'room-closed', pin: roomChannel.pin }); } catch (inner) { /* abaikan */ }
+          }
+          return;
+        }
+      }
+      roomChannel.polling = false;
+    }, 1800);
+    if (roomChannel.timer.unref !== undefined) { /* browser timer: biarkan */ }
+  }
+
+  function unsubscribeRoom(listener) {
+    if (listener) socketListeners.delete(listener);
+    else socketListeners.clear();
+    if (!socketListeners.size) {
+      window.clearInterval(roomChannel.timer);
+      roomChannel.timer = null;
+      roomChannel.pin = '';
+      roomChannel.rev = 0;
+    }
+  }
+
+  function sendRoomMessage(payload) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      try { socket.send(JSON.stringify({ token, ...payload })); return; } catch (error) { /* jatuh ke REST */ }
+    }
+    if (payload.type === 'room-score') {
+      request('/api/room/score', { method: 'POST', body: { ...payload } }).catch(() => {});
+    }
+  }
+
   /* ---------------- API publik ---------------- */
+
+  function setServerBase(value) {
+    const clean = String(value || '').trim().replace(/\/+$/, '');
+    try {
+      if (clean) localStorage.setItem(BASE_KEY, clean);
+      else localStorage.removeItem(BASE_KEY);
+    } catch (error) { /* penyimpanan privat */ }
+    serverBase = /^https?:\/\//i.test(clean) ? clean : '';
+    isFile = location.protocol === 'file:' && !serverBase;
+    return serverBase;
+  }
 
   Neko.api = {
     request, probe, setToken,
     get token() { return token; },
     get online() { return online; },
+    server: {
+      get base() { return serverBase; },
+      set(value) { return setServerBase(value); },
+      clear() { return setServerBase(''); }
+    },
     lastSyncAt: 0,
     login, register, restoreSession, logout,
     scheduleSync, flushSync,
     startEvents, stopEvents,
     subscribeLive, unsubscribeLive, sendLiveAnswer,
+    subscribeRoom, unsubscribeRoom, sendRoomMessage,
+    room: {
+      create(options) { return request('/api/room/create', { method: 'POST', body: options }); },
+      join(pin, character) { return request('/api/room/join', { method: 'POST', body: { pin, character } }); },
+      leave(pin) { return request('/api/room/leave', { method: 'POST', body: { pin } }); },
+      ready(pin, value) { return request('/api/room/ready', { method: 'POST', body: { pin, ready: value } }); },
+      character(pin, character) { return request('/api/room/character', { method: 'POST', body: { pin, character } }); },
+      start(pin) { return request('/api/room/start', { method: 'POST', body: { pin } }); },
+      skip(pin) { return request('/api/room/skip', { method: 'POST', body: { pin } }); },
+      score(pin, round, score, won, detail) { return request('/api/room/score', { method: 'POST', body: { pin, round, score, won, detail } }); },
+      invite(pin, usernames, kind, game) { return request('/api/room/invite', { method: 'POST', body: { pin, usernames, kind, game } }); },
+      state(pin) { return request('/api/room/state?pin=' + encodeURIComponent(pin)); },
+      list() { return request('/api/room/list'); }
+    },
     live: {
       create(options) { return request('/api/live/create', { method: 'POST', body: options }); },
       join(pin, name, character) { return request('/api/live/join', { method: 'POST', body: { pin, name, character } }); },

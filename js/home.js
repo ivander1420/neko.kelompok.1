@@ -170,7 +170,7 @@
       '<button type="button" class="btn ' + (checkinDone ? 'btn-soft' : 'btn-primary') + ' btn-block" data-checkin ' + (checkinDone ? 'disabled' : '') + '>' + icon(checkinDone ? 'check' : 'sparkles') + (checkinDone ? 'Sampai jumpa besok' : 'Ambil hadiah hari ini') + '</button>' +
       '</article>' +
       '<div class="home-stats">' +
-      statCard('gamepad', formatNumber(games), 'Game dimainkan', 'Arena TJKT') +
+      statCard('gamepad', formatNumber(games), 'Game dimainkan', 'Game TJKT') +
       statCard('books', formatNumber(booksDone), 'Buku selesai', profile.stats.pagesRead + ' halaman dibaca') +
       statCard('target', formatNumber(bestQuiz), 'Skor quiz terbaik', 'Dari 100') +
       statCard('flame', formatNumber(profile.stats.xpToday || 0), 'XP hari ini', 'Terus bertambah') +

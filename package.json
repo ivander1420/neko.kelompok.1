@@ -1,11 +1,13 @@
 {
   "name": "neko-tjkt",
-  "version": "3.0.27",
+  "version": "3.0.35",
   "private": true,
   "description": "NEKO - Belajar TJKT Sambil Bermain. Aplikasi web + server Node tanpa dependency.",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "build": "node scripts/prepare-build.js",
+    "check": "node scripts/check-project.js"
   },
   "engines": {
     "node": ">=18"

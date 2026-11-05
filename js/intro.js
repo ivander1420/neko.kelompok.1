@@ -33,7 +33,7 @@
       view: 'arena',
       icon: 'gamepad',
       tint: 'var(--accent-2)',
-      title: 'Arena',
+      title: 'Game',
       line: 'Belasan game adu paham: Memory, Spy, Kabel LAN, dan lainnya.'
     },
     {
@@ -202,7 +202,6 @@
       '<div class="cine-mark"><span class="logo-mask"></span></div>' +
       '<div class="cine-word">' + letters + '</div>' +
       '<p class="cine-tag">Belajar TJKT Sambil Bermain</p>' +
-      '<p class="cine-by">Kelompok 1 · XI TJKT 2</p>' +
       '</section>' +
 
       '<section class="cine-scene" data-scene="1">' +
@@ -233,13 +232,13 @@
       '</div>' +
 
       '<div class="cine-controls">' +
-      '<button type="button" class="cine-prev" data-cine-prev>' +
+      '<button type="button" class="cine-back" data-cine-prev>' +
       icon('arrow-left') + ' Kembali</button>' +
 
       '<span class="cine-step" data-cine-step>1 / 4</span>' +
 
       '<button type="button" class="cine-next" data-cine-next>' +
-      'Selanjutnya ' + icon('arrow-right') +
+      'Lanjutkan ' + icon('arrow-right') +
       '</button>' +
       '</div>' +
 
@@ -311,7 +310,7 @@
 
       nextButton.innerHTML = index === 3
         ? icon('rocket') + ' Mulai Belajar'
-        : 'Selanjutnya ' + icon('arrow-right');
+        : 'Lanjutkan ' + icon('arrow-right');
 
       stepLabel.textContent = (index + 1) + ' / 4';
 
@@ -321,15 +320,15 @@
       const messages = [
         'Selamat datang di NEKO. Belajar TJKT kini menjadi lebih seru melalui materi, permainan, dan aktivitas bersama teman.',
 
-        'Ini adalah fitur utama NEKO. Kamu bisa menjelajahi Beranda, Perpustakaan, Arena, Kelas Langsung, Pesan, dan Profil.',
+        'Ini adalah fitur utama NEKO. Kamu bisa menjelajahi Beranda, Perpustakaan, Game, Kelas Langsung, Pesan, dan Profil.',
 
-        'Kenalan dengan tiga asisten NEKO. Miki membantu mengenal aplikasi, Miko menemani aktivitas Arena, dan Neksya membantu memahami istilah jaringan.',
+        'Kenalan dengan tiga asisten NEKO. Miki membantu mengenal aplikasi, Miko menemani aktivitas Game, dan Neksya membantu memahami istilah jaringan.',
 
         'Semua sudah siap. Jelajahi NEKO, pelajari materi, bermain, dan kumpulkan pengalaman belajar bersama teman.'
       ];
 
       const captions = [
-        'NEKO — Belajar TJKT Sambil Bermain. Dibuat oleh Kelompok 1, XI TJKT 2.',
+        'NEKO — Belajar TJKT Sambil Bermain.',
         'Jelajahi setiap fitur NEKO untuk menemukan pengalaman belajar yang kamu butuhkan.',
         'Mereka siap menemani perjalanan belajarmu di NEKO.',
         'Tekan Mulai Belajar untuk masuk ke aplikasi.'
@@ -425,33 +424,30 @@
       }
 
       const tile = event.target.closest('[data-goto]');
-
       if (tile) {
-        const view = tile.dataset.goto;
-
-        close('goto');
-
-        window.setTimeout(() => {
-          try {
-            Neko.app.go(view);
-          } catch (_) {}
-        }, 150);
-
+        tile.classList.add('pulse');
+        window.setTimeout(() => tile.classList.remove('pulse'), 400);
+        const idx = Number(tile.dataset.tile || 0);
+        const item = TOUR[idx];
+        if (item) {
+          setCaption(item.title + ' — ' + item.line, item.line);
+          sfx('tap');
+        }
         return;
       }
 
       const cat = event.target.closest('.cine-cat');
-
       if (cat) {
+        cat.classList.add('pulse');
+        window.setTimeout(() => cat.classList.remove('pulse'), 400);
         const id = cat.dataset.cat;
-
-        close('chat');
-
-        window.setTimeout(() => {
-          try {
-            Neko.mascot.openChat(id);
-          } catch (_) {}
-        }, 150);
+        const who = CAST.find(c => c.id === id);
+        if (who) {
+          const info = (Neko.mascot && Neko.mascot.cast && Neko.mascot.cast[id]) || { name: id };
+          setCaption(info.name + ': ' + who.line, 'Halo! Aku ' + info.name + '. ' + who.line, id);
+          sfx('tap');
+        }
+        return;
       }
     });
 

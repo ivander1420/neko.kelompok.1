@@ -214,7 +214,6 @@ NEKO · js/auth.js
         '<div class="intro-shapes" aria-hidden="true"><i style="left:18%;top:22%"></i><i style="left:78%;top:32%;animation-delay:-2s"></i><i style="left:32%;top:74%;animation-delay:-4s"></i><i style="left:68%;top:82%;animation-delay:-1s"></i></div>' +
         '<div class="intro-inner"><div class="intro-mark"><span class="logo-mask"></span></div>' +
         '<div class="intro-word">Neko<span class="dot-run" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></div>' +
-        '<div class="intro-by">by Kelompok 1</div>' +
         '<p class="intro-hi">Halo, ' + esc(name) + '. Selamat datang di duniamu.</p></div>';
       document.body.appendChild(node);
       Neko.audio.play('success');

@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NEKO">
+<!-- Alamat server NEKO kalau web dan server dipisah (mis. web di Vercel, server di Render).
+     Kosong = pakai alamat halaman ini sendiri. Bisa diganti lewat Pengaturan → Server. -->
+<meta name="neko-server-base" content="">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="apple-touch-icon" href="./favicon.svg">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -18,20 +21,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Chakra+Petch:wght@500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Lilita+One&family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=Patrick+Hand&family=Quicksand:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="./css/base.css?v=3.0.29">
-<link rel="stylesheet" href="./css/layout.css?v=3.0.29">
-<link rel="stylesheet" href="./css/components.css?v=3.0.29">
-<link rel="stylesheet" href="./css/themes.css?v=3.0.29">
-<link rel="stylesheet" href="./css/polish.css?v=3.0.29">
-<link rel="stylesheet" href="./css/paper.css?v=3.0.29">
-<link rel="stylesheet" href="./css/scenes.css?v=3.0.29">
-<link rel="stylesheet" href="./css/book.css?v=3.0.29">
-<link rel="stylesheet" href="./css/games.css?v=3.0.29">
-<link rel="stylesheet" href="./css/views.css?v=3.0.29">
-<link rel="stylesheet" href="./css/social.css?v=3.0.29">
-<link rel="stylesheet" href="./css/live.css?v=3.0.29">
-<link rel="stylesheet" href="./css/messages.css?v=3.0.29">
-<link rel="stylesheet" href="./css/intro.css?v=3.0.29">
+<link rel="stylesheet" href="./css/base.css?v=3.0.35">
+<link rel="stylesheet" href="./css/layout.css?v=3.0.35">
+<link rel="stylesheet" href="./css/components.css?v=3.0.35">
+<link rel="stylesheet" href="./css/themes.css?v=3.0.35">
+<link rel="stylesheet" href="./css/polish.css?v=3.0.35">
+<link rel="stylesheet" href="./css/paper.css?v=3.0.35">
+<link rel="stylesheet" href="./css/scenes.css?v=3.0.35">
+<link rel="stylesheet" href="./css/book.css?v=3.0.35">
+<link rel="stylesheet" href="./css/games.css?v=3.0.35">
+<link rel="stylesheet" href="./css/views.css?v=3.0.35">
+<link rel="stylesheet" href="./css/social.css?v=3.0.35">
+<link rel="stylesheet" href="./css/live.css?v=3.0.35">
+<link rel="stylesheet" href="./css/rooms.css?v=3.0.35">
+<link rel="stylesheet" href="./css/messages.css?v=3.0.35">
+<link rel="stylesheet" href="./css/avatars.css?v=3.0.35">
+<link rel="stylesheet" href="./css/intro.css?v=3.0.35">
 
 <script>
 (function () {
@@ -56,16 +61,15 @@
 
 <div id="scene" class="scene" aria-hidden="true"></div>
 
-<div id="loader" class="loader" role="status" aria-live="polite">
+<div id="loader" class="loader" role="status"k aria-live="polite">
   <div class="loader-aura" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="loader-inner">
     <div class="loader-mark"><span class="logo-mask"></span></div>
     <div class="loader-word">Neko<span class="loader-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></div>
-    <div class="loader-by">by Kelompok 1</div>
     <div class="loader-track"><span id="loaderBar"></span></div>
     <p class="loader-status" id="loaderStatus">Menyiapkan dunia NEKO…</p>
   </div>
-  <div class="loader-corner" aria-hidden="true">TJKT • XI TJKT 2</div>
+  <div class="loader-corner" aria-hidden="true">Belajar sambil bermain</div>
 </div>
 
 <section id="auth" class="auth" aria-label="Masuk ke NEKO" hidden>
@@ -77,7 +81,6 @@
     <div class="auth-copy">
       <div class="auth-mark"><span class="logo-mask" aria-hidden="true"></span></div>
       <h1 class="auth-word">Neko<span class="dot-run" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></h1>
-      <div class="auth-by">by Kelompok 1</div>
       <p class="auth-tagline">Belajar TJKT sambil bermain. Pilih duniamu, baca buku interaktif, tantang teman di arena, dan tumbuh bersama Miki &amp; Miko.</p>
       <div class="auth-chips" aria-hidden="true">
         <span class="mini-chip">8 dunia tema</span>
@@ -119,7 +122,6 @@
   </div>
   <div class="auth-foot">
     <span>NEKO • Media pembelajaran interaktif</span>
-    <span>Guru pembimbing: Pak Andy Musly • Kelompok 1</span>
   </div>
 </section>
 
@@ -138,41 +140,48 @@
 <div id="mascotRoot"></div>
 <div id="themeLayer" class="theme-layer" aria-hidden="true"></div>
 
-<script src="./data/materials.js?v=3.0.29"></script>
-<script src="./data/quiz.js?v=3.0.29"></script>
-<script src="./data/spy.js?v=3.0.29"></script>
-<script src="./js/util.js?v=3.0.29"></script>
-<script src="./js/icons.js?v=3.0.29"></script>
-<script src="./js/audio.js?v=3.0.29"></script>
-<script src="./js/voice.js?v=3.0.29"></script>
-<script src="./js/seasons.js?v=3.0.29"></script>
-<script src="./js/api.js?v=3.0.29"></script>
-<script src="./js/store.js?v=3.0.29"></script>
-<script src="./js/theme.js?v=3.0.29"></script>
-<script src="./js/scenes.js?v=3.0.29"></script>
-<script src="./js/ui.js?v=3.0.29"></script>
-<script src="./js/community.js?v=3.0.29"></script>
-<script src="./js/admin.js?v=3.0.29"></script>
-<script src="./js/fx.js?v=3.0.29"></script>
-<script src="./js/auth.js?v=3.0.29"></script>
-<script src="./js/home.js?v=3.0.29"></script>
-<script src="./js/book.js?v=3.0.29"></script>
-<script src="./js/arena.js?v=3.0.29"></script>
-<script src="./js/live.js?v=3.0.29"></script>
-<script src="./js/friends.js?v=3.0.29"></script>
-<script src="./js/games/quiz.js?v=3.0.29"></script>
-<script src="./js/games/spy.js?v=3.0.29"></script>
-<script src="./js/games/cable.js?v=3.0.29"></script>
-<script src="./js/games/memory.js?v=3.0.29"></script>
-<script src="./js/games/subnet.js?v=3.0.29"></script>
-<script src="./js/games/osi.js?v=3.0.29"></script>
-<script src="./js/games/detective.js?v=3.0.29"></script>
-<script src="./js/games/reaction.js?v=3.0.29"></script>
-<script src="./js/profile.js?v=3.0.29"></script>
-<script src="./js/avatars.js?v=3.0.29"></script>
-<script src="./js/mascot.js?v=3.0.29"></script>
-<script src="./js/contact.js?v=3.0.29"></script>
-<script src="./js/intro.js?v=3.0.29"></script>
-<script src="./js/app.js?v=3.0.29"></script>
+<script src="./data/materials.js?v=3.0.35"></script>
+<script src="./data/materials-koding.js?v=3.0.35"></script>
+<script src="./data/materials-desain.js?v=3.0.35"></script>
+<script src="./data/quiz.js?v=3.0.35"></script>
+<script src="./data/spy-words.js?v=3.0.35"></script>
+<script src="./js/util.js?v=3.0.35"></script>
+<script src="./js/icons.js?v=3.0.35"></script>
+<script src="./js/audio.js?v=3.0.35"></script>
+<script src="./js/voice.js?v=3.0.35"></script>
+<script src="./js/rooms.js?v=3.0.35"></script>
+<script src="./js/seasons.js?v=3.0.35"></script>
+<script src="./js/api.js?v=3.0.35"></script>
+<script src="./js/store.js?v=3.0.35"></script>
+<script src="./js/theme.js?v=3.0.35"></script>
+<script src="./js/scenes.js?v=3.0.35"></script>
+<script src="./js/ui.js?v=3.0.35"></script>
+<script src="./js/community.js?v=3.0.35"></script>
+<script src="./js/admin.js?v=3.0.35"></script>
+<script src="./js/fx.js?v=3.0.35"></script>
+<script src="./js/auth.js?v=3.0.35"></script>
+<script src="./js/home.js?v=3.0.35"></script>
+<script src="./js/book.js?v=3.0.35"></script>
+<script src="./js/arena.js?v=3.0.35"></script>
+<script src="./js/live.js?v=3.0.35"></script>
+<script src="./js/friends.js?v=3.0.35"></script>
+<script src="./js/games/quiz.js?v=3.0.35"></script>
+<script src="./data/spy.js?v=3.0.35"></script>
+<script src="./js/games/cable.js?v=3.0.35"></script>
+<script src="./js/games/memory.js?v=3.0.35"></script>
+<script src="./js/games/subnet.js?v=3.0.35"></script>
+<script src="./js/games/osi.js?v=3.0.35"></script>
+<script src="./js/games/detective.js?v=3.0.35"></script>
+<script src="./js/games/reaction.js?v=3.0.35"></script>
+<script src="./js/games/simon.js?v=3.0.35"></script>
+<script src="./js/games/portrush.js?v=3.0.35"></script>
+<script src="./js/games/merge.js?v=3.0.35"></script>
+<script src="./js/games/typing.js?v=3.0.35"></script>
+<script src="./js/profile.js?v=3.0.35"></script>
+<script src="./js/avatars.js?v=3.0.35"></script>
+<script src="./js/mascot.js?v=3.0.35"></script>
+<script src="./js/contact.js?v=3.0.35"></script>
+<script src="./js/intro.js?v=3.0.35"></script>
+<script src="./js/app.js?v=3.0.35"></script>
 </body>
 </html>

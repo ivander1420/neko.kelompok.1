@@ -130,6 +130,77 @@
     });
   }
 
+  function serverSummary() {
+    const base = Neko.api && Neko.api.server ? Neko.api.server.base : '';
+    return base ? 'Server online: ' + esc(base) : 'Pakai alamat halaman ini';
+  }
+
+  async function pingServer(base, note) {
+    const target = String(base || '').replace(/\/+$/, '');
+    note.textContent = 'Menguji ' + target + ' …';
+    try {
+      const response = await fetch(target + '/api/health', { cache: 'no-store' });
+      const data = await response.json().catch(() => null);
+      if (response.ok && data && data.status === 'ok') {
+        const cloud = data.supabase && data.supabase.configured ? ' · database Supabase' : ' · database lokal server';
+        note.textContent = 'Terhubung: NEKO versi ' + (data.version || '?') + cloud + '.';
+        return true;
+      }
+      note.textContent = 'Ada yang menjawab, tapi bukan server NEKO (status ' + response.status + ').';
+      return false;
+    } catch (error) {
+      note.textContent = 'Tidak bisa menghubungi server: ' + (error.message || 'koneksi tertutup') + '.';
+      return false;
+    }
+  }
+
+  function serverSheet() {
+    const current = (Neko.api && Neko.api.server && Neko.api.server.base) || '';
+    sheet({
+      kicker: 'SERVER NEKO', title: 'Alamat server', sub: 'Isi kalau website dan server berada di tempat berbeda, misalnya web di Vercel dan server di Render.',
+      body:
+        '<label class="field"><span class="form-label">Alamat server (https://…)</span>' +
+        '<input type="url" data-server-input placeholder="https://neko-server.onrender.com" value="' + esc(current) + '" autocomplete="off" spellcheck="false"></label>' +
+        '<p class="field-hint" data-server-note>Biarkan kosong bila server ikut membuka halaman ini. Kelas Langsung, Mabar, pesan, dan leaderboard butuh server.</p>' +
+        '<div class="g-actions">' +
+        '<button type="button" class="btn btn-primary" data-server-save>' + icon('check') + 'Simpan &amp; muat ulang</button>' +
+        '<button type="button" class="btn btn-soft" data-server-test>' + icon('refresh') + 'Uji koneksi</button>' +
+        '<button type="button" class="btn btn-ghost" data-server-clear>' + icon('close') + 'Pakai alamat halaman</button>' +
+        '</div>',
+      onMount(el) {
+        const input = el.querySelector('[data-server-input]');
+        const note = el.querySelector('[data-server-note]');
+        const clean = () => String(input.value || '').trim().replace(/\/+$/, '');
+        el.querySelector('[data-server-save]').addEventListener('click', async () => {
+          const value = clean();
+          if (value && !/^https?:\/\//i.test(value)) {
+            note.textContent = 'Alamat harus diawali http:// atau https://';
+            Neko.audio.play('error');
+            return;
+          }
+          if (value) {
+            const ok = await pingServer(value, note);
+            if (!ok) { Neko.audio.play('error'); return; }
+          }
+          Neko.api.server.set(value);
+          note.textContent = 'Tersimpan. Memuat ulang aplikasi…';
+          Neko.audio.play('success');
+          window.setTimeout(() => window.location.reload(), 600);
+        });
+        el.querySelector('[data-server-test]').addEventListener('click', () => {
+          const value = clean();
+          if (!value) { note.textContent = 'Isi alamat servernya dulu.'; return; }
+          pingServer(value, note);
+        });
+        el.querySelector('[data-server-clear]').addEventListener('click', () => {
+          Neko.api.server.clear();
+          note.textContent = 'Kembali ke alamat halaman ini. Memuat ulang…';
+          window.setTimeout(() => window.location.reload(), 400);
+        });
+      }
+    });
+  }
+
   function settingsSheet() {
     const prefs = Neko.store.prefs;
     const soundOn = Neko.audio.soundOn;
@@ -142,7 +213,8 @@
         '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('sun') + '</span><div><b>Mode terang</b><small>' + (Neko.theme.meta(prefs.theme).modes.includes('light') ? 'Berganti siang / malam' : 'Nonaktif di tema mobil') + '</small></div></div><button type="button" class="switch ' + (Neko.theme.meta(prefs.theme).modes.includes('light') ? '' : 'is-disabled') + '" data-quick-mode aria-pressed="' + String(prefs.mode === 'light') + '"></button></div>' +
         '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('palette') + '</span><div><b>Dunia tema</b><small>Ganti dunia dengan animasi</small></div></div><button type="button" class="btn btn-soft btn-sm" data-open-theme>' + icon('sparkles') + 'Pilih</button></div>' +
         '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('vibrate') + '</span><div><b>Getaran haptic</b><small>Sentuhan halus saat aksi penting</small></div></div><button type="button" class="switch" data-haptics-toggle aria-pressed="' + String(prefs.haptics) + '" aria-label="Getaran haptic"></button></div>' +
-        '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('cursor') + '</span><div><b>Kursor interaktif</b><small>Ekor cahaya mengikuti kursor</small></div></div><button type="button" class="switch" data-cursor-toggle aria-pressed="' + String(prefs.cursor === 'on') + '" aria-label="Kursor interaktif"></button></div>',
+        '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('cursor') + '</span><div><b>Kursor interaktif</b><small>Ekor cahaya mengikuti kursor</small></div></div><button type="button" class="switch" data-cursor-toggle aria-pressed="' + String(prefs.cursor === 'on') + '" aria-label="Kursor interaktif"></button></div>' +
+        '<div class="setting-row"><div class="setting-copy"><span class="setting-ic">' + icon('server') + '</span><div><b>Alamat server NEKO</b><small data-server-state>' + serverSummary() + '</small></div></div><button type="button" class="btn btn-soft btn-sm" data-server-edit>' + icon('edit') + 'Atur</button></div>',
       onMount(el) {
         el.querySelector('[data-audio-toggle]').addEventListener('click', event => {
           Neko.audio.setSound(!Neko.audio.soundOn);
@@ -168,6 +240,10 @@
           Neko.store.patchPrefs({ cursor: next });
           event.currentTarget.setAttribute('aria-pressed', String(next === 'on'));
           if (Neko.fx) Neko.fx.refreshCursor();
+        });
+        el.querySelector('[data-server-edit]').addEventListener('click', () => {
+          Neko.audio.play('tap');
+          serverSheet();
         });
       }
     });

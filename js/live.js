@@ -462,7 +462,7 @@
       ? state.players.map((p, index) => (
         '<div class="live-player-chip" style="--pi:' + index + '">' + avatarSpanHTML(p, 'live-player-avatar') + '<b>' + esc(p.name) + '</b>' + (p.character ? '' : '<small>tanpa karakter</small>') + '</div>'
       )).join('')
-      : '<div class="live-empty-lobby">' + Neko.mascot.svg('miko', 'thinking') + '<p>Menunggu siswa bergabung…<br><small>Bagikan PIN ' + esc(state.pin) + ' ke perangkat mereka.</small></p></div>';
+      : '<div class="live-empty-lobby"><span class="logo-mask" aria-hidden="true"></span>' + '<p>Menunggu siswa bergabung…<br><small>Bagikan PIN ' + esc(state.pin) + ' ke perangkat mereka.</small></p></div>';
     grid.dataset.count = state.players.length;
   }
 

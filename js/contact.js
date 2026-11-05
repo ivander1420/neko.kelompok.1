@@ -129,7 +129,12 @@
       '<header class="kontak-head">' +
       '<span class="kicker">INFORMASI PROYEK</span>' +
       '<h1>Kontak &amp; Informasi</h1>' +
-      '<p>Kenal pembuat media pembelajaran ini dan sampaikan masukan. NEKO dibuat oleh Kelompok 1 XI TJKT 2 di bawah bimbingan guru KKJ 1.</p>' +
+      '<p>Kenal pembuat media pembelajaran ini dan sampaikan masukan. NEKO dibuat oleh Kelompok 1 di bawah bimbingan guru pembimbing.</p>' +
+      '<div class="kontak-meta">' +
+      '<span>' + icon('school') + 'SMKN 3 Kendari</span>' +
+      '<span>' + icon('users') + 'Kelompok 1 · XI TJKT 2</span>' +
+      '<span>' + icon('user') + 'Guru pembimbing: Pak Andy Musly</span>' +
+      '</div>' +
       '</header>' +
       '<div class="kontak-block"><div class="kontak-block-head"><span class="kicker">GURU PEMBIMBING</span><h2>' + icon('school') + 'Pembimbing Proyek</h2></div>' +
       teacherCard() + '</div>' +

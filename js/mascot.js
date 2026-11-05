@@ -60,70 +60,106 @@
     return '--m-fur:' + info.colors.fur + ';--m-shade:' + info.colors.shade + ';--m-cheek:' + info.colors.cheek + ';--m-inner:' + info.colors.inner;
   }
 
+  function uid(prefix) { return prefix + '-' + Math.random().toString(36).slice(2, 7); }
+
   function accessory(id, mood) {
     if (id === 'miko') {
       return (
-        '<path d="M34 37.5q26 7 52 0" fill="none" stroke="var(--m-shade)" stroke-width="8" stroke-linecap="round"/>' +
-        '<path d="M60 30.5l5.2 8.5h-4l2.6 7.5-6.4-9.5h4z" fill="var(--warn)" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/>' +
-        '<path d="M22 26l3.6 5M98 26l-3.6 5" stroke="var(--m-shade)" stroke-width="3" stroke-linecap="round" opacity=".5"/>' +
-        (mood === 'cheer' ? '<path d="M14 44l3 3-3 3M106 44l-3 3 3 3" stroke="var(--warn)" stroke-width="2.6" fill="none" stroke-linecap="round"/>' : '')
+        '<path d="M32 39c8 5 18 7 28 7s20-2 28-7" fill="none" stroke="var(--m-shade)" stroke-width="7" stroke-linecap="round" opacity=".85"/>' +
+        '<path d="M60 31.5l5.8 9.2h-4.4l3 8.2-7.4-10.2h4.5z" fill="var(--warn)" stroke="color-mix(in srgb,var(--m-shade) 55%,#000)" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '<ellipse cx="60" cy="39.5" rx="2.8" ry="1.2" fill="#fff" opacity=".55"/>' +
+        (mood === 'cheer' ? '<path d="M16 46l3 3-3 3M104 46l-3 3 3 3" stroke="var(--warn)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : '')
       );
     }
     if (id === 'neksya') {
       return (
-        '<g fill="none" stroke="#0b1220" stroke-width="2.6"><circle cx="48" cy="50" r="10.4"/><circle cx="72" cy="50" r="10.4"/><path d="M58.4 50h3.2M37.6 48 30 45M82.4 48 90 45"/></g>' +
-        '<circle cx="48" cy="50" r="10.4" fill="var(--accent)" opacity=".22"/><circle cx="72" cy="50" r="10.4" fill="var(--accent)" opacity=".22"/>' +
-        '<path d="M44 79h32l-3 8H47z" fill="var(--m-shade)" opacity=".85"/>' +
-        '<path d="M47 79h26" stroke="#fff" stroke-width="2" opacity=".5"/>'
+        '<g opacity=".92"><ellipse cx="47.5" cy="51" rx="11.2" ry="10.6" fill="none" stroke="color-mix(in srgb,var(--m-shade) 70%,#000)" stroke-width="2.4"/>' +
+        '<ellipse cx="72.5" cy="51" rx="11.2" ry="10.6" fill="none" stroke="color-mix(in srgb,var(--m-shade) 70%,#000)" stroke-width="2.4"/>' +
+        '<path d="M58.7 51h2.6M36.3 49.5l-7-2.8M83.7 49.5l7-2.8" stroke="color-mix(in srgb,var(--m-shade) 70%,#000)" stroke-width="2.2" stroke-linecap="round"/>' +
+        '<ellipse cx="47.5" cy="51" rx="10.4" ry="9.8" fill="color-mix(in srgb,var(--accent) 18%,#fff)" opacity=".22"/>' +
+        '<ellipse cx="72.5" cy="51" rx="10.4" ry="9.8" fill="color-mix(in srgb,var(--accent) 18%,#fff)" opacity=".22"/>' +
+        '<path d="M43 46.5c1.8-2 4.8-2.4 6.8-.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".55"/></g>' +
+        '<g><rect x="44" y="79" width="32" height="9" rx="2.6" fill="var(--m-shade)" opacity=".9"/>' +
+        '<rect x="46" y="80.5" width="18" height="2.4" rx="1.2" fill="#fff" opacity=".35"/>' +
+        '<rect x="46" y="84" width="10" height="1.8" rx=".9" fill="#fff" opacity=".2"/></g>'
       );
     }
     return (
-      '<path d="M60 79c-6 0-9 3-9 3l3 6h12l3-6s-3-3-9-3z" fill="var(--m-shade)" opacity=".9"/>' +
-      '<circle cx="60" cy="86" r="3.2" fill="var(--warn)" stroke="#0b1220" stroke-width="1"/>' +
-      '<path d="M26 44q6-10 16-12" stroke="var(--m-shade)" stroke-width="3" fill="none" stroke-linecap="round" opacity=".5"/>'
+      '<ellipse cx="60" cy="84.5" rx="10.5" ry="6.2" fill="var(--m-shade)" opacity=".9"/>' +
+      '<path d="M53 82.5c2.2-2.8 11.8-2.8 14 0l-2 5.8H55z" fill="var(--m-shade)" opacity=".95"/>' +
+      '<circle cx="60" cy="86.5" r="3.5" fill="var(--warn)" stroke="color-mix(in srgb,var(--m-shade) 55%,#000)" stroke-width=".9"/>' +
+      '<ellipse cx="59" cy="85.4" rx="1.4" ry=".9" fill="#fff" opacity=".65"/>' +
+      '<path d="M28 45c2-5.5 6.5-9.5 13-11" stroke="var(--m-shade)" stroke-width="2.8" fill="none" stroke-linecap="round" opacity=".45"/>'
     );
   }
 
   function svg(id = 'miki', mood = 'happy', className = '') {
     const info = cast[id] || cast.miki;
+    const gid = uid('m');
     const eyes =
-      mood === 'cheer' ? '<path d="M41 51q7-9 14 0M65 51q7-9 14 0" stroke="#0b1220" stroke-width="4.5" fill="none" stroke-linecap="round"/>' :
-      mood === 'sad' ? '<path d="M41 48q7 7 14 0M65 48q7 7 14 0" stroke="#0b1220" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="46" cy="57" r="2.2" fill="var(--accent)"/><circle cx="74" cy="57" r="2.2" fill="var(--accent)"/>' :
-      mood === 'sleepy' ? '<path d="M41 51q7 6 14 0M65 51q7 6 14 0" stroke="#0b1220" stroke-width="4" fill="none" stroke-linecap="round"/>' :
-      mood === 'thinking' ? '<circle cx="48" cy="50" r="5.4" fill="#0b1220"/><path d="M66 51q6-5 12 0" stroke="#0b1220" stroke-width="4" fill="none" stroke-linecap="round"/>' :
-      mood === 'surprised' ? '<circle cx="48" cy="50" r="7.2" fill="#0b1220"/><circle cx="72" cy="50" r="7.2" fill="#0b1220"/><circle cx="45.6" cy="47" r="2.2" fill="#fff"/><circle cx="69.6" cy="47" r="2.2" fill="#fff"/>' :
-      '<circle cx="48" cy="50" r="5.8" fill="#0b1220"/><circle cx="72" cy="50" r="5.8" fill="#0b1220"/><circle cx="46" cy="47.5" r="2" fill="#fff"/><circle cx="70" cy="47.5" r="2" fill="#fff"/>';
+      mood === 'cheer' ? '<path d="M41 52.5c2.6-4.2 5.8-6 8.2-6s5.6 1.8 8.2 6M62.6 52.5c2.6-4.2 5.8-6 8.2-6s5.6 1.8 8.2 6" stroke="#1a2438" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' :
+      mood === 'sad' ? '<path d="M41.5 49.5c3 3.4 6 4.8 8.5 4.8s5.5-1.4 8.5-4.8M61.5 49.5c3 3.4 6 4.8 8.5 4.8s5.5-1.4 8.5-4.8" stroke="#1a2438" stroke-width="3.8" fill="none" stroke-linecap="round"/><ellipse cx="45.5" cy="58.5" rx="2.2" ry="2.8" fill="color-mix(in srgb,var(--accent) 55%,#fff)" opacity=".65"/><ellipse cx="74.5" cy="58.5" rx="2.2" ry="2.8" fill="color-mix(in srgb,var(--accent) 55%,#fff)" opacity=".65"/>' :
+      mood === 'sleepy' ? '<path d="M41 53c3 3.2 6 4.4 8.5 4.4s5.5-1.2 8.5-4.4M62 53c3 3.2 6 4.4 8.5 4.4s5.5-1.2 8.5-4.4" stroke="#1a2438" stroke-width="3.8" fill="none" stroke-linecap="round"/>' :
+      mood === 'thinking' ? '<g><ellipse cx="48.5" cy="51.5" rx="6.4" ry="7" fill="#1a2438"/><ellipse cx="46.6" cy="49.2" rx="2.3" ry="2.6" fill="#fff"/><ellipse cx="50.2" cy="53.4" rx="1.1" ry="1.2" fill="#fff" opacity=".7"/></g><path d="M63.5 52.5c2.8-2.8 6.2-4 9-4s5.8 1 8.2 3.2" stroke="#1a2438" stroke-width="3.8" fill="none" stroke-linecap="round"/>' :
+      mood === 'surprised' ? '<g><ellipse cx="48.5" cy="51.5" rx="7.8" ry="8.4" fill="#1a2438"/><ellipse cx="46" cy="48.5" rx="2.6" ry="3" fill="#fff"/><ellipse cx="50.8" cy="54.2" rx="1.2" ry="1.3" fill="#fff" opacity=".75"/></g><g><ellipse cx="71.5" cy="51.5" rx="7.8" ry="8.4" fill="#1a2438"/><ellipse cx="69" cy="48.5" rx="2.6" ry="3" fill="#fff"/><ellipse cx="73.8" cy="54.2" rx="1.2" ry="1.3" fill="#fff" opacity=".75"/></g>' :
+      '<g><ellipse cx="48.5" cy="51.5" rx="6.6" ry="7.2" fill="#1a2438"/><ellipse cx="46.5" cy="49" rx="2.4" ry="2.7" fill="#fff"/><ellipse cx="50.4" cy="53.6" rx="1.1" ry="1.2" fill="#fff" opacity=".7"/></g><g><ellipse cx="71.5" cy="51.5" rx="6.6" ry="7.2" fill="#1a2438"/><ellipse cx="69.5" cy="49" rx="2.4" ry="2.7" fill="#fff"/><ellipse cx="73.4" cy="53.6" rx="1.1" ry="1.2" fill="#fff" opacity=".7"/></g>';
+
     const mouth =
-      mood === 'cheer' ? '<ellipse cx="60" cy="67" rx="8" ry="6" fill="#3b1220"/><path d="M55 70q5 4 10 0" stroke="var(--m-cheek)" stroke-width="2" fill="none" stroke-linecap="round"/>' :
-      mood === 'sad' ? '<path d="M53 71q7-8 14 0" stroke="#0b1220" stroke-width="3.2" fill="none" stroke-linecap="round"/>' :
-      mood === 'surprised' ? '<ellipse cx="60" cy="68" rx="4.2" ry="5" fill="#3b1220"/>' :
-      mood === 'thinking' ? '<path d="M54 67q6 4 11 0" stroke="#0b1220" stroke-width="3" fill="none" stroke-linecap="round"/>' :
-      '<path d="M53 65q7 8 14 0" stroke="#0b1220" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M58 63h4" stroke="#0b1220" stroke-width="2.4" stroke-linecap="round"/>';
+      mood === 'cheer' ? '<path d="M52 65.5c2.4 5.5 13.6 5.5 16 0z" fill="#4a1830"/><path d="M55 68.8c2 2.4 8 2.4 10 0" fill="none" stroke="var(--m-cheek)" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>' :
+      mood === 'sad' ? '<path d="M54 70.5c2.2-3.4 9.8-3.4 12 0" stroke="#1a2438" stroke-width="3.2" fill="none" stroke-linecap="round"/>' :
+      mood === 'surprised' ? '<ellipse cx="60" cy="68.5" rx="4.8" ry="5.8" fill="#4a1830"/><ellipse cx="60" cy="70.5" rx="2.4" ry="2.2" fill="var(--m-cheek)" opacity=".55"/>' :
+      mood === 'thinking' ? '<path d="M54.5 67.5c2.2 2.2 8.8 2.2 11 0" stroke="#1a2438" stroke-width="3" fill="none" stroke-linecap="round"/>' :
+      '<path d="M53 65c2.4 4.8 11.6 4.8 14 0" stroke="#1a2438" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M58 63.2h4" stroke="#1a2438" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>';
+
     return (
       '<svg class="mascot-svg ' + className + '" viewBox="0 0 120 120" style="' + palette(info.id) + '" aria-hidden="true" focusable="false">' +
-      '<path d="M91 88c17 1 20-15 10-23" fill="none" stroke="var(--m-shade)" stroke-width="9" stroke-linecap="round"/>' +
-      '<ellipse cx="60" cy="88" rx="27" ry="22" fill="var(--m-fur)"/>' +
-      '<ellipse cx="60" cy="92" rx="16" ry="14" fill="#fff" opacity=".55"/>' +
-      '<ellipse cx="38" cy="92" rx="8" ry="6" fill="var(--m-fur)"/>' +
-      '<ellipse cx="82" cy="92" rx="8" ry="6" fill="var(--m-fur)"/>' +
-      '<path d="M35 31 39 8l20 15z" fill="var(--m-fur)"/>' +
-      '<path d="M85 31 81 8 61 23z" fill="var(--m-fur)"/>' +
-      '<path d="M41 27 43 15l11 8z" fill="var(--m-inner)"/>' +
-      '<path d="M79 27 77 15 66 23z" fill="var(--m-inner)"/>' +
-      '<circle cx="60" cy="53" r="30" fill="var(--m-fur)"/>' +
-      '<ellipse cx="47" cy="33" rx="10" ry="5" fill="#fff" opacity=".35"/>' +
-      '<circle cx="38" cy="61" r="6" fill="var(--m-cheek)" opacity=".55"/>' +
-      '<circle cx="82" cy="61" r="6" fill="var(--m-cheek)" opacity=".55"/>' +
-      eyes +
-      '<path d="M60 58l-4 3.4h8z" fill="var(--m-cheek)"/>' +
-      mouth +
-      '<path d="M30 54h-9M31 60l-9 3M90 54h9M89 60l9 3" stroke="var(--m-shade)" stroke-width="2" stroke-linecap="round" opacity=".65"/>' +
-      accessory(info.id, mood) +
+      '<defs>' +
+        '<radialGradient id="' + gid + '-fur" cx="38%" cy="28%" r="70%">' +
+          '<stop offset="0%" stop-color="#fff" stop-opacity=".35"/>' +
+          '<stop offset="55%" stop-color="var(--m-fur)" stop-opacity="1"/>' +
+          '<stop offset="100%" stop-color="var(--m-shade)" stop-opacity=".55"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="' + gid + '-body" cx="40%" cy="25%" r="75%">' +
+          '<stop offset="0%" stop-color="#fff" stop-opacity=".28"/>' +
+          '<stop offset="60%" stop-color="var(--m-fur)"/>' +
+          '<stop offset="100%" stop-color="var(--m-shade)" stop-opacity=".45"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="' + gid + '-belly" cx="50%" cy="35%" r="65%">' +
+          '<stop offset="0%" stop-color="#fff" stop-opacity=".95"/>' +
+          '<stop offset="100%" stop-color="#fff" stop-opacity=".45"/>' +
+        '</radialGradient>' +
+        '<filter id="' + gid + '-shadow" x="-30%" y="-20%" width="160%" height="160%">' +
+          '<feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#0b1220" flood-opacity=".18"/>' +
+        '</filter>' +
+      '</defs>' +
+      '<g filter="url(#' + gid + '-shadow)">' +
+        '<path d="M90 89c16 2 21-14 11-23" fill="none" stroke="var(--m-shade)" stroke-width="8.5" stroke-linecap="round" opacity=".85"/>' +
+        '<ellipse cx="60" cy="90.5" rx="28.5" ry="23.5" fill="url(#' + gid + '-body)"/>' +
+        '<ellipse cx="60" cy="94" rx="17.5" ry="15" fill="url(#' + gid + '-belly)"/>' +
+        '<ellipse cx="39" cy="94.5" rx="8.5" ry="6.8" fill="var(--m-fur)"/>' +
+        '<ellipse cx="81" cy="94.5" rx="8.5" ry="6.8" fill="var(--m-fur)"/>' +
+        '<path d="M34.5 33.5c-1.5-8.5-.2-17 4.5-25 6.5 4 13.5 9.5 19 15.5z" fill="url(#' + gid + '-fur)"/>' +
+        '<path d="M85.5 33.5c1.5-8.5.2-17-4.5-25-6.5 4-13.5 9.5-19 15.5z" fill="url(#' + gid + '-fur)"/>' +
+        '<path d="M39.5 29c-.8-5.2 0-10 2.8-14.2 4 2.8 8 6 11.5 9.5z" fill="var(--m-inner)" opacity=".9"/>' +
+        '<path d="M80.5 29c.8-5.2 0-10-2.8-14.2-4 2.8-8 6-11.5 9.5z" fill="var(--m-inner)" opacity=".9"/>' +
+        '<ellipse cx="60" cy="55" rx="32.5" ry="31.5" fill="url(#' + gid + '-fur)"/>' +
+        '<ellipse cx="46" cy="36" rx="12" ry="7" fill="#fff" opacity=".3"/>' +
+        '<ellipse cx="40" cy="39.5" rx="5.5" ry="3.2" fill="#fff" opacity=".18"/>' +
+        '<ellipse cx="37.5" cy="62.5" rx="7" ry="5.2" fill="var(--m-cheek)" opacity=".42"/>' +
+        '<ellipse cx="82.5" cy="62.5" rx="7" ry="5.2" fill="var(--m-cheek)" opacity=".42"/>' +
+        eyes +
+        '<path d="M60 59.5l-4.6 3.8c-.4.3-.1 1 .4 1h8.4c.5 0 .8-.7.4-1z" fill="var(--m-cheek)"/>' +
+        '<ellipse cx="58.8" cy="60.8" rx="1.2" ry=".7" fill="#fff" opacity=".55"/>' +
+        mouth +
+        '<g stroke="var(--m-shade)" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".55">' +
+          '<path d="M33 56.5h-10M34 62l-9.5 3M87 56.5h10M86 62l9.5 3"/>' +
+        '</g>' +
+        accessory(info.id, mood) +
+      '</g>' +
       '</svg>'
     );
   }
-
-  /* ---------------- Pengetahuan singkat ---------------- */
+/* ---------------- Pengetahuan singkat ---------------- */
 
   const knowledge = {
     subnet: {
@@ -636,6 +672,7 @@
     node: null,
     body: null,
     bubble: null,
+    close: null,
     id: 'miki',
     mood: 'happy',
     mounted: false,
@@ -665,8 +702,7 @@
   ];
   const IDLE_LINES = [
     'Aku di sini kalau kamu butuh teman belajar.',
-    'Mau baca satu halaman atau main satu game?',
-    'Pelan-pelan saja, yang penting terus jalan.'
+    'Mau baca satu halaman atau main satu game?'
   ];
 
   function randomOf(list) {
@@ -945,9 +981,30 @@
     }, 170);
   }
 
+  /* Simpan pilihan user: maskot bisa dimunculkan atau disembunyikan. */
+  function hidePet() {
+    Neko.store.patchPrefs({ mascotHidden: true });
+    if (pet.dock) {
+      pet.dock.classList.add('is-hiding');
+      window.setTimeout(() => { unmount(); }, 240);
+    } else {
+      unmount();
+    }
+    Neko.audio.play('toggle');
+    if (Neko.ui && Neko.ui.toast) {
+      Neko.ui.toast('Maskot disembunyikan', 'Munculkan lagi di Profil tab Atur, baris Maskot melayang.', 'info', 'cat');
+    }
+  }
+
+  function showPet() {
+    Neko.store.patchPrefs({ mascotHidden: false });
+    if (Neko.store.profile) mount();
+  }
+
   function mount() {
     const root = document.getElementById('mascotRoot');
     if (!root || root.querySelector('.mascot-pet')) return;
+    if (Neko.store.prefs.mascotHidden) return;
     pet.root = root;
     pet.id = 'miki';
     pet.mood = 'happy';
@@ -973,7 +1030,8 @@
     button.className = 'mascot-pet';
     button.style.setProperty('--wx', '0px');
     button.style.setProperty('--wy', '0px');
-    button.innerHTML = '<span class="mascot-pet-body" style="' + palette('miki') + '">' + svg('miki', 'happy') + '</span><span class="mascot-pet-label">' + icon('chat') + 'Tanya Miki</span>';
+    button.innerHTML = '<span class="mascot-pet-frame"><span class="mascot-pet-body" style="' + palette('miki') + '">' + svg('miki', 'happy') + '</span></span>' +
+      '<span class="mascot-pet-label">' + icon('chat') + 'Tanya Miki</span>';
     button.addEventListener('click', openChatFromPet);
     button.addEventListener('pointerdown', onPetDown);
     button.addEventListener('pointermove', onPetMove);
@@ -985,6 +1043,22 @@
     pet.node = button;
     pet.body = button.querySelector('.mascot-pet-body');
     dock.appendChild(button);
+
+    /* Tombol silang kecil di atas kepala: menyembunyikan maskot. */
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'mascot-pet-close';
+    close.setAttribute('aria-label', 'Sembunyikan maskot');
+    close.title = 'Sembunyikan maskot';
+    close.innerHTML = icon('close');
+    close.addEventListener('click', event => {
+      event.stopPropagation();
+      event.preventDefault();
+      hidePet();
+    });
+    close.addEventListener('pointerdown', event => event.stopPropagation());
+    pet.close = close;
+    dock.appendChild(close);
     root.appendChild(dock);
 
     paintPet();
@@ -1016,13 +1090,15 @@
     pet.wanderTimer = pet.bubbleTimer = pet.reactTimer = pet.comfortTimer = pet.swapTimer = null;
     pet.dragId = null;
     pet.dragMoved = false;
-    pet.root = pet.node = pet.body = pet.bubble = pet.dock = null;
+    pet.root = pet.node = pet.body = pet.bubble = pet.close = pet.dock = null;
     const root = document.getElementById('mascotRoot');
     if (root) root.innerHTML = '';
   }
 
   Neko.mascot = {
     cast, svg, openChat, close: closeSheet, mount, unmount, react,
+    hide: hidePet, show: showPet,
+    get hidden() { return Boolean(Neko.store.prefs.mascotHidden); },
     ask(text, characterId) { return replyFor(text, characterId || 'miki'); }
   };
 })();

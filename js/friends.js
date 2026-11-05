@@ -120,7 +120,7 @@
 
   function threadPlaceholder() {
     return (
-      '<div class="msg-thread-empty">' + Neko.mascot.svg('miki', 'happy') +
+      '<div class="msg-thread-empty"><span class="logo-mask" aria-hidden="true"></span>' +
       '<p>Pilih percakapan di sebelah untuk mulai membaca dan membalas.</p></div>'
     );
   }

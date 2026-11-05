@@ -14,7 +14,7 @@
   transition: opacity .6s var(--ease-soft);
 }
 
-.scene > * {
+.scene>* {
   pointer-events: none;
 }
 
@@ -80,13 +80,27 @@
 }
 
 @keyframes logo-breathe {
-  0%, 100% { transform: translateY(0) rotate(-2deg) scale(1); }
-  50% { transform: translateY(-8px) rotate(2deg) scale(1.03); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg) scale(1);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(2deg) scale(1.03);
+  }
 }
 
 @keyframes ring-pulse {
-  0% { transform: scale(.7); opacity: .9; }
-  100% { transform: scale(1.28); opacity: 0; }
+  0% {
+    transform: scale(.7);
+    opacity: .9;
+  }
+
+  100% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
 }
 
 .loader-word {
@@ -123,9 +137,14 @@
 }
 
 .loader-dots i:nth-child(2),
-.dot-run i:nth-child(2) { animation-delay: .15s; }
+.dot-run i:nth-child(2) {
+  animation-delay: .15s;
+}
+
 .loader-dots i:nth-child(3),
-.dot-run i:nth-child(3) { animation-delay: .3s; }
+.dot-run i:nth-child(3) {
+  animation-delay: .3s;
+}
 
 .loader-track {
   position: relative;
@@ -235,7 +254,11 @@
 }
 
 @keyframes auth-out {
-  to { opacity: 0; transform: scale(1.015); filter: blur(8px); }
+  to {
+    opacity: 0;
+    transform: scale(1.015);
+    filter: blur(8px);
+  }
 }
 
 .auth-top {
@@ -560,7 +583,12 @@
 }
 
 @keyframes intro-out {
-  to { opacity: 0; transform: scale(1.04); filter: blur(10px); visibility: hidden; }
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(10px);
+    visibility: hidden;
+  }
 }
 
 .intro-inner {
@@ -709,7 +737,9 @@
 }
 
 .side-link .ic {
-  font-size: 18px; --sw: 2.15;}
+  font-size: 18px;
+  --sw: 2.15;
+}
 
 .side-link:hover {
   color: var(--ink);
@@ -975,8 +1005,15 @@
 }
 
 @keyframes view-in {
-  from { opacity: 0; transform: translateY(16px) scale(.994); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(.994);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .page-head {
@@ -1043,13 +1080,13 @@
 }
 
 .dock-btn .dock-ic {
-  font-size: 20px;
+  font-size: var(--dock-ic-size, 20px);
   --sw: 2.05;
   transition: transform .25s var(--ease-spring);
 }
 
 .dock-btn .dock-label {
-  font-size: 10px;
+  font-size: var(--dock-label-size, 10px);
   font-weight: 700;
   letter-spacing: .01em;
   white-space: nowrap;
@@ -1091,7 +1128,8 @@
 }
 
 /* Versi label dock ditentukan lewat pengukuran lebar nyata di js/app.js:
-   tulisan penuh -> singkatan -> ikon saja bila benar-benar tidak muat. */
+   ukuran huruf (= --dock-label-size) dicari agar tulisan selalu muat di bawah
+   ikon. Kalau label penuh tidak muat, dipakai singkatan — ikon saja tidak. */
 
 html[data-dock-fit="short"] .dock-btn .dock-label:not(.is-short) {
   display: none;
@@ -1099,23 +1137,6 @@ html[data-dock-fit="short"] .dock-btn .dock-label:not(.is-short) {
 
 html[data-dock-fit="short"] .dock-btn .dock-label.is-short {
   display: block;
-}
-
-html[data-dock-fit="icon"] {
-  --dock-h: 58px;
-}
-
-html[data-dock-fit="icon"] .dock-btn .dock-label {
-  display: none;
-}
-
-html[data-dock-fit="icon"] .dock-btn .dock-ic {
-  font-size: 22px;
-  --sw: 1.95;
-}
-
-html[data-dock-fit="icon"] .dock-btn.on::after {
-  bottom: 7px;
 }
 
 /* Mode ukur: kedua label dibuat terlihat bayangan agar scrollWidth akurat */
@@ -1132,7 +1153,7 @@ html.dock-measure .dock-btn .dock-label {
 }
 
 html.dock-measure .dock-btn .dock-ic {
-  font-size: 20px;
+  font-size: var(--dock-ic-size, 20px);
   --sw: 2.05;
 }
 
@@ -1295,17 +1316,13 @@ html.dock-measure .dock-btn .dock-ic {
     --topbar-h: 50px;
   }
 
-  html[data-dock-fit="icon"] {
-    --dock-h: 52px;
-  }
-
+  /* Tulisan tetap di bawah ikon; yang dipangkas hanya tingginya. */
   .dock-btn {
-    flex-direction: row;
-    gap: 5px;
+    gap: 1px;
   }
 
-  .dock-btn .dock-label {
-    font-size: 9px;
+  .dock {
+    padding: 4px;
   }
 
   .dock-btn.on::after {

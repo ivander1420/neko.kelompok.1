@@ -69,7 +69,7 @@
       '<section class="library-hero">' +
       '<div class="library-hero-copy"><span class="kicker">PERPUSTAKAAN TJKT</span>' +
       '<h1>Buku materi yang bisa kamu buka seperti buku asli.</h1>' +
-      '<p>Enam buku ringkas dengan gambar, tabel, dan cek pemahaman. Setiap halaman baru memberi XP, dan menamatkan buku membuka badge koleksi.</p>' +
+      '<p>' + books().length + ' buku materi — ' + totalPages + ' halaman — dengan gambar, tabel, kode, dan cek pemahaman. Setiap halaman baru memberi XP, dan menamatkan buku membuka badge koleksi.</p>' +
       '<div class="library-hero-actions"><button type="button" class="btn btn-primary" data-scroll-shelf>' + icon('books') + 'Mulai membaca</button>' +
       '<button type="button" class="btn btn-soft" data-go="arena">' + icon('gamepad') + 'Uji di arena</button></div></div>' +
       '<div class="library-stats">' +
@@ -148,7 +148,7 @@
       '<div class="cover-page-inner">' +
       '<div class="cover-badge">' + icon(book.icon) + '</div>' +
       '<div><small>' + esc(book.tag) + '</small><h2>' + esc(book.title) + '</h2><p>' + esc(book.subtitle) + '</p></div>' +
-      '<div class="cover-foot"><span>Kelompok 1</span><span>' + book.pages.length + ' halaman</span></div>' +
+      '<div class="cover-foot"><span>NEKO</span><span>' + book.pages.length + ' halaman</span></div>' +
       '</div>'
     );
   }
@@ -160,7 +160,16 @@
     if (index < 0 || index >= book.pages.length) {
       return '<div class="book-page ' + side + ' ' + extraClass + '">' + blankPage(book) + '</div>';
     }
-    return '<div class="book-page ' + side + ' ' + extraClass + '" data-page-index="' + index + '">' + contentPage(book.pages[index], index, book) + '</div>';
+    return '<div class="book-page ' + side + ' ' + extraClass + '" data-page-index="' + index + '">' + pageCorners() + contentPage(book.pages[index], index, book) + '</div>';
+  }
+
+  /* Hiasan sudut bergaya buku dongeng — murni CSS, tidak menutupi teks. */
+  function pageCorners() {
+    return '<span class="page-orn tl" aria-hidden="true"></span>' +
+      '<span class="page-orn tr" aria-hidden="true"></span>' +
+      '<span class="page-orn bl" aria-hidden="true"></span>' +
+      '<span class="page-orn br" aria-hidden="true"></span>' +
+      '<span class="page-ribbon" aria-hidden="true"></span>';
   }
 
   function isMobile() {

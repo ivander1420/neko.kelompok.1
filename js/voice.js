@@ -40,8 +40,68 @@
     }
   };
 
-  const MAX_QUEUE = 6;
+  const MAX_QUEUE = 8;
   const DUPLICATE_DELAY = 2600;
+  const MAX_CHUNK = 170;          // satu utterance tidak boleh terlalu panjang
+  const CANCEL_GAP = 140;         // jeda wajib sesudah cancel() (bug Chrome/WebView)
+  const STALL_MS = 1200;          // watchdog: onend tidak datang -> lepas antrian
+
+  const activeUtterances = new Set();
+  let keepAliveTimer = null;
+  let watchdog = null;
+
+  function cleanSpeechText(str) {
+    if (!str) return '';
+    return str
+      .replace(/https?:\/\/\S+/gi, '')
+      .replace(/[*_#`~[\]()>]/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* Pecah teks panjang jadi potongan per kalimat.
+     Ini penyebab utama suara 'putus': satu utterance panjang di Android
+     sering dipotong di tengah, sedangkan potongan pendek selalu selesai. */
+  function splitForSpeech(text) {
+    const clean = cleanSpeechText(text);
+    if (!clean) return [];
+    if (clean.length <= MAX_CHUNK) return [clean];
+
+    const sentences = clean.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [clean];
+    const chunks = [];
+    let buffer = '';
+
+    for (const sentence of sentences) {
+      const piece = sentence.trim();
+      if (!piece) continue;
+
+      if ((buffer + ' ' + piece).trim().length <= MAX_CHUNK) {
+        buffer = (buffer + ' ' + piece).trim();
+        continue;
+      }
+
+      if (buffer) chunks.push(buffer);
+      buffer = '';
+
+      if (piece.length > MAX_CHUNK) {
+        // kalimat tunggal yang kepanjangan: potong di spasi terdekat
+        let rest = piece;
+        while (rest.length > MAX_CHUNK) {
+          let cut = rest.lastIndexOf(' ', MAX_CHUNK);
+          if (cut < 40) cut = MAX_CHUNK;
+          chunks.push(rest.slice(0, cut).trim());
+          rest = rest.slice(cut).trim();
+        }
+        buffer = rest;
+      } else {
+        buffer = piece;
+      }
+    }
+
+    if (buffer) chunks.push(buffer);
+    return chunks.filter(Boolean);
+  }
 
   let voices = [];
   let queue = [];
@@ -51,6 +111,7 @@
   let lastText = '';
   let lastTime = 0;
   let currentUtterance = null;
+  let cancelledAt = 0;
 
   const synth = window.speechSynthesis;
 
@@ -148,14 +209,15 @@
      ============================================================ */
 
   function createUtterance(item) {
-    const utterance = new SpeechSynthesisUtterance(item.text);
+    const speechText = cleanSpeechText(item.text);
+    const utterance = new SpeechSynthesisUtterance(speechText);
     const voice = getVoice(item.persona);
     const tone = getTone(item.persona);
 
     // Paksa bahasa Indonesia.
     utterance.lang = 'id-ID';
 
-    // Jangan pernah memasang voice non-Indonesia.
+    // Pasang voice Indonesia jika tersedia.
     if (voice && isIndonesia(voice)) {
       utterance.voice = voice;
     }
@@ -164,23 +226,52 @@
     utterance.rate = tone.rate;
     utterance.volume = tone.volume;
 
+    // Simpan referensi objek agar tidak di-garbage-collect oleh Chrome / Android
+    activeUtterances.add(utterance);
+
     utterance.onstart = () => {
       speaking = true;
       currentUtterance = utterance;
+      clearTimeout(watchdog);
+
+      // Keep-alive: Chrome/WebView berhenti di tengah kalimat panjang setelah ±15 detik.
+      clearInterval(keepAliveTimer);
+      keepAliveTimer = setInterval(() => {
+        if (!synth.speaking || synth.paused) {
+          clearInterval(keepAliveTimer);
+          return;
+        }
+        try {
+          synth.pause();
+          synth.resume();
+        } catch (error) { /* abaikan */ }
+      }, 9000);
     };
 
-    utterance.onend = () => {
+    const cleanup = () => {
+      // onend/onerror dari utterance lama kadang datang terlambat.
+      // Tanpa penjaga ini, dua kalimat bisa bertumpuk dan suara jadi putus-putus.
+      if (currentUtterance && currentUtterance !== utterance) {
+        activeUtterances.delete(utterance);
+        return;
+      }
+
       speaking = false;
       currentUtterance = null;
+      activeUtterances.delete(utterance);
+      clearInterval(keepAliveTimer);
+      clearTimeout(watchdog);
       processQueue();
     };
 
+    utterance.onend = cleanup;
     utterance.onerror = (event) => {
-      console.warn('[NEKO Voice] TTS error:', event.error);
-
-      speaking = false;
-      currentUtterance = null;
-      processQueue();
+      const kind = event && event.error;
+      // 'interrupted' / 'canceled' itu normal setiap kali kita ganti halaman.
+      if (kind !== 'interrupted' && kind !== 'canceled') {
+        console.warn('[NEKO Voice] TTS error:', kind);
+      }
+      cleanup();
     };
 
     return utterance;
@@ -192,6 +283,14 @@
 
   function processQueue() {
     if (!enabled || speaking || !queue.length) {
+      return;
+    }
+
+    // sesudah cancel(), Chrome/WebView butuh sebentar sebelum speak() berikutnya,
+    // kalau tidak: utterance baru dibuang diam-diam -> kalimat terdengar terpotong.
+    const sinceCancel = Date.now() - cancelledAt;
+    if (sinceCancel < CANCEL_GAP) {
+      setTimeout(processQueue, CANCEL_GAP - sinceCancel + 10);
       return;
     }
 
@@ -216,7 +315,25 @@
       currentUtterance = null;
 
       processQueue();
+      return;
     }
+
+    // Penunggu: kalau browser lupa mengirim onend, antrian tidak macet selamanya.
+    clearTimeout(watchdog);
+    watchdog = setTimeout(checkStall, STALL_MS);
+  }
+
+  function checkStall() {
+    if (!speaking) return;
+    if (synth.speaking || synth.pending) {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(checkStall, STALL_MS);   // masih bicara, perpanjang penjagaan
+      return;
+    }
+    speaking = false;
+    currentUtterance = null;
+    clearInterval(keepAliveTimer);
+    processQueue();
   }
 
   /* ============================================================
@@ -251,20 +368,27 @@
       ? persona
       : 'miki';
 
-    const item = {
-      text: cleanText,
+    const chunks = splitForSpeech(cleanText);
+
+    if (!chunks.length) {
+      return false;
+    }
+
+    const items = chunks.map((chunk) => ({
+      text: chunk,
       persona: normalizedPersona,
       priority: options.priority || false
-    };
+    }));
 
-    if (item.priority) {
-      queue.unshift(item);
+    if (options.priority) {
+      queue.unshift(...items);
     } else {
-      if (queue.length >= MAX_QUEUE) {
-        queue.shift();
+      for (const item of items) {
+        if (queue.length >= MAX_QUEUE) {
+          queue.shift();
+        }
+        queue.push(item);
       }
-
-      queue.push(item);
     }
 
     processQueue();
@@ -280,12 +404,23 @@
     queue = [];
     speaking = false;
     currentUtterance = null;
+    activeUtterances.clear();
+    clearInterval(keepAliveTimer);
+    clearTimeout(watchdog);
+    cancelledAt = Date.now();
 
     try {
       synth.cancel();
     } catch (error) {
       console.warn('[NEKO Voice] Cancel gagal:', error);
     }
+  }
+
+  /* Ganti kalimat tanpa jeda kosong: bersihkan antrian, lalu ucapkan baru.
+     Dipakai halaman yang bubble-nya sering berganti (maskot, intro). */
+  function speak(text, persona = 'miki', options = {}) {
+    cancel();
+    return say(text, persona, options);
   }
 
   /* ============================================================
@@ -362,6 +497,7 @@
 
   window.Neko.voice = {
     say,
+    speak,
     cancel,
     enabled: isEnabled,
     setEnabled,

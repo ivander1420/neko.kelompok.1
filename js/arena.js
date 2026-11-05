@@ -51,6 +51,26 @@
       id: 'reaction', name: 'Refleks Neko', icon: 'bolt', color: tone(7),
       desc: 'Tunggu sinyal berubah, lalu sentuh secepat mungkin. Fokus dan kecepatan tangan diuji.',
       tags: ['Refleks', 'Kilat'], players: 1, roundLabel: 'Percobaan', rounds: [5, 7, 10], defaults: 5
+    },
+    {
+      id: 'simon', name: 'Simon Router', icon: 'router', color: tone(0),
+      desc: 'Lampu port menyala berurutan. Hafal urutannya, lalu tekan ulang persis sama.',
+      tags: ['Ingatan', 'Urutan port'], players: 1, roundLabel: 'Ronde', rounds: [4, 5, 7], defaults: 5
+    },
+    {
+      id: 'portrush', name: 'Serang Port', icon: 'crosshair', color: tone(2),
+      desc: 'Port muncul di papan switch. Sentuh hanya port layanan yang diminta, abaikan yang palsu.',
+      tags: ['Refleks', 'Port layanan'], players: 1, roundLabel: 'Ronde', rounds: [5, 6, 8], defaults: 6
+    },
+    {
+      id: 'merge', name: 'Subnet 2048', icon: 'grid', color: tone(4),
+      desc: 'Geser papan, gabungkan prefix yang sama sampai jaringan melebar ke target yang ditentukan.',
+      tags: ['Gabung', 'Prefix'], players: 1, roundLabel: 'Target', rounds: [6, 8, 10], defaults: 8
+    },
+    {
+      id: 'typing', name: 'Terminal Kilat', icon: 'keyboard', color: tone(6),
+      desc: 'Ketik perintah Cisco IOS persis seperti tertulis. Semakin cepat, semakin besar poinnya.',
+      tags: ['Cisco', 'Mengetik'], players: 1, roundLabel: 'Perintah', rounds: [5, 6, 10], defaults: 6
     }
   ];
 
@@ -77,10 +97,10 @@
     const totalBest = catalog.reduce((sum, item) => sum + bestOf(item.id), 0);
     return (
       '<section class="arena-hero">' +
-      '<div class="arena-hero-copy"><span class="kicker">ARENA TJKT</span>' +
+      '<div class="arena-hero-copy"><span class="kicker">GAME TJKT</span>' +
       '<h1>Pilih game, atur sesi, lalu buktikan ilmumu.</h1>' +
-      '<p>Sembilan mode latihan: delapan game lokal plus Kelas Langsung online antarperangkat. Pilih kartu untuk melihat pengaturan sebelum mulai.</p>' +
-      '<div class="arena-mode"><span class="chip">' + icon('gamepad') + '8 game + live</span><span class="chip">' + icon('users') + 'Mode bergiliran</span><span class="chip">' + icon('bolt') + 'XP tiap sesi</span></div>' +
+      '<p>Dua belas mode latihan: sebelas game lokal plus Kelas Langsung online antarperangkat. Pilih kartu untuk melihat pengaturan sebelum mulai.</p>' +
+      '<div class="arena-mode"><span class="chip">' + icon('gamepad') + '11 game + live</span><span class="chip">' + icon('users') + 'Mode bergiliran</span><span class="chip">' + icon('bolt') + 'XP tiap sesi</span></div>' +
       '<div class="home-meta" style="margin-top:16px"><span class="chip">' + icon('trophy') + 'Total rekor ' + formatNumber(totalBest) + '</span><span class="chip">' + icon('target') + played + ' sesi dimainkan</span></div>' +
       '</div>' +
       '<div class="arena-hero-visual" aria-hidden="true"><div class="arena-orbit">' +
@@ -235,6 +255,7 @@
       id: item.id,
       meta: item,
       config,
+      sessionId: item.id + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
       difficulty: difficulty[config.level] || difficulty.normal,
       layer,
       stage,
@@ -408,6 +429,10 @@
       '</div>'
     );
     ctx.lastResult = { id: item.id, name: item.name, won, score, xp, title: result.title || '' };
+    // modul room mabar memakai event ini untuk mengirim skor ke server
+    document.dispatchEvent(new CustomEvent('neko:game-score', {
+      detail: { ...ctx.lastResult, stats: result.stats || [], sessionId: ctx.sessionId || '' }
+    }));
     if (Neko.app) Neko.app.refresh();
   }
 
