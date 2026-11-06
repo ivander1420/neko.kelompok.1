@@ -29,9 +29,21 @@ try {
 }
 
 const ROOT = path.join(__dirname, '..');
-const DB_FILE = path.join(ROOT, 'server', 'db.json');
+
+/* NEKO bisa berjalan dalam dua mode:
+   1) Server Node biasa  → `node server/server.js` (lokal, LAN, APK Mode A).
+   2) Serverless (Vercel) → api/neko.js memanggil modul ini, tanpa listen(),
+      tanpa menulis ke disk, dan seluruh state diambil/disimpan ke Supabase. */
+const IS_SERVERLESS = process.env.NEKO_SERVERLESS === '1' || Boolean(process.env.VERCEL);
+
+const DB_FILE = IS_SERVERLESS
+  ? path.join(os.tmpdir(), 'neko-db.json')
+  : path.join(ROOT, 'server', 'db.json');
 const PORT = Number(process.env.PORT || process.env.NEKO_PORT || 3000);
 const SCRYPT_N = 1 << 14;
+const BACKEND_VERSION = '4.0.0';
+let REALTIME_WEBSOCKET = true;   // dimatikan saat berjalan di serverless
+let cloudEpoch = 0;              // revision snapshot Supabase yang sedang dipakai
 
 /* ---------------- Database JSON sederhana ---------------- */
 
@@ -48,6 +60,7 @@ const emptyDB = () => ({
 let db = emptyDB();
 
 function loadDB() {
+  if (IS_SERVERLESS) return;   // state di serverless selalu berasal dari Supabase
   try {
     if (fs.existsSync(DB_FILE)) {
       const parsed = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -81,15 +94,25 @@ function flushDB() {
 }
 
 async function writeDB() {
-  const tmp = DB_FILE + '.tmp';
-  await fsp.writeFile(tmp, JSON.stringify(db), 'utf8');
-  await fsp.rename(tmp, DB_FILE);
+  /* Di serverless (Vercel) filesystem bersifat read-only, jadi penulisan
+     disk dilewati — tetapi sinkronisasi Supabase WAJIB tetap jalan. */
+  if (!IS_SERVERLESS) {
+    try {
+      const tmp = DB_FILE + '.tmp';
+      await fsp.writeFile(tmp, JSON.stringify(db), 'utf8');
+      await fsp.rename(tmp, DB_FILE);
+    } catch (error) {
+      console.error('[neko] gagal menulis db.json:', error.message);
+    }
+  }
   if (sync && sync.CONFIGURED && !suppressSync) sync.push(db);
 }
 
-process.on('exit', () => {
-  try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch (error) { /* abaikan */ }
-});
+if (!IS_SERVERLESS) {
+  process.on('exit', () => {
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(db)); } catch (error) { /* abaikan */ }
+  });
+}
 
 /* ---------------- Sinkronisasi Supabase ---------------- */
 
@@ -238,7 +261,17 @@ process.on('unhandledRejection', (reason) => {
 // Hanya sisakan akun Developer utama saat seeding awal.
 // Role lain (Head Admin, Admin, Guru, Wali Kelas, Custom) dikelola via Admin Panel.
 const PRESET_ACCOUNTS = [
-  { username: 'ivander', displayName: 'Ivander', pin: '141210', role: 'Developer' }
+  { username: 'ivander', displayName: 'Ivander', pin: '141210', role: 'Developer' },
+  { username: 'Muh.haditrafanizam', displayName: 'Rafanizam', pin: '220810', role: 'President' },
+  { username: 'AkhsanJauharSantoso', displayName: 'Akhsan', pin: '140411', role: 'Admin' },
+  { username: 'Pakandy', displayName: 'Pak Andy', pin: '123321', role: 'Guru' },
+  { username: 'Pakharry', displayName: 'Pak Harry', pin: '456654', role: 'Guru' },
+  { username: 'Buksri', displayName: 'Bu Sri', pin: '789987', role: 'Guru' },
+  { username: 'Firmansyah', displayName: 'Pak Firman', pin: '100110', role: 'Wali Kelas' },
+  { username: 'Nurlinda', displayName: 'Bu Linda', pin: '120200', role: 'Guru' },
+  { username: 'Norma.S.Kom', displayName: 'Bu Norma', pin: '344334', role: 'Guru' },
+  { username: 'Wahyu.', displayName: 'Pak Wahyu', pin: '456756', role: 'Guru' },
+  { username: 'demo', displayName: 'Siswa Demo', pin: '111111', role: 'Member' }
 ];
 
 function isSuperAdmin(role) {
@@ -1865,9 +1898,9 @@ async function serveStatic(req, res) {
 
 /* ---------------- Server utama ---------------- */
 
-const server = http.createServer(async (req, res) => {
+async function handle(req, res) {
   const parsed = new URL(req.url, 'http://localhost');
-  const method = req.method.toUpperCase();
+  const method = String(req.method || 'GET').toUpperCase();
   res.nekoOrigin = corsOrigin(req);
   if (method === 'OPTIONS') {
     res.writeHead(204, {
@@ -1897,6 +1930,13 @@ const server = http.createServer(async (req, res) => {
   }
   if (parsed.pathname.startsWith('/api/')) return sendJSON(res, 404, { error: 'endpoint tidak dikenal' });
   serveStatic(req, res);
+}
+
+const server = http.createServer((req, res) => {
+  handle(req, res).catch((error) => {
+    console.error('[neko] gagal menangani permintaan:', error.message);
+    if (!res.headersSent) sendJSON(res, 500, { error: 'server error' });
+  });
 });
 
 server.on('upgrade', (req, socket) => {
@@ -1909,7 +1949,8 @@ loadDB();
 seedPresets();
 loadQuizBank();
 
-server.listen(PORT, '0.0.0.0', () => {
+if (require.main === module) {
+  server.listen(PORT, '0.0.0.0', () => {
   const nets = os.networkInterfaces();
   const lan = [];
   for (const list of Object.values(nets)) {
@@ -1923,7 +1964,41 @@ server.listen(PORT, '0.0.0.0', () => {
   for (const ip of lan) console.log('  Jaringan:  http://' + ip + ':' + PORT + '  ← bagikan ke teman/kelas');
   console.log('  Data   :  server/db.json (' + countDetail(db) + ')');
   console.log('  Sinkron:  ' + (sync && sync.CONFIGURED ? 'Supabase — sedang menghubungkan...' : 'belum aktif (pakai server/db.json saja)'));
-  if (sync && sync.CONFIGURED) console.log('  Cek     :  http://localhost:' + PORT + '/api/sync-status');
-  console.log('==================================================');
-  startSupabase();
-});
+    if (sync && sync.CONFIGURED) console.log('  Cek     :  http://localhost:' + PORT + '/api/sync-status');
+    console.log('==================================================');
+    startSupabase();
+  });
+}
+
+/* ---------------- Ekspor untuk serverless (Vercel) ----------------
+   api/neko.js memakai bagian ini supaya logika yang sama berjalan tanpa
+   listen() dan tanpa menulis ke disk; seluruh state ada di Supabase. */
+
+function getDB() { return db; }
+function setDB(next) { db = next && typeof next === 'object' ? next : emptyDB(); }
+function setEpoch(value) { cloudEpoch = Number(value) || 0; }
+function getEpoch() { return cloudEpoch; }
+
+async function pullCloud() {
+  if (!sync || !sync.CONFIGURED) return null;
+  return sync.pull();
+}
+
+async function pushCloud(state) {
+  if (!sync || !sync.CONFIGURED) return false;
+  return sync.pushNow(state || db);
+}
+
+module.exports = {
+  IS_SERVERLESS,
+  BACKEND_VERSION,
+  handle,
+  server,
+  routes,
+  getDB, setDB, setEpoch, getEpoch,
+  pullCloud, pushCloud,
+  emptyDB, mergeDB, countData, countDetail,
+  seedPresets, loadQuizBank,
+  sendJSON, readBody, bearer, corsOrigin, safePath, serveStatic,
+  sync, liveRooms
+};

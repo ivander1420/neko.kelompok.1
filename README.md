@@ -11,6 +11,25 @@ database cloud (lihat bagian 7).
 
 ---
 
+## Situs online + APK (versi tayang)
+
+- **Alamat web:** https://neko-tjkt.vercel.app — dibuka dari HP mana pun, datanya sama.
+- **API online:** `https://neko-tjkt.vercel.app/api/...` (Vercel Function + Supabase). Kunci
+  Supabase disimpan sebagai *Environment Variable* di akun Vercel, tidak ada di kode/APK.
+- **APK online:** `dist/NEKO-online-v3.0.38.apk`. APK-nya ringan (±1,9 MB) karena
+  isinya dimuat dari situs di atas; kalau internet mati, APK otomatis memakai salinan
+  bawaan di dalam APK (`assets/neko/`).
+- **Cara berbagi:** unggah file `.apk` itu ke MediaFire / BetaDrop / Google Drive. Siapa pun
+  yang mengunduh dan memasang APK tersebut langsung membuka versi terbaru situs — tidak perlu
+  build ulang APK setiap ada perubahan. Build ulang APK hanya perlu kalau berubah di sisi
+  Android (ikon, `MainActivity.java`, atau salinan offline di `assets/neko/`).
+- **Ikon aplikasi:** tanda "M" NEKO dipotong tepat pada garis oranye luarnya — seluruh area di
+  luar garis itu **transparan**, jadi ikon menempel rapi di wallpaper apa pun. Sumbernya
+  `favicon.svg`; PNG-nya ada di `public/icons/` (web) dan `android-apk/.../res/mipmap-*/`
+  (launcher Android). Lihat bagian **6.5** untuk cara memperbaruinya.
+
+---
+
 ## Daftar isi
 
 1. [Yang perlu diketahui soal "bisa / tidak bisa"](#1-yang-perlu-diketahui-soal-bisa--tidak-bisa)
@@ -35,9 +54,9 @@ chat) butuh **server Node** hidup.
 
 | Fitur | Laptop sendiri | Lintas perangkat (1 WiFi) | GitHub Pages / hosting statis | Server di internet (bagian 7) | APK Mode B (offline) |
 |---|:--:|:--:|:--:|:--:|:--:|
-| Beranda, maskot Miki/Miko/Neksya | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Beranda + asisten Miko | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Perpustakaan (6 bab TJKT) & kuis bacaan | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 8 game Arena + XP + season | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 12 game Arena + XP + season | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Tema (8 dunia), audio, animasi | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Halaman Kontak + lapor bug | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Akun yang mengikuti data ke HP lain | ✅ lokal | ✅ server | ❌ lokal per perangkat | ✅ lintas jaringan/sekolah | ❌ lokal per perangkat |
@@ -112,7 +131,7 @@ kalau pas-pasan dipakai label pendek; kalau tetap sempit (HP kecil / layar lands
 sisa **ikon saja** — jadi tiap device mendapatkan ukuran yang paling rapi.
 
 **Pertama kali dibuka** (setelah login pertama) NEKO menayangkan intro sinematik empat babak:
-logo, tur enam halaman penting, perkenalan Miki/Miko/Neksya (ketiganya bicara dengan suaranya
+logo, tur enam halaman penting, perkenalan **Miko** (asisten tunggal NEKO, bicara dengan suaranya
 sendiri), lalu tombol **Mulai belajar** yang mengajak langsung ke halaman yang ditekan.
 Semua narasi berbahasa Indonesia dengan suara cewek lembut; ada tombol lewati, ketuk layar untuk
 berlanjut, dan bisa diputar ulang dari Profil. Intro hanya tayang sekali per perangkat.
@@ -124,21 +143,20 @@ Crimson Core · Velocity (balap, selalu gelap) · Orbit NEKO · Neon Circuit.
 ### Beranda
 - Halo personal, ringkasan XP/season, progres bacaan, dan papan informasi admin.
 - Bulatan maskot di pojok **dan** gelembung teksnya sama-sama bisa ditekan: sekali ketuk,
-  jendela chat langsung terbuka untuk maskot yang sedang tampil.
-- Maskot berganti otomatis; di dalam chat ada tab **Miki / Miko / Neksya** untuk berpindah.
-- Setiap gelembung chat (dan gelembung maskot di pojok) **dibacakan dengan suara masing-masing**:
-  Miki cewek dewasa yang lembut, Miko anak-anak cowok, Neksya anak cewek kecil yang imut.
-  Bahasa yang dipakai bahasa Indonesia; kalau perangkat tidak punya suara Indonesia, aplikasi
-  memakai suara cewek/cowok yang ada lalu mengatur nada (pitch) supaya tetap berbeda.
-  Saklarnya: **Profil → Atur → Suara karakter** (sama dengan tombol mikrofon di intro).
-  Setiap maskot **hanya menjawab bagiannya**:
-  | Maskot | Bagian |
+  jendela chat langsung terbuka.
+- Asistennya **satu**: **Miko**, Partner NEKO. Miki dan Neksya sudah dihapus dari aplikasi —
+  termasuk dari dalam APK — jadi tidak ada tab berpindah lagi dan riwayat chat lama tetap
+  bisa dibaca tanpa error.
+- Miko memegang semua bagian:
+  | Topik | Contoh pertanyaan |
   |---|---|
-  | **Miki** — Pemandu NEKO | cara pakai aplikasi, tema, check-in, akun |
-  | **Miko** — Partner Arena | game, Kelas Langsung, XP & season, semangat |
-  | **Neksya** — Penjaga Perpustakaan | materi TJKT: subnet, OSI, kabel, VLAN, troubleshooting, keamanan, rekomendasi bacaan |
-  Kalau bertanya ke maskot yang salah, ia menjawab "itu bukan tugasanku" dan memberi tombol
-  **Tanya …** yang berpindah tab sekaligus mengulang pertanyaanmu ke maskot yang benar.
+  | Cara pakai NEKO | tema, check-in harian, akun & PIN, tombol keluar |
+  | Arena + Kelas Langsung | pilih game, tingkat kesulitan, XP, season, PIN enam angka |
+  | Perpustakaan | subnet, OSI, kabel, VLAN, troubleshooting, keamanan, rekomendasi bacaan |
+- Jawaban Miko **dibacakan dengan suara karakternya** (cowok muda, ramah). Bahasa yang dipakai
+  bahasa Indonesia; kalau perangkat tidak punya suara Indonesia, aplikasi memakai suara yang ada
+  lalu mengatur nada (pitch). Saklarnya: **Profil → Atur → Suara karakter**
+  (sama dengan tombol mikrofon di intro).
 
 ### Perpustakaan
 - 6 buku materi: Dasar Jaringan, IP Address & Subnetting, VLAN & Switching, Hardware & Kabel,
@@ -148,10 +166,10 @@ Crimson Core · Velocity (balap, selalu gelap) · Orbit NEKO · Neon Circuit.
 - Setiap halaman baru memberi XP; menamatkan buku membuka badge di koleksi.
 
 ### Arena
-- 8 game: **Kuis Kilat, Kata Penyusup, Lab Kabel, Kartu Memori, Subnet Master, Menara OSI,
-  Detektif Jaringan, Refleks Neko**.
+- 12 game: **Kuis Kilat, Who Is The Spy, Lab Kabel, Kartu Memori, Subnet Master, Menara OSI,
+  Detektif Jaringan, Refleks Neko, Simon Router, Serang Port, Subnet 2048, Terminal Kilat**.
 - Pilih kartu game → atur tingkat/opsi → Main. Skor masuk XP dan papan peringkat.
-- **Kata Penyusup** mendukung 3–8 pemain dengan **nama pemain sendiri** (atur di editor roster).
+- **Who Is The Spy** mendukung 3–8 pemain dengan **nama pemain sendiri** (atur di editor roster).
 
 ### Pesan
 - Cari teman lewat username, kirim permintaan berteman, lalu chat realtime.
@@ -226,9 +244,12 @@ NEKO-APK/
 ```
 
 > Saat menyusun ulang `assets/neko`, salin **semua** file web terbaru — termasuk yang masih baru:
-> `js/voice.js` (suara Miki/Miko/Neksya) dan `css/intro.css` (intro sinematik). Kalau keduanya
+> `js/voice.js` (suara Miko) dan `css/intro.css` (intro sinematik). Kalau keduanya
 > ketinggalan, intro tidak muncul dan bubble chat tidak bersuara.
-> Daftar aset + versi cache ada di `index.html` (`?v=3.0.29`).
+> Cara paling aman: jalankan `powershell -File update-apk-assets.ps1` (folder root) — skrip itu
+> menyalin `css/ data/ js/ assets/ public/` + `index.html manifest.webmanifest favicon.svg`
+> ke `android-apk/app/src/main/assets/neko`, lalu membuang sampah lama (`neko-backup`,
+> `.nojekyll`, `Mulai-NEKO.bat`). Daftar aset + versi cache ada di `index.html` (`?v=3.0.38`).
 
 **settings.gradle**
 ```groovy
@@ -378,6 +399,80 @@ Karena ada `manifest.webmanifest`, situs NEKO yang sudah online bisa **di-instal
 aplikasi**: Chrome di HP → buka alamatnya → menu ⋮ → **Tambahkan ke layar utama**.
 Ikon muncul di homescreen dan berjalan layar penuh (standalone). Ini bukan APK, tapi untuk
 demonstrasi biasanya cukup.
+
+### 6.5 Cara update APK online (langkah demi langkah)
+
+APK "online" = cangkang yang membuka `https://neko-tjkt.vercel.app`. Jadi **hampir semua
+perubahan tidak perlu build ulang APK** — cukup deploy webnya:
+
+**A. Update tampilan/isi aplikasi (paling sering)**
+1. Ubah file web seperti biasa di folder project.
+2. `npm run build && npm run check` — dua-duanya harus lolos.
+3. Naikkan versi di **tiga tempat**: `package.json`, semua `?v=` di `index.html`,
+   dan `versionName` (+`versionCode`) di `android-apk/app/build.gradle`.
+   Cara cepat (ganti `3.0.38` → `3.0.39`):
+   ```
+   node -e "const fs=require('fs');for(const f of ['index.html','README.md'])fs.writeFileSync(f,fs.readFileSync(f,'utf8').split('3.0.38').join('3.0.39'));const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='3.0.39';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')"
+   ```
+   Versi ini penting: browser dan WebView menyimpan aset lama 5 menit (`max-age=300`), dan
+   penanda `?v=` memaksa mereka mengambil yang baru.
+4. Deploy ke Vercel: `vercel --prod` (atau push ke branch utama kalau auto-deploy aktif).
+5. Selesai — semua APK yang terpasang di HP langsung ikut versi baru saat dibuka.
+
+**B. Update yang wajib build ulang APK**
+- Ikon launcher (`res/mipmap-*/ic_launcher.png`) atau `AndroidManifest.xml`.
+- `MainActivity.java` (alamat server, perilaku offline, header WebView).
+- Salinan offline `assets/neko/` — dipakai hanya saat internet mati.
+
+Prosedurnya:
+1. Ganti ikon: sunting `favicon.svg`, lalu render PNG transparan dan tempatkan di
+   `public/icons/` + `res/mipmap-*/ic_launcher.png`. Skrip pembuatnya ada di
+   `scripts/make-icons.ps1` (memakai Chrome headless untuk raster + `System.Drawing` untuk
+   memperkecil; hasilnya `Format32bppArgb`, jadi di luar garis oranye benar-benar transparan).
+2. Sinkronkan aset web ke APK: `powershell -File update-apk-assets.ps1`.
+3. Build: dari folder `android-apk`, jalankan Gradle 8.14.3 (wrapper bawaan rusak, jadi pakai
+   distribusi yang sudah tercache)
+   ```
+   "%USERPROFILE%\.gradle\wrapper\dists\gradle-8.14.3-bin\cv11ve7ro1n3o1j4so8xd9n66\gradle-8.14.3\bin\gradle.bat" assembleDebug --offline
+   ```
+4. Ambil hasilnya dan simpan dengan nama bertanda versi:
+   ```
+   copy app\build\outputs\apk\debug\app-debug.apk ..\dist\NEKO-online-v3.0.38.apk
+   ```
+5. Unggah `dist\NEKO-online-v3.0.38.apk` ke MediaFire / Google Drive / GitHub Releases, lalu
+   sebarkan tautannya. Ganti file lama dengan yang baru (versi Android menerima install
+   di atas versi lama selama `versionCode` naik — sekarang 5).
+6. Cek isi APK sebelum disebarkan:
+   ```
+   unzip -l dist\NEKO-online-v3.0.38.apk | findstr mipmap
+   ```
+
+### 6.6 Isi APK lengkap (bahan presentasi / PPT)
+
+Ukuran akhir **±1,9 MB**. APK adalah file ZIP; isinya begini:
+
+| Bagian | Isi | Fungsi |
+|---|---|---|
+| `AndroidManifest.xml` | 1 | nama "NEKO TJKT", ikon launcher, izin INTERNET, activity utama |
+| `classes.dex` | 1 kelas `com.neko.tjkt.MainActivity` + androidx.webkit | membuka WebView, memutuskan online/offline |
+| `res/mipmap-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}/ic_launcher.png` | 5 ikon (48/72/96/144/192 px) | logo "M" NEKO, transparan di luar garis oranye |
+| `res/drawable*/`, `res/layout*/` | ±19 file kecil | sumber daya dari library androidx.webkit |
+| `resources.arsc` | 1 | tabel resource Android |
+| `META-INF/*` | 5 | tanda tangan debug keystore |
+| `assets/neko/index.html` | 1 | halaman tunggal aplikasi (semua layar ada di sini) |
+| `assets/neko/css/` | **17 stylesheet** (±508 KB) | dasar, layout, komponen, tema 8 dunia, glass, paper, scene, ornamen, buku, game, view, sosial, live, room, pesan, avatar, intro |
+| `assets/neko/js/` | **27 modul** + **12 game** (±720 KB) | app, auth, store, api, theme, scenes, ornaments, ui, community, admin, fx, mascot, voice, audio, rooms, seasons, profile, avatars, contact, intro, book, arena, live, friends + `games/` (quiz, spy lewat data, cable, memory, subnet, osi, detective, reaction, simon, portrush, merge, typing) |
+| `assets/neko/data/` | **6 berkas** (±184 KB) | `materials.js` (6 bab TJKT), `materials-koding.js`, `materials-desain.js`, `quiz.js`, `spy-words.js`, `spy.js` (40 karakter Who Is The Spy) |
+| `assets/neko/public/icons/` | 6 PNG (±296 KB) | ikon web/PWA 32–1024 px + `apple-touch-icon.png` |
+| `assets/neko/favicon.svg` + `manifest.webmanifest` | 2 | ikon vektor + install PWA |
+
+Alur kerja APK ketika dibuka:
+1. `MainActivity` mengecek koneksi.
+2. Ada internet → memuat `https://neko-tjkt.vercel.app/` (versi terbaru + server API nyata).
+3. Tidak ada internet → memuat `assets/neko/index.html` lewat `WebViewAssetLoader`
+   (alamat palsu `https://neko.app/neko/index.html`) sehingga aplikasi tetap jalan, tapi
+   data hanya tersimpan di HP itu (mode lokal).
+4. Login memakai username + PIN enam angka; PIN dikirim sebagai hash, bukan teks biasa.
 
 ---
 
@@ -587,12 +682,17 @@ Neko Fix/
   Mulai-NEKO.bat          peluncur server (Windows)
   index.html              satu halaman aplikasi + daftar aset (?v= versi cache)
   manifest.webmanifest    supaya bisa "Tambahkan ke layar utama"
-  favicon.svg             ikon aplikasi
-  css/                    styles tema & komponen
+  favicon.svg             ikon aplikasi — dipotong tepat di garis oranye, luarnya transparan
+  public/icons/           PNG ikon hasil scripts/make-icons.ps1 (32/180/192/512/1024 + apple-touch)
+  css/                    17 stylesheet tema & komponen
   js/                     app.js, api.js, auth.js, live.js, mascot.js, contact.js, ...
-    games/                8 game arena
-  data/                   materials.js (6 bab) + kuis + kata untuk Kata Penyusup
+    games/                12 game arena
+  data/                   materials.js (6 bab) + kuis + kata & 40 karakter Who Is The Spy
   assets/                 gambar/ilustrasi
+  scripts/
+    prepare-build.js      gerbang "npm run build" (cek kelengkapan file + versi ?v=)
+    check-project.js      gerbang "npm run check" (syntax, manifest, pola rahasia)
+    make-icons.ps1        render favicon.svg -> semua ukuran ikon web + Android
   server/
     server.js             Node tanpa dependency: REST + WebSocket + long-poll
     db.json               penyimpanan lokal (file JSON) — isi akun, jangan di-upload
@@ -602,6 +702,11 @@ Neko Fix/
     supabase/
       schema.sql          skrip database: tabel + index + RLS + Realtime + seed
   android-apk/            project Android (Mode A / Mode B)
+    app/src/main/res/mipmap-*/ic_launcher.png   ikon launcher transparan
+    app/src/main/assets/neko/                   salinan offline (hasil update-apk-assets.ps1)
+  dist/                   hasil jadi untuk diunggah
+    NEKO-online-v3.0.38.apk                     APK terbaru untuk MediaFire/Drive/Releases
+    arsip/                                      APK versi lama
   README.md               dokumen ini
 ```
 
