@@ -6,6 +6,7 @@
 <title>NEKO — Belajar TJKT Sambil Bermain</title>
 <meta name="description" content="NEKO adalah aplikasi belajar TJKT interaktif: buku materi, arena game, asisten Miko, delapan dunia tema, dan lima season XP.">
 <meta name="application-name" content="NEKO">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#1b110b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,25 +21,28 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Chakra+Petch:wght@500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Lilita+One&family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=Patrick+Hand&family=Quicksand:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Chakra+Petch:wght@500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Lilita+One&family=Nunito:wght@400;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=Patrick+Hand&family=Quicksand:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"> -->
 
-<link rel="stylesheet" href="./css/base.css?v=3.0.38">
-<link rel="stylesheet" href="./css/layout.css?v=3.0.38">
-<link rel="stylesheet" href="./css/components.css?v=3.0.38">
-<link rel="stylesheet" href="./css/themes.css?v=3.0.38">
-<link rel="stylesheet" href="./css/polish.css?v=3.0.38">
-<link rel="stylesheet" href="./css/paper.css?v=3.0.38">
-<link rel="stylesheet" href="./css/scenes.css?v=3.0.38">
-<link rel="stylesheet" href="./css/ornaments.css?v=3.0.38">
-<link rel="stylesheet" href="./css/book.css?v=3.0.38">
-<link rel="stylesheet" href="./css/games.css?v=3.0.38">
-<link rel="stylesheet" href="./css/views.css?v=3.0.38">
-<link rel="stylesheet" href="./css/social.css?v=3.0.38">
-<link rel="stylesheet" href="./css/live.css?v=3.0.38">
-<link rel="stylesheet" href="./css/rooms.css?v=3.0.38">
-<link rel="stylesheet" href="./css/messages.css?v=3.0.38">
-<link rel="stylesheet" href="./css/avatars.css?v=3.0.38">
-<link rel="stylesheet" href="./css/intro.css?v=3.0.38">
+<link rel="stylesheet" href="./css/base.css?v=3.0.43">
+<link rel="stylesheet" href="./css/layout.css?v=3.0.43">
+<link rel="stylesheet" href="./css/components.css?v=3.0.43">
+<link rel="stylesheet" href="./css/themes.css?v=3.0.43">
+<link rel="stylesheet" href="./css/polish.css?v=3.0.43">
+<link rel="stylesheet" href="./css/paper.css?v=3.0.43">
+<link rel="stylesheet" href="./css/scenes.css?v=3.0.43">
+<link rel="stylesheet" href="./css/ornaments.css?v=3.0.43">
+<link rel="stylesheet" href="./css/book.css?v=3.0.43">
+<link rel="stylesheet" href="./css/games.css?v=3.0.43">
+<link rel="stylesheet" href="./css/arcade.css?v=3.0.43">
+<link rel="stylesheet" href="./css/views.css?v=3.0.43">
+<link rel="stylesheet" href="./css/social.css?v=3.0.43">
+<link rel="stylesheet" href="./css/live.css?v=3.0.43">
+<link rel="stylesheet" href="./css/rooms.css?v=3.0.43">
+<link rel="stylesheet" href="./css/nobar.css?v=3.0.43">
+<link rel="stylesheet" href="./css/messages.css?v=3.0.43">
+<link rel="stylesheet" href="./css/avatars.css?v=3.0.43">
+<link rel="stylesheet" href="./css/intro.css?v=3.0.43">
+<link rel="stylesheet" href="./css/glass.css?v=3.0.43">
 
 <script>
 (function () {
@@ -142,49 +146,59 @@
 <div id="mascotRoot"></div>
 <div id="themeLayer" class="theme-layer" aria-hidden="true"></div>
 
-<script src="./data/materials.js?v=3.0.38"></script>
-<script src="./data/materials-koding.js?v=3.0.38"></script>
-<script src="./data/materials-desain.js?v=3.0.38"></script>
-<script src="./data/quiz.js?v=3.0.38"></script>
-<script src="./data/spy-words.js?v=3.0.38"></script>
-<script src="./js/util.js?v=3.0.38"></script>
-<script src="./js/icons.js?v=3.0.38"></script>
-<script src="./js/audio.js?v=3.0.38"></script>
-<script src="./js/voice.js?v=3.0.38"></script>
-<script src="./js/rooms.js?v=3.0.38"></script>
-<script src="./js/seasons.js?v=3.0.38"></script>
-<script src="./js/api.js?v=3.0.38"></script>
-<script src="./js/store.js?v=3.0.38"></script>
-<script src="./js/theme.js?v=3.0.38"></script>
-<script src="./js/scenes.js?v=3.0.38"></script>
-<script src="./js/ornaments.js?v=3.0.38"></script>
-<script src="./js/ui.js?v=3.0.38"></script>
-<script src="./js/community.js?v=3.0.38"></script>
-<script src="./js/admin.js?v=3.0.38"></script>
-<script src="./js/fx.js?v=3.0.38"></script>
-<script src="./js/auth.js?v=3.0.38"></script>
-<script src="./js/home.js?v=3.0.38"></script>
-<script src="./js/book.js?v=3.0.38"></script>
-<script src="./js/arena.js?v=3.0.38"></script>
-<script src="./js/live.js?v=3.0.38"></script>
-<script src="./js/friends.js?v=3.0.38"></script>
-<script src="./js/games/quiz.js?v=3.0.38"></script>
-<script src="./data/spy.js?v=3.0.38"></script>
-<script src="./js/games/cable.js?v=3.0.38"></script>
-<script src="./js/games/memory.js?v=3.0.38"></script>
-<script src="./js/games/subnet.js?v=3.0.38"></script>
-<script src="./js/games/osi.js?v=3.0.38"></script>
-<script src="./js/games/detective.js?v=3.0.38"></script>
-<script src="./js/games/reaction.js?v=3.0.38"></script>
-<script src="./js/games/simon.js?v=3.0.38"></script>
-<script src="./js/games/portrush.js?v=3.0.38"></script>
-<script src="./js/games/merge.js?v=3.0.38"></script>
-<script src="./js/games/typing.js?v=3.0.38"></script>
-<script src="./js/profile.js?v=3.0.38"></script>
-<script src="./js/avatars.js?v=3.0.38"></script>
-<script src="./js/mascot.js?v=3.0.38"></script>
-<script src="./js/contact.js?v=3.0.38"></script>
-<script src="./js/intro.js?v=3.0.38"></script>
-<script src="./js/app.js?v=3.0.38"></script>
+<script src="./data/materials.js?v=3.0.43"></script>
+<script src="./data/materials-mega.js?v=3.0.43"></script>
+<script src="./data/materials-koding.js?v=3.0.43"></script>
+<script src="./data/materials-desain.js?v=3.0.43"></script>
+<script src="./data/quiz.js?v=3.0.43"></script>
+<script src="./data/spy-words.js?v=3.0.43"></script>
+<script src="./data/netgames.js?v=3.0.43"></script>
+<script src="./js/util.js?v=3.0.43"></script>
+<script src="./js/api.js?v=3.0.43"></script>
+<script src="./js/icons.js?v=3.0.43"></script>
+<script src="./js/audio.js?v=3.0.43"></script>
+<script src="./js/voice.js?v=3.0.43"></script>
+<script src="./js/rooms.js?v=3.0.43"></script>
+<script src="./js/nobar.js?v=3.0.43"></script>
+<script src="./js/seasons.js?v=3.0.43"></script>
+<script src="./js/store.js?v=3.0.43"></script>
+<script src="./js/theme.js?v=3.0.43"></script>
+<script src="./js/scenes.js?v=3.0.43"></script>
+<script src="./js/ornaments.js?v=3.0.43"></script>
+<script src="./js/ui.js?v=3.0.43"></script>
+<script src="./js/community.js?v=3.0.43"></script>
+<script src="./js/admin.js?v=3.0.43"></script>
+<script src="./js/fx.js?v=3.0.43"></script>
+<script src="./js/auth.js?v=3.0.43"></script>
+<script src="./js/home.js?v=3.0.43"></script>
+<script src="./js/book.js?v=3.0.43"></script>
+<script src="./js/arena.js?v=3.0.43"></script>
+<script src="./js/live.js?v=3.0.43"></script>
+<script src="./js/friends.js?v=3.0.43"></script>
+<script src="./js/games/quiz.js?v=3.0.43"></script>
+<script src="./data/spy.js?v=3.0.43"></script>
+<script src="./js/games/cable.js?v=3.0.43"></script>
+<script src="./js/games/memory.js?v=3.0.43"></script>
+<script src="./js/games/subnet.js?v=3.0.43"></script>
+<script src="./js/games/osi.js?v=3.0.43"></script>
+<script src="./js/games/detective.js?v=3.0.43"></script>
+<script src="./js/games/reaction.js?v=3.0.43"></script>
+<script src="./js/games/simon.js?v=3.0.43"></script>
+<script src="./js/games/portrush.js?v=3.0.43"></script>
+<script src="./js/games/merge.js?v=3.0.43"></script>
+<script src="./js/games/typing.js?v=3.0.43"></script>
+<script src="./js/games/netquest.js?v=3.0.43"></script>
+<script src="./js/games/arcade.js?v=3.0.43"></script>
+<script src="./js/games/puzzle.js?v=3.0.43"></script>
+<script src="./js/games/networksnake.js?v=3.0.43"></script>
+<script src="./js/games/blockdrop.js?v=3.0.43"></script>
+<script src="./js/games/bubblepop.js?v=3.0.43"></script>
+<script src="./js/spy-v2.js?v=3.0.43"></script>
+<script src="./js/profile.js?v=3.0.43"></script>
+<script src="./js/avatars.js?v=3.0.43"></script>
+<script src="./js/mascot.js?v=3.0.43"></script>
+<script src="./js/contact.js?v=3.0.43"></script>
+<script src="./js/intro.js?v=3.0.43"></script>
+<script src="./js/app.js?v=3.0.43"></script>
 </body>
 </html>
